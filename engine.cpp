@@ -656,7 +656,7 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 }
 
 
-Texture::Texture(Renderer &renderer, const string file) {
+Texture::Texture(Renderer &renderer, const string &file) {
 	tex_renderer = &renderer;
 	texture = IMG_LoadTexture(tex_renderer -> renderer, file.c_str());
 	if (texture == NULL) cout << "failed to load texture! [" << file << "] : "<< SDL_GetError() << endl;

@@ -223,7 +223,7 @@ class Texture {
 		int w, h;
 
 		Texture() {};
-		Texture(Renderer &renderer, const string file);
+		Texture(Renderer &renderer, const string &file);
 		Texture(Renderer &renderer, SDL_Surface *surface);
 
 		Rect get_rect();
