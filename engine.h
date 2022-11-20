@@ -245,7 +245,7 @@ class Texture {
 		Texture() {};
 		Texture(Renderer &renderer, const string &file);
 		Texture(Renderer &renderer, SDL_Surface *surface);
-		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_STREAMING|SDL_TEXTUREACCESS_TARGET);
+		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
 
 		Rect get_rect();
 
