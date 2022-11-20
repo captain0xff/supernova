@@ -693,9 +693,9 @@ Texture::Texture(Renderer &renderer, SDL_Surface *surface) {
 
 Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, const int access) {
 	tex_renderer = &renderer;
-	w = size.w;
-	h = size.h;
-	texture = SDL_CreateTexture(tex_renderer -> renderer, format, access, size.w, size.h);
+	w = size.x;
+	h = size.y;
+	texture = SDL_CreateTexture(tex_renderer -> renderer, format, access, size.x, size.y);
 	if (texture == NULL) cout << "failed to create texture! : "<< SDL_GetError() << endl;
 	else {
 		id = TEX_ID;
