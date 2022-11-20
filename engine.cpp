@@ -403,8 +403,12 @@ void Renderer::set_blend_mode(SDL_BlendMode blendmode) {
 	SDL_SetRenderDrawBlendMode(renderer, blendmode);
 }
 
+void Renderer::set_target() {
+	SDL_SetRenderTarget(renderer, NULL);
+}
+
 void Renderer::set_target(Texture &tex) {
-	SDL_SetRenderTarget(tex.texture);
+	SDL_SetRenderTarget(renderer, tex.texture);
 }
 
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {

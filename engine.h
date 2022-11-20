@@ -140,6 +140,24 @@ struct MouseButton {
 
 
 
+// Forward declarations
+class Clock;
+class Window;
+class Renderer;
+class Texture;
+class Mouse;
+class Events;
+class Fonts;
+class SpriteSheet;
+class AnimatedSprite;
+class States;
+class Packet;
+class Socket;
+class NetUtils;
+
+
+
+
 // Classes
 class Clock {
     private:
@@ -175,8 +193,8 @@ class Renderer {
 		void clear(const Colour &colour);
 		void present();
 		void set_blend_mode(SDL_BlendMode blend_mode);
-		// The texture param is kept NULL for setting the target to the window
-		void set_target(Texture &tex=NULL);
+		void set_target(); // Resets the render target to the window
+		void set_target(Texture &tex);
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
