@@ -175,6 +175,8 @@ class Renderer {
 		void clear(const Colour &colour);
 		void present();
 		void set_blend_mode(SDL_BlendMode blend_mode);
+		// The texture param is kept NULL for setting the target to the window
+		void set_target(Texture &tex=NULL);
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
@@ -225,6 +227,7 @@ class Texture {
 		Texture() {};
 		Texture(Renderer &renderer, const string &file);
 		Texture(Renderer &renderer, SDL_Surface *surface);
+		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_STREAMING|SDL_TEXTUREACCESS_TARGET);
 
 		Rect get_rect();
 

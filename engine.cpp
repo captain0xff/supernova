@@ -403,6 +403,10 @@ void Renderer::set_blend_mode(SDL_BlendMode blendmode) {
 	SDL_SetRenderDrawBlendMode(renderer, blendmode);
 }
 
+void Renderer::set_target(Texture &tex) {
+	SDL_SetRenderTarget(tex.texture);
+}
+
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
 	set_colour(colour);
 	SDL_RenderDrawPoint(renderer, point_pos.x, point_pos.y);
@@ -681,6 +685,19 @@ Texture::Texture(Renderer &renderer, SDL_Surface *surface) {
 	}
 
 	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+}
+
+Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, const int access) {
+	tex_renderer = &renderer;
+	w = size.w;
+	h = size.h;
+	texture = SDL_CreateTexture(tex_renderer -> renderer, format, access, size.w, size.h);
+	if (texture == NULL) cout << "failed to create texture! : "<< SDL_GetError() << endl;
+	else {
+		id = TEX_ID;
+		cout << "texture created successfully! " << "[" << id << "]" << endl;
+		TEX_ID++;
+	}
 }
 
 Rect Texture::get_rect() {
