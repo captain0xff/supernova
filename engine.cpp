@@ -369,16 +369,48 @@ Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx,
 	else cout << "window created successfully!" << endl;
 }
 
+Window::~Window() {
+	if (window != nullptr) destroy();
+}
+
+Window::Window(Window &&win) noexcept {
+	win.window = nullptr;
+}
+
+Window& Window::operator=(Window &&win) noexcept {
+	if (&win == this) return *this;
+	if (window != nullptr) destroy();
+	window = win.window;
+	win.window = nullptr;
+	return *this;
+}
+
 void Window::destroy() {
 	SDL_DestroyWindow(window);
 	cout << "window closed successfully!" << endl;
 }
 
 
-Renderer::Renderer(Window window, int index, Uint32 flags) {
+Renderer::Renderer(Window &window, int index, Uint32 flags) {
 	renderer = SDL_CreateRenderer(window.window, index, flags);
 	if (renderer == NULL) cout << "failed to create renderer! : " << SDL_GetError() << endl;
 	else cout << "renderer created successfully!" << endl;
+}
+
+Renderer::~Renderer() {
+	if (renderer != nullptr) destroy();
+}
+
+Renderer::Renderer(Renderer &&ren) noexcept {
+	ren.renderer = nullptr;
+}
+
+Renderer& Renderer::operator=(Renderer &&ren) noexcept {
+	if (&ren == this) return *this;
+	if (renderer != nullptr) destroy();
+	renderer = ren.renderer;
+	ren.renderer = nullptr;
+	return *this;
 }
 
 void Renderer::destroy() {
@@ -704,6 +736,24 @@ Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, co
 	}
 }
 
+Texture::~Texture() {
+	if (texture != nullptr) {
+		destroy();
+	}
+}
+
+Texture::Texture(Texture &&tex) noexcept {
+	tex.texture = nullptr;
+}
+
+Texture& Texture::operator=(Texture &&tex) noexcept {
+	if (&tex == this) return *this;
+	if (texture != nullptr) destroy();
+	texture = tex.texture;
+	tex.texture = nullptr;
+	return *this;
+}
+
 Rect Texture::get_rect() {
 	return {0, 0, w, h};
 }
@@ -718,9 +768,9 @@ void Texture::set_blend_mode(SDL_BlendMode blend_mode) {
 }
 
 void Texture::render(const Rect &dst_rect) {
-	const SDL_Rect r1 = {0, 0, w, h};
-	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
-	SDL_RenderCopy(tex_renderer -> renderer, texture, &r1, &r2);
+	const SDL_Rect src_rect = get_rect();
+	const SDL_Rect r2 = dst_rect;
+	SDL_RenderCopy(tex_renderer -> renderer, texture, &src_rect, &r2);
 }
 
 void Texture::render(const Rect &dst_rect, const Rect &src_rect) {
@@ -775,10 +825,6 @@ void Font2::destroy() {
 */
 
 
-void Font::FontAtlas::destroy() {
-	atlas.destroy();
-}
-
 Font::Font(const string &file, const int size) {
 	font = TTF_OpenFont(file.c_str(), size);
 
@@ -788,6 +834,22 @@ Font::Font(const string &file, const int size) {
 		cout << "font " << " (" << file << ")" << " loaded successfully! " << "[" << id << "]" << endl;
 		FONT_ID++;
 	}
+}
+
+Font::~Font() {
+	if (font != nullptr) destroy(); 
+}
+
+Font::Font(Font &&fnt) noexcept {
+	fnt.font = nullptr;
+}
+
+Font& Font::operator=(Font &&fnt) noexcept {
+	if (&fnt == this) return *this;
+	if (font != nullptr) destroy();
+	font = fnt.font;
+	fnt.font = nullptr;
+	return *this;
 }
 
 Texture Font::create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality, const bool &wrap_text, const Uint32 &wrap_length, const Colour &background_colour) {
@@ -826,20 +888,22 @@ Texture Font::create_text(Renderer &renderer, const string &text, const Colour &
 
 Font::FontAtlas Font::create_atlas(Renderer &renderer, const string chars, const int quality, const Uint8 &alpha) {
 	TTF_SetFontKerning(font, 0);
-	Texture atlas = this->create_text(renderer, chars, {255, 255, 255, alpha}, quality);
-	unordered_map<char, Rect> atlas_data;
+	
+	FontAtlas font_atlas;
+	font_atlas.atlas = this->create_text(renderer, chars, {255, 255, 255, alpha}, quality);
+	
 	int x = 0;
 	int w;
 	int h;
 	for (int i = 0; i < chars.length(); i++) {
 		char ch[] = { chars[i], '\0' };
 		TTF_SizeUTF8(font, ch, &w, &h);
-		atlas_data[chars[i]] = {x, 0, w, atlas.h};
+		font_atlas.data[chars[i]] = {x, 0, w, font_atlas.atlas.h};
 		x += w;
 	}
 	TTF_SetFontKerning(font, 1);
 
-	return {atlas, atlas_data};
+	return font_atlas;
 }
 
 void Font::draw_text(FontAtlas &font_atlas, const string &text, const Colour &colour, const int &x, const int &y, const double size) {

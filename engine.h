@@ -177,6 +177,13 @@ class Window {
 		SDL_Window *window;
 
 		Window(string title, int screen_w, int screen_h, Uint32 flags=0, int posx=SDL_WINDOWPOS_CENTERED, int posy=SDL_WINDOWPOS_CENTERED);
+		~Window();
+		Window(Window &&win) noexcept;
+		Window(const Window &win) = delete;
+
+		Window& operator=(Window &&win) noexcept;
+		Window& operator=(const Window &win) = delete;
+
 
 		void destroy();
 };
@@ -186,7 +193,13 @@ class Renderer {
 	public:
 		SDL_Renderer *renderer;
 
-		Renderer(Window window, int index=-1, Uint32 flags=SDL_RENDERER_ACCELERATED);
+		Renderer(Window &window, int index=-1, Uint32 flags=SDL_RENDERER_ACCELERATED);
+		~Renderer();
+		Renderer(Renderer &&ren) noexcept;
+		Renderer(const Renderer &ren) = delete;
+
+		Renderer& operator=(Renderer &&ren) noexcept;
+		Renderer& operator=(const Renderer &ren) = delete;
 
 		void destroy();
 		void set_colour(const Colour &colour);
@@ -246,6 +259,12 @@ class Texture {
 		Texture(Renderer &renderer, const string &file);
 		Texture(Renderer &renderer, SDL_Surface *surface);
 		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
+		~Texture();
+		Texture(Texture &&tex) noexcept;
+		Texture(const Texture &) = delete;
+
+		Texture& operator=(Texture &&tex) noexcept;
+		Texture& operator=(const Texture &tex) = delete;
 
 		Rect get_rect();
 
@@ -284,12 +303,16 @@ class Font {
 		struct FontAtlas {
 			Texture atlas;
 			unordered_map<char, Rect> data;
-
-			void destroy();
 		};
 
 		Font() {};
 		Font(const string &file, const int size);
+		~Font();
+		Font(Font &&fnt) noexcept;
+		Font(const Font &) = delete;
+
+		Font& operator=(Font &&fnt) noexcept;
+		Font& operator=(const Font &fnt) = delete;
 
 		Texture create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality=0, const bool &wrap_text=false, const Uint32 &wrap_length=0, const Colour &background_colour={0, 0, 0, 0});
 		FontAtlas create_atlas(Renderer &renderer, const string chars, const int quality, const Uint8 &alpha);
