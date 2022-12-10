@@ -478,7 +478,7 @@ void Renderer::draw_circle(const Vector &center_pos, const int radius, const Col
 
 	if (filled) {
 		constexpr int tris = 225; // Amount of triangles
-		float mirror = 2.0f * static_cast<float>(M_PI); // 2*PI
+		float mirror = 2.0f * static_cast<float>(PI); // 2*PI
 		SDL_Vertex vertices[tris] = {0};
 
 		for (int i = 0; i < tris; i += 3) {
@@ -595,7 +595,6 @@ Mouse::Mouse(const vector<string> &needed_buttons) {
 
 
 void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys) {
-	SDL_Event event;
 	for (auto &[key, value]: event_keys) {
 		value.pressed = false;
 		value.released = false;
@@ -630,7 +629,6 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 }
 
 void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse) {
-	SDL_Event event;
 	for (auto &[key, value]: event_keys) {
 		value.pressed = false;
 		value.released = false;
@@ -691,6 +689,73 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 				mouse.vert_wheel = event.wheel.preciseY;
 				mouse.horz_wheel = event.wheel.preciseX;
 				break;
+		}
+	}
+}
+
+void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, void (*event_handler)(SDL_Event)) {
+	for (auto &[key, value]: event_keys) {
+		value.pressed = false;
+		value.released = false;
+	}
+
+	for (auto &[key, value]: mouse.buttons) {
+		value.pressed = false;
+		value.released = false;
+	}
+	mouse.vert_wheel = mouse.horz_wheel = 0;
+
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+			case SDL_QUIT:
+				running = false;
+				break;
+			case SDL_KEYDOWN:
+				if (!event.key.repeat) {
+					for (auto &[key, value]: event_keys) {
+						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+							value.pressed = true;
+							value.down = true;
+						}
+					}
+				}
+				break;
+			case SDL_KEYUP:
+				if (!event.key.repeat) {
+					for (auto &[key, value]: event_keys) {
+						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+							value.released = true;
+							value.down = false;
+						}
+					}
+				}
+				break;
+			case SDL_MOUSEMOTION:
+				mouse.pos.x = event.button.x;
+				mouse.pos.y = event.button.y;
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				for (auto &[key, value]: mouse.buttons) {
+					if (event.button.button == value.id) {
+						value.pressed = true;
+						value.down = true;
+					}
+				}
+				break;
+			case SDL_MOUSEBUTTONUP:
+				for (auto &[key, value]: mouse.buttons) {
+					if (event.button.button == value.id) {
+						value.released = true;
+						value.down = false;
+					}
+				}
+				break;
+			case SDL_MOUSEWHEEL:
+				mouse.vert_wheel = event.wheel.preciseY;
+				mouse.horz_wheel = event.wheel.preciseX;
+				break;
+			default:
+				event_handler(event);
 		}
 	}
 }
@@ -930,6 +995,22 @@ SpriteSheet::SpriteSheet(Renderer &renderer, const string &file, const int &colu
 	tile_w = src_rect.w/tile_x; tile_h = src_rect.h/tile_y;
 }
 
+SpriteSheet::~SpriteSheet() {
+	if (texture.texture != nullptr) destroy(); 
+}
+
+SpriteSheet::SpriteSheet(SpriteSheet &&ss) noexcept {
+	ss.texture.texture = nullptr;
+}
+
+SpriteSheet& SpriteSheet::operator=(SpriteSheet &&ss) noexcept {
+	if (&ss == this) return *this;
+	if (texture.texture != nullptr) destroy();
+	texture.texture = ss.texture.texture;
+	ss.texture.texture = nullptr;
+	return *this;
+}
+
 void SpriteSheet::set_src_rect(const Rect &src_rect) {
 	this->src_rect = src_rect;
 	tile_w = src_rect.w/tile_x; tile_h = src_rect.h/tile_y;
@@ -1005,6 +1086,22 @@ Packet::Packet(const int maxlen, IPaddress &destination) {
 	this->destination = destination;
 
 	for_sending = true;
+}
+
+Packet::~Packet() {
+	if (packet != nullptr) destroy(); 
+}
+
+Packet::Packet(Packet &&pk) noexcept {
+	pk.packet = nullptr;
+}
+
+Packet& Packet::operator=(Packet &&pk) noexcept {
+	if (&pk == this) return *this;
+	if (packet != nullptr) destroy();
+	packet = pk.packet;
+	pk.packet = nullptr;
+	return *this;
 }
 
 void Packet::clear_data() {
@@ -1148,6 +1245,22 @@ Packet& operator>>(Packet &packet, Rect &rect) {
 
 Socket::Socket(const int port) {
 	socket = SDLNet_UDP_Open(port);
+}
+
+Socket::~Socket() {
+	if (socket != nullptr) destroy(); 
+}
+
+Socket::Socket(Socket &&sock) noexcept {
+	sock.socket = nullptr;
+}
+
+Socket& Socket::operator=(Socket &&sock) noexcept {
+	if (&sock == this) return *this;
+	if (socket != nullptr) destroy();
+	socket = sock.socket;
+	sock.socket = nullptr;
+	return *this;
 }
 
 bool Socket::send(Packet &packet, const int channel) {

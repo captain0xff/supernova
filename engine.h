@@ -10,7 +10,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
-//#include <SDL2/SDL_font.h>
+// #include <SDL2/SDL_font.h>
 
 
 using namespace std;
@@ -242,8 +242,11 @@ class Mouse {
 
 class Events {
 	public:
+		SDL_Event event;
+
 		void process_events(bool &running, unordered_map<string, EventKey> &event_keys);
 		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse);
+		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, void (*event_handler)(SDL_Event));
 };
 
 
@@ -330,6 +333,12 @@ class SpriteSheet {
 
 		SpriteSheet() {};
 		SpriteSheet(Renderer &renderer, const string &file, const int &column, const int &row);
+		~SpriteSheet();
+		SpriteSheet(SpriteSheet &&ss) noexcept;
+		SpriteSheet(const SpriteSheet &) = delete;
+
+		SpriteSheet& operator=(SpriteSheet &&ss) noexcept;
+		SpriteSheet& operator=(const SpriteSheet &ss) = delete;
 
 		void set_src_rect(const Rect &src_rect);
 		void draw_sprite(const Rect &dst_rect, const int &column, const int &row);
@@ -345,6 +354,12 @@ class AnimatedSprite: public SpriteSheet {
 
 		AnimatedSprite() {};
 		AnimatedSprite(Renderer &renderer, const string &file, const int &column, const int &row, const double animation_speed, bool loop=true);
+		// ~AnimatedSprite();
+		// AnimatedSprite(AnimatedSprite &&as) noexcept;
+		// AnimatedSprite(const AnimatedSprite &) = delete;
+
+		// AnimatedSprite& operator=(AnimatedSprite &&as) noexcept;
+		// AnimatedSprite& operator=(const AnimatedSprite &as) = delete;
 
 		// Returns true when the animation has just completed looping once
 		bool update(double dt);
@@ -397,6 +412,12 @@ class Packet {
 		Packet() {};
 		Packet(const int maxlen);
 		Packet(const int maxlen, IPaddress &destination);
+		~Packet();
+		Packet(Packet &&pk) noexcept;
+		Packet(const Packet &) = delete;
+
+		Packet& operator=(Packet &&pk) noexcept;
+		Packet& operator=(const Packet &pk) = delete;
 
 		void clear_data();
 		// This function shouldn't be called explicitly by the user.
@@ -431,6 +452,12 @@ class Socket {
 
 		Socket() {};
 		Socket(const int port);
+		~Socket();
+		Socket(Socket &&sock) noexcept;
+		Socket(const Socket &) = delete;
+
+		Socket& operator=(Socket &&sock) noexcept;
+		Socket& operator=(const Socket &sock) = delete;
 
 		// Returns true if the packet is sent successfully
 		bool send(Packet &packet, const int chanel=-1);
