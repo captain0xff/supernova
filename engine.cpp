@@ -706,6 +706,7 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 	mouse.vert_wheel = mouse.horz_wheel = 0;
 
 	while (SDL_PollEvent(&event)) {
+		event_handler(event);
 		switch (event.type) {
 			case SDL_QUIT:
 				running = false;
@@ -754,8 +755,6 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 				mouse.vert_wheel = event.wheel.preciseY;
 				mouse.horz_wheel = event.wheel.preciseX;
 				break;
-			default:
-				event_handler(event);
 		}
 	}
 }
