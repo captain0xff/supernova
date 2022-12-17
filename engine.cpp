@@ -693,7 +693,7 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 	}
 }
 
-void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, void (*event_handler)(SDL_Event)) {
+void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, bool (*event_handler)(SDL_Event &)) {
 	for (auto &[key, value]: event_keys) {
 		value.pressed = false;
 		value.released = false;
@@ -706,55 +706,56 @@ void Events::process_events(bool &running, unordered_map<string, EventKey> &even
 	mouse.vert_wheel = mouse.horz_wheel = 0;
 
 	while (SDL_PollEvent(&event)) {
-		event_handler(event);
-		switch (event.type) {
-			case SDL_QUIT:
-				running = false;
-				break;
-			case SDL_KEYDOWN:
-				if (!event.key.repeat) {
-					for (auto &[key, value]: event_keys) {
-						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+		if (event_handler(event)) {
+			switch (event.type) {
+				case SDL_QUIT:
+					running = false;
+					break;
+				case SDL_KEYDOWN:
+					if (!event.key.repeat) {
+						for (auto &[key, value]: event_keys) {
+							if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+								value.pressed = true;
+								value.down = true;
+							}
+						}
+					}
+					break;
+				case SDL_KEYUP:
+					if (!event.key.repeat) {
+						for (auto &[key, value]: event_keys) {
+							if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+								value.released = true;
+								value.down = false;
+							}
+						}
+					}
+					break;
+				case SDL_MOUSEMOTION:
+					mouse.pos.x = event.button.x;
+					mouse.pos.y = event.button.y;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					for (auto &[key, value]: mouse.buttons) {
+						if (event.button.button == value.id) {
 							value.pressed = true;
 							value.down = true;
 						}
 					}
-				}
-				break;
-			case SDL_KEYUP:
-				if (!event.key.repeat) {
-					for (auto &[key, value]: event_keys) {
-						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+					break;
+				case SDL_MOUSEBUTTONUP:
+					for (auto &[key, value]: mouse.buttons) {
+						if (event.button.button == value.id) {
 							value.released = true;
 							value.down = false;
 						}
 					}
-				}
-				break;
-			case SDL_MOUSEMOTION:
-				mouse.pos.x = event.button.x;
-				mouse.pos.y = event.button.y;
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				for (auto &[key, value]: mouse.buttons) {
-					if (event.button.button == value.id) {
-						value.pressed = true;
-						value.down = true;
-					}
-				}
-				break;
-			case SDL_MOUSEBUTTONUP:
-				for (auto &[key, value]: mouse.buttons) {
-					if (event.button.button == value.id) {
-						value.released = true;
-						value.down = false;
-					}
-				}
-				break;
-			case SDL_MOUSEWHEEL:
-				mouse.vert_wheel = event.wheel.preciseY;
-				mouse.horz_wheel = event.wheel.preciseX;
-				break;
+					break;
+				case SDL_MOUSEWHEEL:
+					mouse.vert_wheel = event.wheel.preciseY;
+					mouse.horz_wheel = event.wheel.preciseX;
+					break;
+			}
 		}
 	}
 }

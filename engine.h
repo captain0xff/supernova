@@ -246,7 +246,7 @@ class Events {
 
 		void process_events(bool &running, unordered_map<string, EventKey> &event_keys);
 		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse);
-		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, void (*event_handler)(SDL_Event));
+		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, bool (*event_handler)(SDL_Event &));
 };
 
 
