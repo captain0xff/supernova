@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include "engine.h"
 
@@ -26,6 +27,16 @@ double degrees(const double angle) {
 	return angle * (180 / PI);
 }
 
+int randint(const int end) {
+	// Generates a random integer b/w 0 to end (0 included and end excluded).
+	return rand()%end;
+}
+
+int randint(const int start, const int end) {
+	// Generates a random integer b/w start to end (start included and end excluded).
+	return start + rand()%(end - start);
+}
+
 
 
 // Main functions
@@ -34,6 +45,8 @@ void Init() {
 	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();
 	if (SDLNet_Init() < 0) cout << "Error! SDLNet_Init(): " << SDLNet_GetError() << endl;
+
+	srand((unsigned) time(NULL)); // Create a seed for random number generation
 }
 
 
@@ -331,6 +344,11 @@ bool Rect::clamp_ip(const Rect &rect) {
 	if (top() < rect.y) {is_changed = true; top(rect.y);}
 	else if (bottom() > (rect.y + rect.h)) {is_changed = true; bottom(rect.y + rect.h);}
 	return is_changed;
+}
+
+void Rect::move(const Vector &vec) {
+	x += vec.x;
+	y += vec.y;
 }
 
 

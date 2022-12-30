@@ -26,6 +26,9 @@ extern double PI;
 double radians(const double angle); // Degree to radians
 double degrees(const double angle); // Radians to degrees
 
+int randint(const int end); // Generates a random integer b/w 0 to end (0 included and end excluded).
+int randint(const int start, const int end); // Generates a random integer b/w start to end (start included and end excluded).
+
 
 
 // Main functions
@@ -124,6 +127,7 @@ struct Rect {
 		// Clamps the rect within the rect passed
 		Rect clamp(const Rect &rect);
 		bool clamp_ip(const Rect &rect);
+		void move(const Vector &vec);
 };
 
 
