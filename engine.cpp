@@ -41,6 +41,8 @@ int randint(const int start, const int end) {
 
 // Main functions
 void Init() {
+	SDL_SetMainReady();
+
 	SDL_Init(SDL_INIT_EVERYTHING);
 	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();

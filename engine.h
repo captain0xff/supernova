@@ -1,6 +1,8 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#define SDL_MAIN_HANDLED
+
 
 #include <string>
 #include <unordered_map>
@@ -135,6 +137,8 @@ struct EventKey {
 	int primary, secondary = SDLK_UNKNOWN;
 	bool pressed = false, released = false, down = false;
 };
+
+inline unordered_map<string, EventKey> EVENT_KEYS;
 
 
 struct MouseButton {
