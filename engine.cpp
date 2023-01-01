@@ -133,8 +133,9 @@ Vector Vector::rotate_rad(const double &angle) {
 }
 
 void Vector::rotate_rad_ip(const double &angle) {
-	x = x*sin(angle) - y*cos(angle);
-	y = x*sin(angle) + y*cos(angle);
+	double temp = x;
+	x = x*cos(angle) - y*sin(angle);
+	y = temp*sin(angle) + y*cos(angle);
 }
 
 Vector Vector::rotate(const double &angle) {
@@ -147,6 +148,15 @@ void Vector::rotate_ip(const double &angle) {
 
 double Vector::distance_to(const Vector &vec) {
 	return sqrt(pow(vec.x - x, 2) + pow(vec.y - y, 2));
+}
+
+double Vector::angle_rad() {
+	double temp = atan2(y, x);
+	return (temp > 0) ? temp : 2*PI + temp;
+}
+
+double Vector::angle() {
+	return degrees(angle_rad());
 }
 
 

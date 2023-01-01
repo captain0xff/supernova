@@ -73,6 +73,8 @@ struct Vector {
 	Vector rotate(const double &angle); // In degrees
 	void rotate_ip(const double &angle); // In degrees
 	double distance_to(const Vector &vec);
+	double angle_rad();
+	double angle(); // In degrees
 };
 
 
