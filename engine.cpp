@@ -1273,19 +1273,19 @@ Packet& operator>>(Packet &packet, Rect &rect) {
 }
 
 
-Socket::Socket(const int port) {
+UDPSocket::UDPSocket(const int port) {
 	socket = SDLNet_UDP_Open(port);
 }
 
-Socket::~Socket() {
+UDPSocket::~UDPSocket() {
 	if (socket != nullptr) destroy(); 
 }
 
-Socket::Socket(Socket &&sock) noexcept {
+UDPSocket::UDPSocket(UDPSocket &&sock) noexcept {
 	sock.socket = nullptr;
 }
 
-Socket& Socket::operator=(Socket &&sock) noexcept {
+UDPSocket& UDPSocket::operator=(UDPSocket &&sock) noexcept {
 	if (&sock == this) return *this;
 	if (socket != nullptr) destroy();
 	socket = sock.socket;
@@ -1293,7 +1293,7 @@ Socket& Socket::operator=(Socket &&sock) noexcept {
 	return *this;
 }
 
-bool Socket::send(Packet &packet, const int channel) {
+bool UDPSocket::send(Packet &packet, const int channel) {
 	packet.ready();
 	if (SDLNet_UDP_Send(socket, channel, packet.packet)) {
 		return true;
@@ -1303,7 +1303,7 @@ bool Socket::send(Packet &packet, const int channel) {
 	}
 }
 
-bool Socket::recv(Packet &packet) {
+bool UDPSocket::recv(Packet &packet) {
 	int val = SDLNet_UDP_Recv(socket, packet.packet);
 	if (val == 1) {
 		packet.set();
@@ -1314,11 +1314,70 @@ bool Socket::recv(Packet &packet) {
 	return false;
 }
 
-void Socket::destroy() {
+void UDPSocket::destroy() {
 	SDLNet_UDP_Close(socket);
+}
+
+TCPSocket::TCPSocket(IPaddress &ip) {
+	if ((socket = SDLNet_TCP_Open(&ip)) == NULL)
+		cout << "Error! Failed to create socket: " << SDLNet_GetError() << endl;
+	else
+		cout << "Socket created successfully!" << endl;
+}
+
+TCPSocket::~TCPSocket() {
+	if (socket != nullptr)
+		destroy();
+}
+
+TCPSocket::TCPSocket(TCPSocket &&sock) noexcept {
+	sock.socket = nullptr;
+}
+
+TCPSocket& TCPSocket::operator=(TCPSocket &&sock) noexcept {
+	if (&sock == this)
+		return *this;
+	if (socket != nullptr)
+		destroy();
+	socket = sock.socket;
+	sock.socket = nullptr;
+	return *this;
+}
+
+bool TCPSocket::accept(TCPSocket &sock) {
+	if ((sock.socket = SDLNet_TCP_Accept(socket)))
+		return 1;
+	return 0;
+}
+
+IPaddress* TCPSocket::get_peer_address() {
+	if (!(ip = SDLNet_TCP_GetPeerAddress(socket)))
+		cout << "Error! " << SDLNet_GetError() << endl;
+	return ip;
+}
+
+void TCPSocket::send(const string &data) {
+	_val = SDLNet_TCP_Send(socket, (void *)data.c_str(), data.length() + 1);
+	if (_val < 0) {
+		cout << "Error! Invalid socket: " << SDLNet_GetError() << endl;
+	} else if (_val < data.length()) {
+		cout << "Error! Full data not sent: " << SDLNet_GetError() << endl;
+	}
+}
+
+bool TCPSocket::recv(char buffer[], const int size) {
+	if (SDLNet_TCP_Recv(socket, buffer, size) > 0)
+		return 1;
+	else
+		return 0;
+}
+
+void TCPSocket::destroy() {
+	SDLNet_TCP_Close(socket);
 }
 
 
 void NetUtils::resolve_host(IPaddress &IP, const int port, const string host) {
-	if (SDLNet_ResolveHost(&IP, host.c_str(), port) < 0) cout << "Error! Failed to resolve host: " << SDLNet_GetError() << endl;
+	if (SDLNet_ResolveHost(&IP, host.c_str(), port) < 0)
+		cout << "Error! Failed to resolve host: " << SDLNet_GetError() << endl;
 }

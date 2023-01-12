@@ -456,18 +456,18 @@ class Packet {
 };
 
 
-class Socket {
+class UDPSocket {
 	public:
 		UDPsocket socket;
 
-		Socket() {};
-		Socket(const int port);
-		~Socket();
-		Socket(Socket &&sock) noexcept;
-		Socket(const Socket &) = delete;
+		UDPSocket() {};
+		UDPSocket(const int port);
+		~UDPSocket();
+		UDPSocket(UDPSocket &&sock) noexcept;
+		UDPSocket(const UDPSocket &) = delete;
 
-		Socket& operator=(Socket &&sock) noexcept;
-		Socket& operator=(const Socket &sock) = delete;
+		UDPSocket& operator=(UDPSocket &&sock) noexcept;
+		UDPSocket& operator=(const UDPSocket &sock) = delete;
 
 		// Returns true if the packet is sent successfully
 		bool send(Packet &packet, const int chanel=-1);
@@ -479,9 +479,39 @@ class Socket {
 };
 
 
+class TCPSocket {
+	private:
+		int _val;
+		IPaddress *ip;
+
+	public:
+		TCPsocket socket;
+
+		TCPSocket() {};
+		TCPSocket(IPaddress &ip);
+		// The buffer used for receiving data
+		// TCPSocket(IPaddress &ip, char buffer[], const int size);
+		~TCPSocket();
+		TCPSocket(TCPSocket &&sock) noexcept;
+		TCPSocket(const TCPSocket &) = delete;
+
+		TCPSocket& operator=(TCPSocket &&sock) noexcept;
+		TCPSocket& operator=(const TCPSocket &sock) = delete;
+
+		// Returns true if connection is accepted successfully
+		bool accept(TCPSocket &sock);
+		// Returns address of the machine connected to the socket
+		IPaddress* get_peer_address();
+		void send(const string &data);
+		// Returns true if any data is received otherwise false (error or no data)
+		bool recv(char buffer[], const int size);
+		void destroy();
+};
+
+
 class NetUtils {
 	public:
-		void resolve_host(IPaddress &IP, const int port, const string host=string(INADDR_ANY));
+		void static resolve_host(IPaddress &IP, const int port, const string host="0.0.0.0");
 };
 
 
