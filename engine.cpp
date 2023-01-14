@@ -1318,6 +1318,7 @@ void UDPSocket::destroy() {
 	SDLNet_UDP_Close(socket);
 }
 
+
 TCPSocket::TCPSocket(IPaddress &ip) {
 	if ((socket = SDLNet_TCP_Open(&ip)) == NULL)
 		cout << "Error! Failed to create socket: " << SDLNet_GetError() << endl;
@@ -1356,24 +1357,26 @@ IPaddress* TCPSocket::get_peer_address() {
 	return ip;
 }
 
-void TCPSocket::send(const string &data) {
-	_val = SDLNet_TCP_Send(socket, (void *)data.c_str(), data.length() + 1);
+void TCPSocket::send(const char buffer[], int size) {
+	_val = SDLNet_TCP_Send(socket, buffer, size);
 	if (_val < 0) {
 		cout << "Error! Invalid socket: " << SDLNet_GetError() << endl;
-	} else if (_val < data.length()) {
+	} else if (_val < size) {
 		cout << "Error! Full data not sent: " << SDLNet_GetError() << endl;
 	}
 }
 
-bool TCPSocket::recv(char buffer[], const int size) {
-	if (SDLNet_TCP_Recv(socket, buffer, size) > 0)
-		return 1;
-	else
-		return 0;
+void TCPSocket::send(string &data) {
+	send(data.data(), data.length() + 1);
+}
+
+int TCPSocket::recv(char buffer[], const int size) {
+	return SDLNet_TCP_Recv(socket, buffer, size);
 }
 
 void TCPSocket::destroy() {
 	SDLNet_TCP_Close(socket);
+	cout << "Socket closed successfully" << endl;
 }
 
 
