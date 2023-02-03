@@ -131,8 +131,30 @@ struct Rect {
 		// Clamps the rect within the rect passed
 		Rect clamp(const Rect &rect);
 		bool clamp_ip(const Rect &rect);
-		void move(const Vector &vec);
+		Rect move(const Vector &vec);
+		void move_ip(const Vector &vec);
 };
+
+
+struct Circle {
+	public:
+		int x, y, r;
+
+		friend ostream& operator<<(ostream &os, const Circle &circle);
+
+		double radius();
+		void radius(const double rad);
+		Vector center();
+		void center(const Vector &vec);
+
+		bool collide_point(const Vector &vec);
+		bool collide_circle(const Circle &circle);
+		// Clamps the circle within the circle passed
+		Circle clamp(const Circle &circle);
+		bool clamp_ip(const Circle &circle);
+		Circle move(const Vector &vec);
+		void move_ip(const Vector &vec);
+}
 
 
 struct EventKey {
@@ -164,7 +186,6 @@ class States;
 class Packet;
 class Socket;
 class NetUtils;
-
 
 
 
