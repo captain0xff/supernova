@@ -104,22 +104,22 @@ void operator/=(Vector &vec1, const Vector &vec2) {
 }
 
 Vector::operator SDL_Point() const {
-	return {x, y};
+	return {static_cast<int>(x), static_cast<int>(y)};
 }
 
 Vector::operator SDL_FPoint() const {
-	return {x, y};
+	return {static_cast<float>(x), static_cast<float>(y)};
 }
 
-double Vector::magnitude_squared() {
+double Vector::magnitude_squared() const {
 	return pow(x, 2) + pow(y, 2);
 }
 
-double Vector::magnitude() {
+double Vector::magnitude() const {
 	return pow(magnitude_squared(), 0.5);
 }
 
-Vector Vector::normalize() {
+Vector Vector::normalize() const {
 	return {x / magnitude(), y / magnitude()};
 }
 
@@ -128,7 +128,7 @@ void Vector::normalize_ip() {
 	y = y / magnitude();
 }
 
-Vector Vector::rotate_rad(const double &angle) {
+Vector Vector::rotate_rad(const double &angle) const {
 	return {x*cos(angle) - y*sin(angle), x*sin(angle) + y*cos(angle)};
 }
 
@@ -138,7 +138,7 @@ void Vector::rotate_rad_ip(const double &angle) {
 	y = temp*sin(angle) + y*cos(angle);
 }
 
-Vector Vector::rotate(const double &angle) {
+Vector Vector::rotate(const double &angle) const {
 	return rotate_rad(radians(angle));
 }
 
@@ -146,16 +146,16 @@ void Vector::rotate_ip(const double &angle) {
 	rotate_rad_ip(radians(angle));
 }
 
-double Vector::distance_to(const Vector &vec) {
+double Vector::distance_to(const Vector &vec) const {
 	return sqrt(pow(vec.x - x, 2) + pow(vec.y - y, 2));
 }
 
-double Vector::angle_rad() {
+double Vector::angle_rad() const {
 	double temp = atan2(y, x);
 	return (temp > 0) ? temp : 2*PI + temp;
 }
 
-double Vector::angle() {
+double Vector::angle() const {
 	return degrees(angle_rad());
 }
 
@@ -169,8 +169,13 @@ Rect::operator SDL_Rect() const {
 	return {x, y, w, h};
 }
 
-Vector Rect::size() {
-	return {w, h};
+Vector Rect::size() const {
+	return {static_cast<double>(w), static_cast<double>(h)};
+}
+
+void Rect::size(const Vector &vec) {
+	w = vec.x;
+	h = vec.y;
 }
 
 void Rect::scale(const Vector &vec) {
@@ -183,24 +188,19 @@ void Rect::scale(const double val) {
 	h = h*val;
 }
 
-void Rect::size(const Vector &vec) {
-	w = vec.x;
-	h = vec.y;
-}
-
-double Rect::half_width() {
+double Rect::half_width() const {
 	return w / 2;
 }
 
-double Rect::half_height() {
+double Rect::half_height() const {
 	return h / 2;
 }
 
-Vector Rect::half_size() {
+Vector Rect::half_size() const {
 	return {half_width(), half_width()};
 }
 
-double Rect::top() {
+double Rect::top() const {
 	return y;
 }
 
@@ -208,7 +208,7 @@ void Rect::top(const double &val) {
 	y = val;
 }
 
-double Rect::bottom() {
+double Rect::bottom() const {
 	return y + h;
 }
 
@@ -216,7 +216,7 @@ void Rect::bottom(const double &val) {
 	y = val - h;
 }
 
-double Rect::left() {
+double Rect::left() const {
 	return x;
 }
 
@@ -224,7 +224,7 @@ void Rect::left(const double &val) {
 	x = val;
 }
 
-double Rect::right() {
+double Rect::right() const {
 	return x + w;
 }
 
@@ -232,7 +232,7 @@ void Rect::right(const double &val) {
 	x = val - w;
 }
 
-double Rect::centerx() {
+double Rect::centerx() const {
 	return x + half_width();
 }
 
@@ -240,7 +240,7 @@ void Rect::centerx(const double &val) {
 	x = val - half_width();
 }
 
-double Rect::centery() {
+double Rect::centery() const {
 	return y + half_height();
 }
 
@@ -248,7 +248,7 @@ void Rect::centery(const double &val) {
 	y = val - half_height();
 }
 
-Vector Rect::topleft() {
+Vector Rect::topleft() const {
 	return {left(), top()};
 }
 
@@ -257,7 +257,7 @@ void Rect::topleft(const Vector &vec) {
 	left(vec.x);
 }
 
-Vector Rect::topright() {
+Vector Rect::topright() const {
 	return {right(), top()};
 }
 
@@ -266,7 +266,7 @@ void Rect::topright(const Vector &vec) {
 	right(vec.x);
 }
 
-Vector Rect::bottomleft() {
+Vector Rect::bottomleft() const {
 	return {left(), bottom()};
 }
 
@@ -275,7 +275,7 @@ void Rect::bottomleft(const Vector &vec) {
 	left(vec.x);
 }
 
-Vector Rect::bottomright() {
+Vector Rect::bottomright() const {
 	return {right(), bottom()};
 }
 
@@ -284,7 +284,7 @@ void Rect::bottomright(const Vector &vec) {
 	right(vec.x);
 }
 
-Vector Rect::center() {
+Vector Rect::center() const {
 	return {centerx(), centery()};
 }
 
@@ -293,7 +293,7 @@ void Rect::center(const Vector &vec) {
 	centerx(vec.x);
 }
 
-Vector Rect::midtop() {
+Vector Rect::midtop() const {
 	return {centerx(), top()};
 }
 
@@ -302,7 +302,7 @@ void Rect::midtop(const Vector &vec) {
 	top(vec.y);
 }
 
-Vector Rect::midbottom() {
+Vector Rect::midbottom() const {
 	return {centerx(), bottom()};
 }
 
@@ -311,7 +311,7 @@ void Rect::midbottom(const Vector &vec) {
 	bottom(vec.y);
 }
 
-Vector Rect::midleft() {
+Vector Rect::midleft() const {
 	return {left(), centery()};
 }
 
@@ -320,7 +320,7 @@ void Rect::midleft(const Vector &vec) {
 	centery(vec.y);
 }
 
-Vector Rect::midright() {
+Vector Rect::midright() const {
 	return {right(), centery()};
 }
 
@@ -329,17 +329,17 @@ void Rect::midright(const Vector &vec) {
 	centery(vec.y);
 }
 
-bool Rect::collide_point(const Vector &vec) {
+bool Rect::collide_point(const Vector &vec) const {
 	if (((left() <= vec.x) && (vec.x <= right())) && ((top() <= vec.y) && (vec.y <= bottom()))) return true;
 	return false;
 }
 
-bool Rect::collide_rect(const Rect &rect) {
+bool Rect::collide_rect(const Rect &rect) const {
 	if ((left() < rect.x + rect.w) && (right() > rect.x) && (top() < rect.y + rect.h) && (bottom() > rect.y)) return true;
 	return false;
 }
 
-Rect Rect::clamp(const Rect &rect) {
+Rect Rect::clamp(const Rect &rect) const {
 	// Clamps the rect within the rect passed
 	Rect new_rect = {x, y, w, h};
 	if (left() < rect.x) new_rect.left(rect.x);
@@ -350,15 +350,101 @@ Rect Rect::clamp(const Rect &rect) {
 }
 
 bool Rect::clamp_ip(const Rect &rect) {
+	// Returns if the rect is clamped or not
 	bool is_changed = false;
-	if (left() < rect.x) {is_changed = true; left(rect.x);}
-	else if (right() > (rect.x + rect.w)) {is_changed = true; right(rect.x + rect.w);}
-	if (top() < rect.y) {is_changed = true; top(rect.y);}
-	else if (bottom() > (rect.y + rect.h)) {is_changed = true; bottom(rect.y + rect.h);}
+
+	if (left() < rect.x) {
+		is_changed = true;
+		left(rect.x);
+	} else if (right() > (rect.x + rect.w)) {
+		is_changed = true;
+		right(rect.x + rect.w);
+	}
+
+	if (top() < rect.y) {
+		is_changed = true;
+		top(rect.y);
+	} else if (bottom() > (rect.y + rect.h)) {
+		is_changed = true;
+		bottom(rect.y + rect.h);
+	}
+
 	return is_changed;
 }
 
-void Rect::move(const Vector &vec) {
+Rect Rect::move(const Vector &vec) const {
+	return {static_cast<int>(x + vec.x), static_cast<int>(y + vec.y), w, h};
+}
+
+void Rect::move_ip(const Vector &vec) {
+	x += vec.x;
+	y += vec.y;
+}
+
+
+ostream& operator<<(ostream &os, const Circle &circle) {
+	cout << "Circle(" << circle.x << ", " << circle.y << ", " << circle.r << ")";
+	return os;
+}
+
+double Circle::radius() const {
+	return r;
+}
+
+void Circle::radius(const double radius) {
+	r = radius;
+}
+
+Vector Circle::center() const {
+	return {static_cast<double>(x), static_cast<double>(y)};
+}
+
+void Circle::center(const Vector &vec) {
+	x = vec.x;
+	y = vec.y;
+}
+
+bool Circle::collide_point(const Vector &vec) const {
+	if (center().distance_to(vec) > r)
+		return false;
+	else
+		return true;
+}
+
+bool Circle::collide_circle(const Circle &circle) const {
+	if (circle.center().distance_to(center()) > circle.r + r)
+		return false;
+	else
+		return true;
+}
+
+Circle Circle::clamp(const Circle &circle) const {
+	Circle new_circle = {x, y, r};
+	Vector center_diff = center() - circle.center();
+
+	if (center_diff.magnitude() > circle.r - r) {
+		new_circle.center(center_diff.normalize()*(circle.r - r) + circle.center());
+	}
+
+	return new_circle;
+}
+
+bool Circle::clamp_ip(const Circle &circle) {
+	// Returns if the circle is clamped or not
+	Vector center_diff = center() - circle.center();
+
+	if (center_diff.magnitude() > circle.r - r) {
+		center(center_diff.normalize()*(circle.r - r) + circle.center());
+		return true;
+	} else
+		return false;
+}
+
+Circle Circle::move(const Vector &vec) const {
+	return {static_cast<int>(x + vec.x), static_cast<int>(y + vec.y), r};
+}
+
+void Circle::move_ip(const Vector &vec) {
 	x += vec.x;
 	y += vec.y;
 }
@@ -366,7 +452,8 @@ void Rect::move(const Vector &vec) {
 
 
 // Classes
-double Clock::tick(double target_fps) { //Leave target_fps to 0 if fps should be unclamped
+double Clock::tick(double target_fps) {
+	//Leave target_fps to 0 if fps should be unclamped
 	current_time = SDL_GetTicks();
 	dt = (current_time - last_time) / 1000;
 	last_time = current_time;
@@ -395,12 +482,15 @@ Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx,
 		flags
 	);
 
-	if (window == NULL) cout << "failed to create window! : " << SDL_GetError() << endl;
-	else cout << "window created successfully!" << endl;
+	if (window == NULL)
+		cout << "failed to create window! : " << SDL_GetError() << endl;
+	else
+		cout << "window created successfully!" << endl;
 }
 
 Window::~Window() {
-	if (window != nullptr) destroy();
+	if (window != nullptr)
+		destroy();
 }
 
 Window::Window(Window &&win) noexcept {
@@ -408,8 +498,10 @@ Window::Window(Window &&win) noexcept {
 }
 
 Window& Window::operator=(Window &&win) noexcept {
-	if (&win == this) return *this;
-	if (window != nullptr) destroy();
+	if (&win == this)
+		return *this;
+	if (window != nullptr)
+		destroy();
 	window = win.window;
 	win.window = nullptr;
 	return *this;
@@ -423,12 +515,15 @@ void Window::destroy() {
 
 Renderer::Renderer(Window &window, int index, Uint32 flags) {
 	renderer = SDL_CreateRenderer(window.window, index, flags);
-	if (renderer == NULL) cout << "failed to create renderer! : " << SDL_GetError() << endl;
-	else cout << "renderer created successfully!" << endl;
+	if (renderer == NULL)
+		cout << "failed to create renderer! : " << SDL_GetError() << endl;
+	else
+		cout << "renderer created successfully!" << endl;
 }
 
 Renderer::~Renderer() {
-	if (renderer != nullptr) destroy();
+	if (renderer != nullptr)
+		destroy();
 }
 
 Renderer::Renderer(Renderer &&ren) noexcept {
@@ -436,8 +531,10 @@ Renderer::Renderer(Renderer &&ren) noexcept {
 }
 
 Renderer& Renderer::operator=(Renderer &&ren) noexcept {
-	if (&ren == this) return *this;
-	if (renderer != nullptr) destroy();
+	if (&ren == this)
+		return *this;
+	if (renderer != nullptr)
+		destroy();
 	renderer = ren.renderer;
 	ren.renderer = nullptr;
 	return *this;
@@ -624,170 +721,112 @@ Mouse::Mouse(const vector<string> &needed_buttons) {
 }
 
 
-void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys) {
-	for (auto &[key, value]: event_keys) {
-		value.pressed = false;
-		value.released = false;
-	}
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_QUIT:
-				running = false;
-				break;
-			case SDL_KEYDOWN:
-				if (!event.key.repeat) {
-					for (auto &[key, value]: event_keys) {
-						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
-							value.pressed = true;
-							value.down = true;
-						}
-					}
-				}
-				break;
-			case SDL_KEYUP:
-				if (!event.key.repeat) {
-					for (auto &[key, value]: event_keys) {
-						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
-							value.released = true;
-							value.down = false;
-						}
-					}
-				}
-				break;
+bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *mouse, unordered_map<SDL_FingerID, Finger> *fingers, bool (*event_handler)(SDL_Event &)) {
+	// The function event handler should return true if the engine loop should not be run otherwise true
+	if (event_keys) {
+		for (auto &[key, value]: *event_keys) {
+			value.pressed = false;
+			value.released = false;
 		}
 	}
-}
 
-void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse) {
-	for (auto &[key, value]: event_keys) {
-		value.pressed = false;
-		value.released = false;
-	}
-
-	for (auto &[key, value]: mouse.buttons) {
-		value.pressed = false;
-		value.released = false;
-	}
-	mouse.vert_wheel = mouse.horz_wheel = 0;
-
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_QUIT:
-				running = false;
-				break;
-			case SDL_KEYDOWN:
-				if (!event.key.repeat) {
-					for (auto &[key, value]: event_keys) {
-						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
-							value.pressed = true;
-							value.down = true;
-						}
-					}
-				}
-				break;
-			case SDL_KEYUP:
-				if (!event.key.repeat) {
-					for (auto &[key, value]: event_keys) {
-						if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
-							value.released = true;
-							value.down = false;
-						}
-					}
-				}
-				break;
-			case SDL_MOUSEMOTION:
-				mouse.pos.x = event.button.x;
-				mouse.pos.y = event.button.y;
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				for (auto &[key, value]: mouse.buttons) {
-					if (event.button.button == value.id) {
-						value.pressed = true;
-						value.down = true;
-					}
-				}
-				break;
-			case SDL_MOUSEBUTTONUP:
-				for (auto &[key, value]: mouse.buttons) {
-					if (event.button.button == value.id) {
-						value.released = true;
-						value.down = false;
-					}
-				}
-				break;
-			case SDL_MOUSEWHEEL:
-				mouse.vert_wheel = event.wheel.preciseY;
-				mouse.horz_wheel = event.wheel.preciseX;
-				break;
+	if (mouse) {
+		for (auto &[key, value]: mouse->buttons) {
+			value.pressed = false;
+			value.released = false;
 		}
+		mouse->vert_wheel = mouse->horz_wheel = 0;
 	}
-}
-
-void Events::process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, bool (*event_handler)(SDL_Event &)) {
-	for (auto &[key, value]: event_keys) {
-		value.pressed = false;
-		value.released = false;
-	}
-
-	for (auto &[key, value]: mouse.buttons) {
-		value.pressed = false;
-		value.released = false;
-	}
-	mouse.vert_wheel = mouse.horz_wheel = 0;
 
 	while (SDL_PollEvent(&event)) {
-		if (event_handler(event)) {
+		if (!(event_handler and event_handler(event))) {
 			switch (event.type) {
 				case SDL_QUIT:
 					running = false;
 					break;
 				case SDL_KEYDOWN:
-					if (!event.key.repeat) {
-						for (auto &[key, value]: event_keys) {
-							if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+					if (event_keys) {
+						if (!event.key.repeat) {
+							for (auto &[key, value]: *event_keys) {
+								if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+									value.pressed = true;
+									value.down = true;
+								}
+							}
+						}
+					}
+					break;
+				case SDL_KEYUP:
+					if (event_keys) {
+						if (!event.key.repeat) {
+							for (auto &[key, value]: *event_keys) {
+								if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+									value.released = true;
+									value.down = false;
+								}
+							}
+						}
+					}
+					break;
+				case SDL_MOUSEMOTION:
+					if (mouse) {
+						mouse->pos.x = event.button.x;
+						mouse->pos.y = event.button.y;
+						break;
+					}
+				case SDL_MOUSEBUTTONDOWN:
+					if (mouse) {
+						for (auto &[key, value]: mouse->buttons) {
+							if (event.button.button == value.id) {
 								value.pressed = true;
 								value.down = true;
 							}
 						}
 					}
 					break;
-				case SDL_KEYUP:
-					if (!event.key.repeat) {
-						for (auto &[key, value]: event_keys) {
-							if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+				case SDL_MOUSEBUTTONUP:
+					if (mouse) {
+						for (auto &[key, value]: mouse->buttons) {
+							if (event.button.button == value.id) {
 								value.released = true;
 								value.down = false;
 							}
 						}
 					}
 					break;
-				case SDL_MOUSEMOTION:
-					mouse.pos.x = event.button.x;
-					mouse.pos.y = event.button.y;
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					for (auto &[key, value]: mouse.buttons) {
-						if (event.button.button == value.id) {
-							value.pressed = true;
-							value.down = true;
-						}
-					}
-					break;
-				case SDL_MOUSEBUTTONUP:
-					for (auto &[key, value]: mouse.buttons) {
-						if (event.button.button == value.id) {
-							value.released = true;
-							value.down = false;
-						}
-					}
-					break;
 				case SDL_MOUSEWHEEL:
-					mouse.vert_wheel = event.wheel.preciseY;
-					mouse.horz_wheel = event.wheel.preciseX;
+					if (mouse) {
+						mouse->vert_wheel = event.wheel.preciseY;
+						mouse->horz_wheel = event.wheel.preciseX;
+					}
 					break;
+				case SDL_FINGERMOTION:
+					if (fingers) {
+						(*fingers)[event.tfinger.fingerId] = {
+							event.tfinger.fingerId,
+							{event.tfinger.x, event.tfinger.y},
+							{event.tfinger.dx, event.tfinger.dy},
+							event.tfinger.pressure
+						};
+					}
+				case SDL_FINGERDOWN:
+					if (fingers) {
+						(*fingers)[event.tfinger.fingerId] = {
+							event.tfinger.fingerId,
+							{event.tfinger.x, event.tfinger.y},
+							{event.tfinger.dx, event.tfinger.dy},
+							event.tfinger.pressure
+						};
+					}
+				case SDL_FINGERUP:
+					if (fingers) {
+						fingers->erase(event.tfinger.fingerId);
+					}
 			}
 		}
 	}
+
+	return running;
 }
 
 
@@ -894,32 +933,6 @@ void Texture::destroy() {
 }
 
 
-/*
-Font2::Font2(Renderer &renderer, const string file, int size, Colour colour, int style) {
-	font_renderer = &renderer;
-	font = FC_CreateFont();
-	FC_LoadFont(font, font_renderer -> renderer, file.c_str(), size, {colour.r, colour.g, colour.b, colour.a}, style);
-
-	id = FONT_ID;
-	cout << "font " << file << " loaded successfully! " << "[" << id << "]" << endl;
-	FONT_ID++;
-}
-
-Rect Font2::get_rect(const string text) {
-	return {0, 0, FC_GetWidth(font, text.c_str()), FC_GetHeight(font, text.c_str())};
-}
-
-void Font2::render(Rect &dst_rect, string text) {
-	FC_Rect rect = FC_Draw(font, font_renderer -> renderer, dst_rect.x, dst_rect.y, text.c_str());
-}
-
-void Font2::destroy() {
-	FC_FreeFont(font);
-	cout << "font destroyed successfully! [" << id << "]" << endl;	
-}
-*/
-
-
 Font::Font(const string &file, const int size) {
 	font = TTF_OpenFont(file.c_str(), size);
 
@@ -1007,7 +1020,7 @@ void Font::draw_text(FontAtlas &font_atlas, const string &text, const Colour &co
 	int cx = x;
 	for (auto &ch: text) {
 		Rect *r = &font_atlas.data[ch];
-		font_atlas.atlas.render({cx, y, r->w*(size/r->h), size}, font_atlas.data[ch]);
+		font_atlas.atlas.render({cx, y, static_cast<int>(r->w*(size/r->h)), static_cast<int>(size)}, font_atlas.data[ch]);
 		cx += r->w*(size/r->h);
 	}
 }

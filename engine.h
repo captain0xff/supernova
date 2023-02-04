@@ -12,7 +12,6 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
-// #include <SDL2/SDL_font.h>
 
 
 using namespace std;
@@ -63,18 +62,18 @@ struct Vector {
 	operator SDL_Point() const;
 	operator SDL_FPoint() const;
 
-	double magnitude_squared();
-	double magnitude();
+	double magnitude_squared() const;
+	double magnitude() const;
 
-	Vector normalize();
+	Vector normalize() const;
 	void normalize_ip();
-	Vector rotate_rad(const double &angle);
+	Vector rotate_rad(const double &angle) const;
 	void rotate_rad_ip(const double &angle);
-	Vector rotate(const double &angle); // In degrees
+	Vector rotate(const double &angle) const; // In degrees
 	void rotate_ip(const double &angle); // In degrees
-	double distance_to(const Vector &vec);
-	double angle_rad();
-	double angle(); // In degrees
+	double distance_to(const Vector &vec) const;
+	double angle_rad() const;
+	double angle() const; // In degrees
 };
 
 
@@ -86,52 +85,53 @@ struct Rect {
 
 		operator SDL_Rect() const;
 
-		Vector size();
+		Vector size() const;
 		void size(const Vector &vec);
 		void scale(const Vector &vec);
 		// Scales the height and width by the given factor
 		void scale(const double val);
-		double half_width();
-		double half_height();
-		Vector half_size();
+		double half_width() const;
+		double half_height() const;
+		Vector half_size() const;
 
-		double top();
+		double top() const;
 		void top(const double &val);
-		double bottom();
+		double bottom() const;
 		void bottom(const double &val);
-		double left();
+		double left() const;
 		void left(const double &val);
-		double right();
+		double right() const;
 		void right(const double &val);
-		double centerx();
+		double centerx() const;
 		void centerx(const double &val);
-		double centery();
+		double centery() const;
 		void centery(const double &val);
-		Vector topleft();
+		Vector topleft() const;
 		void topleft(const Vector &vec);
-		Vector topright();
+		Vector topright() const;
 		void topright(const Vector &vec);
-		Vector bottomleft();
+		Vector bottomleft() const;
 		void bottomleft(const Vector &vec);
-		Vector bottomright();
+		Vector bottomright() const;
 		void bottomright(const Vector &vec);
-		Vector center();
+		Vector center() const;
 		void center(const Vector &vec);
-		Vector midtop();
+		Vector midtop() const;
 		void midtop(const Vector &vec);
-		Vector midbottom();
+		Vector midbottom() const;
 		void midbottom(const Vector &vec);
-		Vector midleft();
+		Vector midleft() const;
 		void midleft(const Vector &vec);
-		Vector midright();
+		Vector midright() const;
 		void midright(const Vector &vec);
 
-		bool collide_point(const Vector &vec);
-		bool collide_rect(const Rect &rect);
+		bool collide_point(const Vector &vec) const;
+		bool collide_rect(const Rect &rect) const;
 		// Clamps the rect within the rect passed
-		Rect clamp(const Rect &rect);
+		Rect clamp(const Rect &rect) const;
+		// Returns if the rect is clamped or not
 		bool clamp_ip(const Rect &rect);
-		Rect move(const Vector &vec);
+		Rect move(const Vector &vec) const;
 		void move_ip(const Vector &vec);
 };
 
@@ -142,19 +142,20 @@ struct Circle {
 
 		friend ostream& operator<<(ostream &os, const Circle &circle);
 
-		double radius();
-		void radius(const double rad);
-		Vector center();
+		double radius() const;
+		void radius(const double radius);
+		Vector center() const;
 		void center(const Vector &vec);
 
-		bool collide_point(const Vector &vec);
-		bool collide_circle(const Circle &circle);
+		bool collide_point(const Vector &vec) const;
+		bool collide_circle(const Circle &circle) const;
 		// Clamps the circle within the circle passed
-		Circle clamp(const Circle &circle);
+		Circle clamp(const Circle &circle) const;
+		// Returns if the circle is clamped or not
 		bool clamp_ip(const Circle &circle);
-		Circle move(const Vector &vec);
+		Circle move(const Vector &vec) const;
 		void move_ip(const Vector &vec);
-}
+};
 
 
 struct EventKey {
@@ -162,13 +163,23 @@ struct EventKey {
 	bool pressed = false, released = false, down = false;
 };
 
-inline unordered_map<string, EventKey> EVENT_KEYS;
+static unordered_map<string, EventKey> EVENT_KEYS;
 
 
 struct MouseButton {
 	Uint8 id;
 	bool pressed = false, released = false, down = false;
 };
+
+
+struct Finger {
+	SDL_FingerID id;
+	Vector pos;
+	Vector dpos;
+	double pressure;
+};
+
+static unordered_map<SDL_FingerID, Finger> FINGERS;
 
 
 
@@ -274,10 +285,10 @@ class Mouse {
 class Events {
 	public:
 		SDL_Event event;
+		bool running = true;
 
-		void process_events(bool &running, unordered_map<string, EventKey> &event_keys);
-		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse);
-		void process_events(bool &running, unordered_map<string, EventKey> &event_keys, Mouse &mouse, bool (*event_handler)(SDL_Event &));
+		// The function event handler should return true if the engine loop should not be run otherwise true
+		bool process_events(unordered_map<string, EventKey> *event_keys = nullptr, Mouse *mouse = nullptr, unordered_map<SDL_FingerID, Finger> *fingers = nullptr, bool (*event_handler)(SDL_Event &) = nullptr);
 };
 
 
@@ -313,22 +324,6 @@ class Texture {
 
 
 extern int FONT_ID;
-/*
-class Font2 {
-	public:
-		int id;
-		Renderer *font_renderer;
-		FC_Font *font;
-
-		Font2(Renderer &renderer, const string file, int size, Colour colour, int style);
-
-		Rect get_rect(const string text);
-		void render(Rect &dst_rect, string text);
-		void destroy();
-};
-*/
-
-
 class Font {
 	public:
 		int id;
