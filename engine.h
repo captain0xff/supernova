@@ -254,7 +254,7 @@ class Renderer {
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
 		// Currently filled circle with alpha is not properly supported
-		void draw_circle(const Vector &center_pos, const int radius, const Colour &colour, const bool filled=true);
+		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);
 		void draw_polygon(const vector<Vector> vertices, const Colour colour, const bool filled=true);
 };
 

@@ -600,7 +600,7 @@ void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
 	}
 }
 
-void Renderer::draw_circle(const Vector &center_pos, const int radius, const Colour &colour, const bool filled) {
+void Renderer::draw_circle(const Circle &circle, const Colour &colour, const bool filled) {
 	set_colour(colour);
 
 	if (filled) {
@@ -610,20 +610,20 @@ void Renderer::draw_circle(const Vector &center_pos, const int radius, const Col
 
 		for (int i = 0; i < tris; i += 3) {
 			// The upper bound of the triangle
-			vertices[i].position = center_pos; // 0, 3, 6, 9
+			vertices[i].position = circle.center(); // 0, 3, 6, 9
 			vertices[i].color = colour;
 
 			// Subtract 3 from tris so we don't operate on a triangle that is out of bounds
 
 			// The lower right bound of the triangle
-			vertices[i + 1].position.x = center_pos.x + (cos(i * mirror / (tris - 3)) * radius); // 1, 4, 7, 10
-			vertices[i + 1].position.y = center_pos.y + (sin(i * mirror / (tris - 3)) * radius);
+			vertices[i + 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 1, 4, 7, 10
+			vertices[i + 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
 			vertices[i + 1].color = colour;
 
 			// The lower left bound of the triangle
 			if (i > 0) {
-				vertices[i - 1].position.x = center_pos.x + (cos(i * mirror / (tris - 3)) * radius); // 2, 5, 8, 11
-				vertices[i - 1].position.y = center_pos.y + (sin(i * mirror / (tris - 3)) * radius);
+				vertices[i - 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 2, 5, 8, 11
+				vertices[i - 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
 				vertices[i - 1].color = colour;
 			}
 		}
@@ -631,22 +631,22 @@ void Renderer::draw_circle(const Vector &center_pos, const int radius, const Col
 		SDL_RenderGeometry(renderer, NULL, vertices, tris - 3, NULL, tris - 3);
 
 	} else {
-		int x = radius, y = 0;
+		int x = circle.r, y = 0;
 
 		// Printing the initial point on the axes
 		// after translation
-		SDL_RenderDrawPoint(renderer, x + center_pos.x, center_pos.y);
+		SDL_RenderDrawPoint(renderer, x + circle.x, circle.y);
 
 		// When radius is zero only a single
 		// point will be printed
-		if (radius > 0) {
-			SDL_RenderDrawPoint(renderer, -x + center_pos.x, center_pos.y);
-			SDL_RenderDrawPoint(renderer, center_pos.x, -x + center_pos.y);
-			SDL_RenderDrawPoint(renderer, center_pos.x, x + center_pos.y);
+		if (circle.r > 0) {
+			SDL_RenderDrawPoint(renderer, -x + circle.x, circle.y);
+			SDL_RenderDrawPoint(renderer, circle.x, -x + circle.y);
+			SDL_RenderDrawPoint(renderer, circle.x, x + circle.y);
 		}
 
 		// Initialising the value of P
-		int P = 1 - radius;
+		int P = 1 - circle.r;
 		while (x > y) {
 			y++;
 
@@ -665,18 +665,18 @@ void Renderer::draw_circle(const Vector &center_pos, const int radius, const Col
 
 			// Printing the generated point and its reflection
 			// in the other octants after translation
-			SDL_RenderDrawPoint(renderer, x + center_pos.x, y + center_pos.y);
-			SDL_RenderDrawPoint(renderer, -x + center_pos.x, y + center_pos.y);
-			SDL_RenderDrawPoint(renderer, x + center_pos.x, -y + center_pos.y);
-			SDL_RenderDrawPoint(renderer, -x + center_pos.x, -y + center_pos.y);
+			SDL_RenderDrawPoint(renderer, x + circle.x, y + circle.y);
+			SDL_RenderDrawPoint(renderer, -x + circle.x, y + circle.y);
+			SDL_RenderDrawPoint(renderer, x + circle.x, -y + circle.y);
+			SDL_RenderDrawPoint(renderer, -x + circle.x, -y + circle.y);
 
 			// If the generated point is on the line x = y then
 			// the perimeter points have already been printed
 			if (x != y) {
-				SDL_RenderDrawPoint(renderer, y + center_pos.x, x + center_pos.y);
-				SDL_RenderDrawPoint(renderer, -y + center_pos.x, x + center_pos.y);
-				SDL_RenderDrawPoint(renderer, y + center_pos.x, -x + center_pos.y);
-				SDL_RenderDrawPoint(renderer, -y + center_pos.x, -x + center_pos.y);
+				SDL_RenderDrawPoint(renderer, y + circle.x, x + circle.y);
+				SDL_RenderDrawPoint(renderer, -y + circle.x, x + circle.y);
+				SDL_RenderDrawPoint(renderer, y + circle.x, -x + circle.y);
+				SDL_RenderDrawPoint(renderer, -y + circle.x, -x + circle.y);
 			}
 		}
 	}
