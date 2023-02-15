@@ -875,6 +875,7 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 							event.tfinger.pressure
 						};
 					}
+					break;
 				case SDL_FINGERDOWN:
 					if (fingers) {
 						(*fingers)[event.tfinger.fingerId] = {
@@ -884,10 +885,12 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 							event.tfinger.pressure
 						};
 					}
+					break;
 				case SDL_FINGERUP:
 					if (fingers) {
 						fingers->erase(event.tfinger.fingerId);
 					}
+					break;
 			}
 		}
 	}

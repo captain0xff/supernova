@@ -23,6 +23,29 @@ extern double PI;
 
 
 
+// Forward Declarations
+struct Vector;
+struct Rect;
+struct Circle;
+struct EventKey;
+struct MouseButton;
+struct Finger;
+class Clock;
+class Window;
+class Renderer;
+class Texture;
+class Mouse;
+class Events;
+class Fonts;
+class SpriteSheet;
+class AnimatedSprite;
+class States;
+class Packet;
+class Socket;
+class NetUtils;
+
+
+
 // Helper functions
 double radians(const double angle); // Degree to radians
 double degrees(const double angle); // Radians to degrees
@@ -187,23 +210,6 @@ static unordered_map<SDL_FingerID, Finger> FINGERS;
 
 
 
-// Forward declarations
-class Clock;
-class Window;
-class Renderer;
-class Texture;
-class Mouse;
-class Events;
-class Fonts;
-class SpriteSheet;
-class AnimatedSprite;
-class States;
-class Packet;
-class Socket;
-class NetUtils;
-
-
-
 // Classes
 class Clock {
     private:
@@ -229,7 +235,7 @@ class Timer {
 		bool update(double dt);
 		// Sets the counter to 0
 		void reset();
-}
+};
 
 
 class Window {
