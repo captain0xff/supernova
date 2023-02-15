@@ -74,6 +74,10 @@ struct Vector {
 	double distance_to(const Vector &vec) const;
 	double angle_rad() const;
 	double angle() const; // In degrees
+	Vector clamp(const Rect &rect);
+	Vector clamp(const Circle &circle);
+	void clamp_ip(const Rect &rect);
+	void clamp_ip(const Circle &circle);
 };
 
 
@@ -205,13 +209,27 @@ class Clock {
     private:
         double current_time;
         double last_time;
-        double static target_dt;
+        double target_dt;
         double dt;
 
     public:
         double tick(double target_fps=0);
         double get_fps();
 };
+
+
+class Timer {
+	public:
+		double time, counter = 0;
+
+		// Time should be in seconds
+		Timer(double time);
+
+		// Returns true once after the set time is over and gets reset
+		bool update(double dt);
+		// Sets the counter to 0
+		void reset();
+}
 
 
 class Window {

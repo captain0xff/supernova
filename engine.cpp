@@ -159,6 +159,51 @@ double Vector::angle() const {
 	return degrees(angle_rad());
 }
 
+Vector Vector::clamp(const Rect &rect) {
+	Vector vec = {x, y};
+
+	if (rect.left() > x)
+		vec.x = rect.left();
+	else if (rect.right() < x)
+		vec.x = rect.right();
+
+	if (rect.top() > y)
+		vec.y = rect.top();
+	else if (rect.bottom() < y)
+		vec.y = rect.bottom();
+
+	return vec;
+}
+
+Vector Vector::clamp(const Circle &circle) {
+	Vector vec = {x, y};
+
+	if (this->distance_to(circle.center()) > circle.r)
+		vec = normalize()*circle.r;
+
+	return vec;
+}
+
+void Vector::clamp_ip(const Rect &rect) {
+	if (rect.left() > x)
+		x = rect.left();
+	else if (rect.right() < x)
+		x = rect.right();
+
+	if (rect.top() > y)
+		y = rect.top();
+	else if (rect.bottom() < y)
+		y = rect.bottom();
+}
+
+void Vector::clamp_ip(const Circle &circle) {
+	if (this->distance_to(circle.center()) > circle.r) {
+		normalize_ip();
+		x *= circle.r;
+		y *= circle.r;
+	}
+}
+
 
 ostream& operator<<(ostream &os, Rect const &rect) {
 	cout << "Rect(" << rect.x << ", " << rect.y << ", " << rect.w << ", " << rect.h << ")";
@@ -457,7 +502,7 @@ double Clock::tick(double target_fps) {
 	current_time = SDL_GetTicks();
 	dt = (current_time - last_time) / 1000;
 	last_time = current_time;
-	double target_dt = 1/target_fps;
+	target_dt = 1/target_fps;
 	if (target_fps != 0) {
 		if (target_dt > dt) {
 			SDL_Delay((target_dt - dt) * 1000);
@@ -469,6 +514,27 @@ double Clock::tick(double target_fps) {
 
 double Clock::get_fps() {
 	return 1/dt; 
+}
+
+
+Timer::Timer(double time) {
+	// Time should be in seconds
+	this->time = time;
+}
+
+bool Timer::update(double dt) {
+	// Returns true once after the set time is over and gets reset
+	counter += dt;
+	if (counter >= time) {
+		reset();
+		return true;
+	}
+	return false;
+}
+
+void Timer::reset() {
+	// Sets the counter to 0
+	counter = 0;
 }
 
 
