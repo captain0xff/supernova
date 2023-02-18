@@ -636,6 +636,10 @@ void Renderer::set_target(Texture &tex) {
 	SDL_SetRenderTarget(renderer, tex.texture);
 }
 
+void Renderer::set_logical_size(const Vector &size) {
+	SDL_RenderSetLogicalSize(renderer, static_cast<int>(size.x), static_cast<int>(size.y));
+}
+
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
 	set_colour(colour);
 	SDL_RenderDrawPoint(renderer, point_pos.x, point_pos.y);
@@ -804,6 +808,12 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 		mouse->vert_wheel = mouse->horz_wheel = 0;
 	}
 
+	if (fingers) {
+		for (auto &[key, value]: *fingers) {
+			value.pressed = false;
+		}
+	}
+
 	while (SDL_PollEvent(&event)) {
 		if (!(event_handler and event_handler(event))) {
 			switch (event.type) {
@@ -872,6 +882,7 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 							event.tfinger.fingerId,
 							{event.tfinger.x, event.tfinger.y},
 							{event.tfinger.dx, event.tfinger.dy},
+							false,
 							event.tfinger.pressure
 						};
 					}
@@ -882,6 +893,7 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 							event.tfinger.fingerId,
 							{event.tfinger.x, event.tfinger.y},
 							{event.tfinger.dx, event.tfinger.dy},
+							true,
 							event.tfinger.pressure
 						};
 					}

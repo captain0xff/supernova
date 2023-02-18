@@ -203,6 +203,7 @@ struct Finger {
 	SDL_FingerID id;
 	Vector pos;
 	Vector dpos;
+	bool pressed;
 	double pressure;
 };
 
@@ -274,6 +275,7 @@ class Renderer {
 		void set_blend_mode(SDL_BlendMode blend_mode);
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
+		void set_logical_size(const Vector &size);
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
