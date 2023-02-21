@@ -182,7 +182,7 @@ Vector Vector::clamp(const Circle &circle) {
 	Vector vec = {x, y};
 
 	if (this->distance_to(circle.center()) > circle.r)
-		vec = normalize()*circle.r;
+		vec = circle.center() + (vec - circle.center()).normalize()*circle.r;
 
 	return vec;
 }
@@ -200,10 +200,11 @@ void Vector::clamp_ip(const Rect &rect) {
 }
 
 void Vector::clamp_ip(const Circle &circle) {
-	if (this->distance_to(circle.center()) > circle.r) {
-		normalize_ip();
-		x *= circle.r;
-		y *= circle.r;
+	double temp = this->distance_to(circle.center());
+
+	if (temp > circle.radius()){
+		x = circle.x + (x - circle.x)*circle.r/temp;
+		y = circle.y + (y - circle.y)*circle.r/temp;
 	}
 }
 
