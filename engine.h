@@ -287,6 +287,7 @@ class Renderer {
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
 		void set_logical_size(const Vector &size);
+		Vector get_output_size();
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);

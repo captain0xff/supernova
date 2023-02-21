@@ -651,6 +651,12 @@ void Renderer::set_logical_size(const Vector &size) {
 	SDL_RenderSetLogicalSize(renderer, static_cast<int>(size.x), static_cast<int>(size.y));
 }
 
+Vector Renderer::get_output_size() {
+	int w, h;
+	SDL_GetRendererOutputSize(renderer, &w, &h);
+	return {static_cast<double>(w), static_cast<double>(h)};
+}
+
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
 	set_colour(colour);
 	SDL_RenderDrawPoint(renderer, point_pos.x, point_pos.y);
