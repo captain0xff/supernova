@@ -1,9 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#ifndef __ANDROID__
-#define SDL_MAIN_HANDLED
-#endif
 
 #include <string>
 #include <unordered_map>
