@@ -8,10 +8,17 @@
 #include <unordered_map>
 #include <vector>
 
+#ifndef __ANDROID__
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
+#else
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#include <SDL_net.h>
+#endif
 
 
 using namespace std;
@@ -84,6 +91,8 @@ struct Vector {
 
 	operator SDL_Point() const;
 	operator SDL_FPoint() const;
+	
+	const string to_str() const;
 
 	double magnitude_squared() const;
 	double magnitude() const;
@@ -111,6 +120,8 @@ struct Rect {
 		friend ostream& operator<<(ostream &os, Rect const &rect);
 
 		operator SDL_Rect() const;
+
+		const string to_str() const;
 
 		Vector size() const;
 		void size(const Vector &vec);
@@ -168,6 +179,8 @@ struct Circle {
 		int x, y, r;
 
 		friend ostream& operator<<(ostream &os, const Circle &circle);
+
+		const string to_str() const;
 
 		double radius() const;
 		void radius(const double radius);

@@ -1,4 +1,5 @@
 #include <cmath>
+#include <ctime>
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -46,7 +47,7 @@ void Init() {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();
-	if (SDLNet_Init() < 0) cout << "Error! SDLNet_Init(): " << SDLNet_GetError() << endl;
+	SDLNet_Init();
 
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
 }
@@ -67,7 +68,7 @@ Colour::operator SDL_Color() const {
 
 
 ostream& operator<<(ostream &os, const Vector &vector) {
-	cout << "Vector(" << vector.x << ", " << vector.y << ")";
+	cout << vector.to_str();
 	return os;
 }
 
@@ -109,6 +110,10 @@ Vector::operator SDL_Point() const {
 
 Vector::operator SDL_FPoint() const {
 	return {static_cast<float>(x), static_cast<float>(y)};
+}
+
+const string Vector::to_str() const {
+	return "Vector(" + to_string(x) + ", " + to_string(y) + ")";
 }
 
 double Vector::magnitude_squared() const {
@@ -206,12 +211,16 @@ void Vector::clamp_ip(const Circle &circle) {
 
 
 ostream& operator<<(ostream &os, Rect const &rect) {
-	cout << "Rect(" << rect.x << ", " << rect.y << ", " << rect.w << ", " << rect.h << ")";
+	cout << rect.to_str();
 	return os;
 }
 
 Rect::operator SDL_Rect() const {
 	return {x, y, w, h};
+}
+
+const string Rect::to_str() const {
+	return "Rect(" + to_string(x) + ", " + to_string(y) + to_string(w) + ", " + to_string(h) + ", " + ")";
 }
 
 Vector Rect::size() const {
@@ -428,8 +437,12 @@ void Rect::move_ip(const Vector &vec) {
 
 
 ostream& operator<<(ostream &os, const Circle &circle) {
-	cout << "Circle(" << circle.x << ", " << circle.y << ", " << circle.r << ")";
+	cout << circle.to_str();
 	return os;
+}
+
+const string Circle::to_str() const {
+	return "Circle(" + to_string(x) + ", " + to_string(y) + to_string(r) + ")";
 }
 
 double Circle::radius() const {
@@ -549,9 +562,9 @@ Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx,
 	);
 
 	if (window == NULL)
-		cout << "failed to create window! : " << SDL_GetError() << endl;
+		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
 	else
-		cout << "window created successfully!" << endl;
+		SDL_Log("Window created successfully!");
 }
 
 Window::~Window() {
@@ -575,16 +588,16 @@ Window& Window::operator=(Window &&win) noexcept {
 
 void Window::destroy() {
 	SDL_DestroyWindow(window);
-	cout << "window closed successfully!" << endl;
+	SDL_Log("Window closed successfully!");
 }
 
 
 Renderer::Renderer(Window &window, int index, Uint32 flags) {
 	renderer = SDL_CreateRenderer(window.window, index, flags);
 	if (renderer == NULL)
-		cout << "failed to create renderer! : " << SDL_GetError() << endl;
+		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
 	else
-		cout << "renderer created successfully!" << endl;
+		SDL_Log("Renderer created successfully!");
 }
 
 Renderer::~Renderer() {
@@ -608,7 +621,7 @@ Renderer& Renderer::operator=(Renderer &&ren) noexcept {
 
 void Renderer::destroy() {
 	SDL_DestroyRenderer(renderer);
-	cout << "renderer destroyed successfully!" << endl;
+	SDL_Log("Renderer destroyed successfully!");
 }
 
 void Renderer::set_colour(const Colour &colour) {
@@ -914,10 +927,11 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 Texture::Texture(Renderer &renderer, const string &file) {
 	tex_renderer = &renderer;
 	texture = IMG_LoadTexture(tex_renderer -> renderer, file.c_str());
-	if (texture == NULL) cout << "failed to load texture! [" << file << "] : "<< SDL_GetError() << endl;
+	if (texture == NULL)
+		SDL_LogError(0, "Failed to load texture! (%s): %s", file.c_str(), SDL_GetError());
 	else {
 		id = TEX_ID;
-		cout << "texture " << " (" << file << ")" << " loaded successfully! " << "[" << id << "]" << endl;
+		SDL_Log("Texture loaded successfully![%i] (%s)", id, file.c_str());
 		TEX_ID++;
 	}
 
@@ -928,10 +942,11 @@ Texture::Texture(Renderer &renderer, SDL_Surface *surface) {
 	tex_renderer = &renderer;
 	texture = SDL_CreateTextureFromSurface(tex_renderer -> renderer, surface);
 	SDL_FreeSurface(surface);
-	if (texture == NULL) cout << "failed to load texture! : "<< SDL_GetError() << endl;
+	if (texture == NULL)
+		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
-		cout << "texture loaded successfully! " << "[" << id << "]" << endl;
+		SDL_Log("Texture created successfully![%i]", id);
 		TEX_ID++;
 	}
 
@@ -943,10 +958,11 @@ Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, co
 	w = size.x;
 	h = size.y;
 	texture = SDL_CreateTexture(tex_renderer -> renderer, format, access, size.x, size.y);
-	if (texture == NULL) cout << "failed to create texture! : "<< SDL_GetError() << endl;
+	if (texture == NULL)
+		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
-		cout << "texture created successfully! " << "[" << id << "]" << endl;
+		SDL_Log("Texture created successfully![%i]", id);
 		TEX_ID++;
 	}
 }
@@ -1010,17 +1026,18 @@ void Texture::render_ex(const Rect &dst_rect, const Rect &src_rect, const double
 
 void Texture::destroy() {
 	SDL_DestroyTexture(texture);
-	cout << "texture destroyed successfully! [" << id << "]" << endl;
+	SDL_Log("Texture destroyed successfully![%i]", id);
 }
 
 
 Font::Font(const string &file, const int size) {
 	font = TTF_OpenFont(file.c_str(), size);
 
-	if (font == NULL) cout << "failed to load font! [" << file << "] : "<< SDL_GetError() << endl;
+	if (font == NULL)
+		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), SDL_GetError());
 	else {
 		id = FONT_ID;
-		cout << "font " << " (" << file << ")" << " loaded successfully! " << "[" << id << "]" << endl;
+		SDL_Log("Texture loaded successfully![%i] (%s)", id, file.c_str());
 		FONT_ID++;
 	}
 }
@@ -1108,7 +1125,7 @@ void Font::draw_text(FontAtlas &font_atlas, const string &text, const Colour &co
 
 void Font::destroy() {
 	TTF_CloseFont(font);
-	cout << "font destroyed successfully! [" << id << "]" << endl;
+	SDL_Log("Font destroyed successfully![%i]", id);
 }
 
 
@@ -1252,7 +1269,8 @@ Uint8* Packet::get_data() {
 		_serialized_data += val + DELIMITER;
 	}
 	clear_data();
-	if (_serialized_data.size() > maxlen) cout << "Packet overflow! Data won't be send." << endl;
+	if (_serialized_data.size() > maxlen)
+		SDL_LogError(0, "Packet overflow! Data won't be send.");
 
 	return (Uint8 *)_serialized_data.c_str();
 }
@@ -1265,15 +1283,17 @@ void Packet::ready() {
 		packet->address.port = destination.port;
 		packet->data = get_data();
 		packet->len = strlen((char *)packet->data) + 1;
-	} else cout << "This packet is not for sending." << endl;
+	} else
+		SDL_LogError(0, "This packet is not for sending.");
 }
 
 void Packet::set() {
 	// This function shouldn't be called explicitly by the user.
 
-	if (for_sending) {
-		cout << "This packet is not for receiving." << endl;
-	} else set_data((char *)packet->data);
+	if (for_sending)
+		SDL_LogError(0, "This packet is not for receiving.");
+	else
+		set_data((char *)packet->data);
 }
 
 string Packet::get_next_val() {
@@ -1392,7 +1412,7 @@ bool UDPSocket::send(Packet &packet, const int channel) {
 	if (SDLNet_UDP_Send(socket, channel, packet.packet)) {
 		return true;
 	} else {
-		cout << "Error! Failed to send packet: " << SDLNet_GetError() << endl;
+		SDL_LogError(0, "Failed to send packet: %s", SDLNet_GetError());
 		return false;
 	}
 }
@@ -1402,9 +1422,10 @@ bool UDPSocket::recv(Packet &packet) {
 	if (val == 1) {
 		packet.set();
 		return true;
-	} else if (val == 0) {
+	} else if (val == 0)
 		return false;
-	} else cout << "Error! Packet not received: " << SDLNet_GetError() << endl;
+	else
+		SDL_LogError(0, "Packet not received: %s", SDLNet_GetError());
 	return false;
 }
 
@@ -1415,9 +1436,9 @@ void UDPSocket::destroy() {
 
 TCPSocket::TCPSocket(IPaddress &ip) {
 	if ((socket = SDLNet_TCP_Open(&ip)) == NULL)
-		cout << "Error! Failed to create socket: " << SDLNet_GetError() << endl;
+		SDL_LogError(0, "Failed to create socket: %s", SDLNet_GetError());
 	else
-		cout << "Socket created successfully!" << endl;
+		SDL_Log("Socket created successfully!");
 }
 
 TCPSocket::~TCPSocket() {
@@ -1447,17 +1468,16 @@ bool TCPSocket::accept(TCPSocket &sock) {
 
 IPaddress* TCPSocket::get_peer_address() {
 	if (!(ip = SDLNet_TCP_GetPeerAddress(socket)))
-		cout << "Error! " << SDLNet_GetError() << endl;
+		SDL_LogError(0, "Failed to get peer address: %s", SDLNet_GetError());
 	return ip;
 }
 
 void TCPSocket::send(const char buffer[], int size) {
 	_val = SDLNet_TCP_Send(socket, buffer, size);
-	if (_val < 0) {
-		cout << "Error! Invalid socket: " << SDLNet_GetError() << endl;
-	} else if (_val < size) {
-		cout << "Error! Full data not sent: " << SDLNet_GetError() << endl;
-	}
+	if (_val < 0)
+		SDL_LogError(0, "Invalid socket: %s", SDLNet_GetError());
+	else if (_val < size)
+		SDL_LogWarn(1, "Full data not sent: %s", SDLNet_GetError());
 }
 
 void TCPSocket::send(string &data) {
@@ -1470,11 +1490,11 @@ int TCPSocket::recv(char buffer[], const int size) {
 
 void TCPSocket::destroy() {
 	SDLNet_TCP_Close(socket);
-	cout << "Socket closed successfully" << endl;
+	SDL_Log("Socket closed successfully!");
 }
 
 
 void NetUtils::resolve_host(IPaddress &IP, const int port, const string host) {
 	if (SDLNet_ResolveHost(&IP, host.c_str(), port) < 0)
-		cout << "Error! Failed to resolve host: " << SDLNet_GetError() << endl;
+		SDL_LogError(0, "Failed to resolve host: %s", SDL_GetError());
 }
