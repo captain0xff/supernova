@@ -325,7 +325,7 @@ class Events {
 		SDL_Event event;
 		bool running = true;
 
-		// The function event handler should return true if the engine loop should not be run otherwise true
+		// The function event handler should return false if the engine loop should not be run otherwise true
 		bool process_events(unordered_map<string, EventKey> *event_keys = nullptr, Mouse *mouse = nullptr, unordered_map<SDL_FingerID, Finger> *fingers = nullptr, bool (*event_handler)(SDL_Event &) = nullptr);
 };
 
