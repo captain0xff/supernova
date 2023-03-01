@@ -534,11 +534,12 @@ Timer::Timer(double time) {
 	this->time = time;
 }
 
-bool Timer::update(double dt) {
+bool Timer::update(double dt, bool _reset) {
 	// Returns true once after the set time is over and gets reset
 	counter += dt;
 	if (counter >= time) {
-		reset();
+		if (_reset)
+			reset();
 		return true;
 	}
 	return false;
@@ -547,6 +548,59 @@ bool Timer::update(double dt) {
 void Timer::reset() {
 	// Sets the counter to 0
 	counter = 0;
+}
+
+double Timer::time_left() {
+	return time - counter;
+}
+
+
+IO::IO(const string &file, const string access_mode) {
+	io = SDL_RWFromFile(file.c_str(), access_mode.c_str());
+}
+
+int IO::read(void *ptr, const int max, const int size) {
+	// The size parameter takes the size of the object to read in bytes
+	// and the max parameter takes the maximum number of objects to read
+	// Returns the number of objects read
+	if (io == NULL) {
+		SDL_LogError(0, "Failed to read: %s", SDL_GetError());
+		return -1;
+	} else {
+		return SDL_RWread(io, ptr, size, max);
+	}
+}
+
+string IO::read(const int max) {
+	char buffer[max+1];
+	read(buffer, max);
+	return string(buffer);
+}
+
+void IO::write(const void *ptr, const int num, const int size) {
+	// The size parameter takes the size of the object to read in bytes
+	// and the num parameter takes the number of objects to write
+	// Returns the numer of objects written
+	if (io == NULL)
+		SDL_LogError(0, "Failed to write: %s", SDL_GetError());
+	else if (SDL_RWwrite(io, ptr, size, num) < num)
+		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
+}
+
+void IO::write(const string &data) {
+	write(data.c_str(), data.length());
+}
+
+Sint64 IO::tell() {
+	return SDL_RWtell(io);
+}
+
+Sint64 IO::seek(Sint64 offset, int whence) {
+	return SDL_RWseek(io, offset, whence);
+}
+
+void IO::close() {
+	SDL_RWclose(io);
 }
 
 

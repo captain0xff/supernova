@@ -240,13 +240,39 @@ class Timer {
 	public:
 		double time, counter = 0;
 
+		Timer() {};
 		// Time should be in seconds
 		Timer(double time);
 
-		// Returns true once after the set time is over and gets reset
-		bool update(double dt);
+		// Returns true once after the set time is over and gets reset if the _reset parameter is true
+		bool update(double dt, bool _reset=true);
 		// Sets the counter to 0
 		void reset();
+
+		double time_left();
+};
+
+
+class IO {
+	public:
+		SDL_RWops *io;
+
+		IO(const string &file, const string access_mode="r");
+
+		// The size parameter takes the size of the object to read in bytes
+		// and the max parameter takes the maximum number of objects to read
+		// Returns the number of objects read or -1 if some error occured
+		int read(void *ptr, const int max, const int size=1);
+		string read(const int max=1024);
+		// The size parameter takes the size of the object to read in bytes
+		// and the num parameter takes the number of objects to write
+		// Returns the numer of objects written
+		void write(const void *ptr, const int num, const int size=1);
+		void write(const string &data);
+		Sint64 tell();
+		// The parameter whence can be any of RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
+		Sint64 seek(Sint64 offset, int whence=RW_SEEK_CUR);
+		void close();
 };
 
 
