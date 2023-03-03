@@ -557,32 +557,36 @@ double Timer::time_left() {
 
 IO::IO(const string &file, const string access_mode) {
 	io = SDL_RWFromFile(file.c_str(), access_mode.c_str());
+
+	if (io == NULL)
+		SDL_LogError(0, "Failed to load file! (%s): %s", file.c_str(), SDL_GetError());
+	else
+		IS_LOADED = true;
 }
 
 int IO::read(void *ptr, const int max, const int size) {
 	// The size parameter takes the size of the object to read in bytes
 	// and the max parameter takes the maximum number of objects to read
-	// Returns the number of objects read
-	if (io == NULL) {
-		SDL_LogError(0, "Failed to read: %s", SDL_GetError());
-		return -1;
-	} else {
+	// Returns the number of objects read or -1 on error
+	if (IS_LOADED)
 		return SDL_RWread(io, ptr, size, max);
-	}
+	SDL_LogWarn(1, "%s", "Failed to read: file not loaded successfully!");
+	return -1;
 }
 
 string IO::read(const int max) {
 	char buffer[max+1];
-	read(buffer, max);
-	return string(buffer);
+	if (IS_LOADED and read(buffer, max))
+		return string(buffer);
+	return NULL;
 }
 
 void IO::write(const void *ptr, const int num, const int size) {
 	// The size parameter takes the size of the object to read in bytes
 	// and the num parameter takes the number of objects to write
 	// Returns the numer of objects written
-	if (io == NULL)
-		SDL_LogError(0, "Failed to write: %s", SDL_GetError());
+	if (!IS_LOADED)
+		SDL_LogWarn(1, "%s", "Failed to write: file not loaded successfully!");
 	else if (SDL_RWwrite(io, ptr, size, num) < num)
 		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
 }
@@ -592,11 +596,17 @@ void IO::write(const string &data) {
 }
 
 Sint64 IO::tell() {
-	return SDL_RWtell(io);
+	if (IS_LOADED)
+		return SDL_RWtell(io);
+	SDL_LogWarn(1, "%s", "Failed to tell: file not loaded successfully!");
+	return -1;
 }
 
 Sint64 IO::seek(Sint64 offset, int whence) {
-	return SDL_RWseek(io, offset, whence);
+	if (IS_LOADED)
+		return SDL_RWseek(io, offset, whence);
+	SDL_LogWarn(1, "%s", "Failed to seek: file not loaded successfully!");
+	return -1;
 }
 
 void IO::close() {
