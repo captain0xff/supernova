@@ -46,6 +46,7 @@ void Init() {
 	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();
 	SDLNet_Init();
+	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
 
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
 }
@@ -54,6 +55,8 @@ void Init() {
 void Quit() {
 	IMG_Quit();
 	TTF_Quit();
+	SDLNet_Quit();
+	Mix_Quit();
 	SDL_Quit();
 }
 

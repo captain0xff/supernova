@@ -11,11 +11,13 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_mixer.h>
 #else
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <SDL_net.h>
+#include <SDL_mixer.h>
 #endif
 
 
@@ -596,6 +598,24 @@ class TCPSocket {
 class NetUtils {
 	public:
 		void static resolve_host(IPaddress &IP, const int port, const string host="0.0.0.0");
+};
+
+
+class Mixer {
+	public:
+		Mixer() {};
+		Mixer(int frequency=MIX_DEFAULT_FREQUENCY, Uint16 format=MIX_DEFAULT_FORMAT, int channels=2, int chunksize=2048);
+
+
+};
+
+
+class Sound {
+	public:
+		Mix_Music *music;
+
+		Sound() {};
+		Sound(const string &file);
 };
 
 
