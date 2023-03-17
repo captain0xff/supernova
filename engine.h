@@ -68,6 +68,11 @@ void Quit();
 
 
 
+// General functions
+void start_text_input();
+
+
+
 // Structs
 struct Colour {
 	Uint8 r, g, b;
@@ -226,15 +231,22 @@ static unordered_map<SDL_FingerID, Finger> FINGERS;
 
 // Classes
 class Clock {
-    private:
-        double current_time;
-        double last_time;
-        double target_dt;
-        double dt;
+	private:
+		Uint64 current_time, last_tick = 0;
+		Uint64 timeit_tick = 0;
+		Sint64 target_ft, delay;
 
-    public:
-        double tick(double target_fps=0);
-        double get_fps();
+	public:
+		// time: Time used in the previous tick in ms
+		// raw_time: Actual time used in the previous tick in ms
+		// fps: The average framerate of the last 10 ticks
+		Uint64 raw_time = 0, frame_time = 0;
+		
+		// The parameter target_fps should be 0 for unclamped fps
+		double tick(double target_fps=0);
+		double get_fps();
+		// Returns the time between two of its successive calls
+		double timeit();
 };
 
 
@@ -603,19 +615,36 @@ class NetUtils {
 
 class Mixer {
 	public:
-		Mixer() {};
-		Mixer(int frequency=MIX_DEFAULT_FREQUENCY, Uint16 format=MIX_DEFAULT_FORMAT, int channels=2, int chunksize=2048);
-
-
+		void static open_audio_device(int frequency=MIX_DEFAULT_FREQUENCY, Uint16 format=MIX_DEFAULT_FORMAT, int channels=2, int chunksize=2048);
 };
 
 
+extern int SOUND_ID;
 class Sound {
 	public:
+		int id;
+		bool is_paused = false;
 		Mix_Music *music;
 
 		Sound() {};
 		Sound(const string &file);
+		~Sound();
+		Sound(Sound &&sound) noexcept;
+		Sound(const Sound &) = delete;
+
+		Sound& operator=(Sound &&sound) noexcept;
+		Sound& operator=(const Sound &sound) = delete;
+
+		void play(int loop=0);
+		// Returns the current volume
+		float volume();
+		// The value of the parameter volume should be between 0 to 1
+		void volume(float volume);
+		void pause();
+		void resume();
+		// Toogles the music playing i.e resumes if paused and vice-versa
+		void toggle();
+		void destroy();
 };
 
 

@@ -15,6 +15,7 @@ using namespace std;
 double PI = 3.141592653589793238463;
 int TEX_ID = 0;
 int FONT_ID = 0;
+int SOUND_ID = 0;
 
 
 
@@ -58,6 +59,13 @@ void Quit() {
 	SDLNet_Quit();
 	Mix_Quit();
 	SDL_Quit();
+}
+
+
+
+// General functions
+void start_text_input() {
+	SDL_StartTextInput();
 }
 
 
@@ -513,22 +521,35 @@ void Circle::move_ip(const Vector &vec) {
 
 // Classes
 double Clock::tick(double target_fps) {
-	//Leave target_fps to 0 if fps should be unclamped
-	current_time = SDL_GetTicks();
-	dt = (current_time - last_time) / 1000;
-	last_time = current_time;
-	target_dt = 1/target_fps;
-	if (target_fps != 0) {
-		if (target_dt > dt) {
-			SDL_Delay((target_dt - dt) * 1000);
-			dt = target_dt;
-		}
+	// The parameter target_fps should be 0 for unclamped fps
+	if (target_fps) {
+		target_ft = 1000/target_fps;
+		raw_time = SDL_GetTicks64() - last_tick;
+		delay = target_ft - raw_time;
+
+		if (delay > 0)
+			SDL_Delay((Uint32)delay);
 	}
-	return dt;
+
+	current_time = SDL_GetTicks64();
+	frame_time = current_time - last_tick;
+	last_tick = current_time;
+
+	if (!target_fps)
+		raw_time = frame_time;
+
+	return (double)frame_time/1000;
 }
 
 double Clock::get_fps() {
-	return 1/dt; 
+	return 1000/(double)frame_time;
+}
+
+double Clock::timeit() {
+	current_time = SDL_GetPerformanceCounter();
+	double time_diff = (current_time - timeit_tick)/(double)SDL_GetPerformanceFrequency()*1000;
+	timeit_tick = current_time;
+	return time_diff;
 }
 
 
@@ -1109,7 +1130,7 @@ Font::Font(const string &file, const int size) {
 		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), SDL_GetError());
 	else {
 		id = FONT_ID;
-		SDL_Log("Texture loaded successfully![%i] (%s)", id, file.c_str());
+		SDL_Log("Font loaded successfully![%i] (%s)", id, file.c_str());
 		FONT_ID++;
 	}
 }
@@ -1569,4 +1590,81 @@ void TCPSocket::destroy() {
 void NetUtils::resolve_host(IPaddress &IP, const int port, const string host) {
 	if (SDLNet_ResolveHost(&IP, host.c_str(), port) < 0)
 		SDL_LogError(0, "Failed to resolve host: %s", SDL_GetError());
+}
+
+
+void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int chunksize) {
+	if (Mix_OpenAudio(frequency, format, channels, chunksize) < 0) {
+		SDL_LogError(0, "Failed to open audio device: %s", Mix_GetError());
+	}
+}
+
+
+Sound::Sound(const string &file) {
+	music = Mix_LoadMUS(file.c_str());
+
+	id = SOUND_ID;
+	SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
+	SOUND_ID++;
+}
+
+Sound::~Sound() {
+	if (music != nullptr) destroy(); 
+}
+
+Sound::Sound(Sound &&sound) noexcept {
+	sound.music = nullptr;
+}
+
+Sound& Sound::operator=(Sound &&sound) noexcept {
+	if (&sound == this) return *this;
+	if (music != nullptr) destroy();
+	music = sound.music;
+	sound.music = nullptr;
+	return *this;
+}
+
+void Sound::play(int loop) {
+	Mix_PlayMusic(music, loop);
+}
+
+float Sound::volume() {
+	// Returns the current volume
+	return Mix_VolumeMusic(-1)/MIX_MAX_VOLUME;
+}
+
+void Sound::volume(float volume) {
+	// The value of the parameter volume should be between 0 to 1
+	Mix_VolumeMusic((int)(volume*MIX_MAX_VOLUME));
+}
+
+void Sound::pause() {
+	if (is_paused) {
+		SDL_LogWarn(1, "Sound is already paused!");
+	} else {
+		Mix_PauseMusic();
+		is_paused = true;
+	}
+}
+
+void Sound::resume() {
+	if (is_paused) {
+		Mix_ResumeMusic();
+		is_paused = false;
+	} else {
+		SDL_LogWarn(1, "Sound is not paused!");
+	}
+}
+
+void Sound::toggle() {
+	if (is_paused)
+		Mix_ResumeMusic();
+	else
+		Mix_PauseMusic();
+	is_paused = not is_paused;
+}
+
+void Sound::destroy() {
+	Mix_FreeMusic(music);
+	SDL_Log("Sound destroyed successfully![%i]", id);
 }
