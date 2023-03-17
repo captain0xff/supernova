@@ -1021,7 +1021,7 @@ Texture::Texture(Renderer &renderer, const string &file) {
 	tex_renderer = &renderer;
 	texture = IMG_LoadTexture(tex_renderer -> renderer, file.c_str());
 	if (texture == NULL)
-		SDL_LogError(0, "Failed to load texture! (%s): %s", file.c_str(), SDL_GetError());
+		SDL_LogError(0, "Failed to load texture! (%s): %s", file.c_str(), IMG_GetError());
 	else {
 		id = TEX_ID;
 		SDL_Log("Texture loaded successfully![%i] (%s)", id, file.c_str());
@@ -1127,7 +1127,7 @@ Font::Font(const string &file, const int size) {
 	font = TTF_OpenFont(file.c_str(), size);
 
 	if (font == NULL)
-		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), SDL_GetError());
+		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), TTF_GetError());
 	else {
 		id = FONT_ID;
 		SDL_Log("Font loaded successfully![%i] (%s)", id, file.c_str());
@@ -1601,11 +1601,13 @@ void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int ch
 
 
 Sound::Sound(const string &file) {
-	music = Mix_LoadMUS(file.c_str());
-
-	id = SOUND_ID;
-	SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
-	SOUND_ID++;
+	if ((music = Mix_LoadMUS(file.c_str())) == NULL) {
+		SDL_LogError(0, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
+	} else {
+		id = SOUND_ID;
+		SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
+		SOUND_ID++;
+	}
 }
 
 Sound::~Sound() {
