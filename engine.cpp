@@ -15,6 +15,7 @@ using namespace std;
 double PI = 3.141592653589793238463;
 int TEX_ID = 0;
 int FONT_ID = 0;
+int MUSIC_ID = 0;
 int SOUND_ID = 0;
 
 
@@ -1600,47 +1601,47 @@ void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int ch
 }
 
 
-Sound::Sound(const string &file) {
+Music::Music(const string &file) {
 	if ((music = Mix_LoadMUS(file.c_str())) == NULL) {
-		SDL_LogError(0, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
+		SDL_LogError(0, "Failed to load music! (%s): %s", file.c_str(), Mix_GetError());
 	} else {
-		id = SOUND_ID;
-		SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
-		SOUND_ID++;
+		id = MUSIC_ID;
+		SDL_Log("Music loaded successfully![%i] (%s)", id, file.c_str());
+		MUSIC_ID++;
 	}
 }
 
-Sound::~Sound() {
+Music::~Music() {
 	if (music != nullptr) destroy(); 
 }
 
-Sound::Sound(Sound &&sound) noexcept {
-	sound.music = nullptr;
+Music::Music(Music &&music) noexcept {
+	music.music = nullptr;
 }
 
-Sound& Sound::operator=(Sound &&sound) noexcept {
-	if (&sound == this) return *this;
+Music& Music::operator=(Music &&music) noexcept {
+	if (&music == this) return *this;
 	if (music != nullptr) destroy();
-	music = sound.music;
-	sound.music = nullptr;
+	music = music.music;
+	music.music = nullptr;
 	return *this;
 }
 
-void Sound::play(int loop) {
+void Music::play(int loop) {
 	Mix_PlayMusic(music, loop);
 }
 
-float Sound::volume() {
+float Music::volume() {
 	// Returns the current volume
 	return Mix_VolumeMusic(-1)/MIX_MAX_VOLUME;
 }
 
-void Sound::volume(float volume) {
+void Music::volume(float volume) {
 	// The value of the parameter volume should be between 0 to 1
 	Mix_VolumeMusic((int)(volume*MIX_MAX_VOLUME));
 }
 
-void Sound::pause() {
+void Music::pause() {
 	if (is_paused) {
 		SDL_LogWarn(1, "Sound is already paused!");
 	} else {
@@ -1649,7 +1650,7 @@ void Sound::pause() {
 	}
 }
 
-void Sound::resume() {
+void Music::resume() {
 	if (is_paused) {
 		Mix_ResumeMusic();
 		is_paused = false;
@@ -1658,7 +1659,7 @@ void Sound::resume() {
 	}
 }
 
-void Sound::toggle() {
+void Music::toggle() {
 	if (is_paused)
 		Mix_ResumeMusic();
 	else
@@ -1666,7 +1667,7 @@ void Sound::toggle() {
 	is_paused = not is_paused;
 }
 
-void Sound::destroy() {
+void Music::destroy() {
 	Mix_FreeMusic(music);
 	SDL_Log("Sound destroyed successfully![%i]", id);
 }

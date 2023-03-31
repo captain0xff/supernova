@@ -619,21 +619,21 @@ class Mixer {
 };
 
 
-extern int SOUND_ID;
-class Sound {
+extern int MUSIC_ID;
+class Music {
 	public:
 		int id;
 		bool is_paused = false;
-		Mix_Music *music;
+		Mix_music *music;
 
-		Sound() {};
-		Sound(const string &file);
-		~Sound();
-		Sound(Sound &&sound) noexcept;
-		Sound(const Sound &) = delete;
+		Music() {};
+		Music(const string &file);
+		~Music();
+		Music(Music &&music) noexcept;
+		Music(const Music &) = delete;
 
-		Sound& operator=(Sound &&sound) noexcept;
-		Sound& operator=(const Sound &sound) = delete;
+		Music& operator=(Music &&music) noexcept;
+		Music& operator=(const Music &music) = delete;
 
 		void play(int loop=0);
 		// Returns the current volume
@@ -646,6 +646,30 @@ class Sound {
 		void toggle();
 		void destroy();
 };
+
+
+extern int SOUND_ID
+class Sound {
+	public:
+		int id, channel;
+		bool is_paused;
+		Mix_Chunk *sound;
+
+		Sound() {};
+		// Currently only supports WAV format
+		Sound(const string file);
+
+		void play(int loop=0);
+		// Returns the current volume
+		float volume();
+		// The value of the parameter volume should be between 0 to 1
+		void volume(float volume);
+		void pause();
+		void resume();
+		// Toogles the music playing i.e resumes if paused and vice-versa
+		void toggle();
+		void destroy();		
+}
 
 
 #endif /* ENGINE_H */
