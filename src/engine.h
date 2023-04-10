@@ -624,16 +624,16 @@ class Music {
 	public:
 		int id;
 		bool is_paused = false;
-		Mix_music *music;
+		Mix_Music *music;
 
 		Music() {};
 		Music(const string &file);
 		~Music();
-		Music(Music &&music) noexcept;
+		Music(Music &&mus) noexcept;
 		Music(const Music &) = delete;
 
-		Music& operator=(Music &&music) noexcept;
-		Music& operator=(const Music &music) = delete;
+		Music& operator=(Music &&mus) noexcept;
+		Music& operator=(const Music &mus) = delete;
 
 		void play(int loop=0);
 		// Returns the current volume
@@ -648,7 +648,7 @@ class Music {
 };
 
 
-extern int SOUND_ID
+extern int SOUND_ID;
 class Sound {
 	public:
 		int id, channel;
@@ -669,7 +669,7 @@ class Sound {
 		// Toogles the music playing i.e resumes if paused and vice-versa
 		void toggle();
 		void destroy();		
-}
+};
 
 
 #endif /* ENGINE_H */

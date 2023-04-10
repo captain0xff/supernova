@@ -1615,15 +1615,15 @@ Music::~Music() {
 	if (music != nullptr) destroy(); 
 }
 
-Music::Music(Music &&music) noexcept {
-	music.music = nullptr;
+Music::Music(Music &&mus) noexcept {
+	mus.music = nullptr;
 }
 
-Music& Music::operator=(Music &&music) noexcept {
-	if (&music == this) return *this;
+Music& Music::operator=(Music &&mus) noexcept {
+	if (&mus == this) return *this;
 	if (music != nullptr) destroy();
-	music = music.music;
-	music.music = nullptr;
+	music = mus.music;
+	mus.music = nullptr;
 	return *this;
 }
 
@@ -1671,3 +1671,4 @@ void Music::destroy() {
 	Mix_FreeMusic(music);
 	SDL_Log("Sound destroyed successfully![%i]", id);
 }
+
