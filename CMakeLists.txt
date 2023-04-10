@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.0)
 project(supernova)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(SOURCES src/engine.cpp)
 set(HEADERS src/engine.h)
+
 set(CMAKE_INSTALL_PREFIX $ENV{PREFIX})
-set(CMAKE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
-set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
-set(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/include)
+include(GNUInstallDirs)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
@@ -18,7 +18,14 @@ find_package(SDL2_net REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC SDL2 SDL2_image SDL2_mixer SDL2_ttf SDL2_net)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	SDL2::SDL2main
+	SDL2::SDL2
+	SDL2_image::SDL2_image
+	SDL2_mixer::SDL2_mixer
+	SDL2_ttf::SDL2_ttf
+	SDL2_net::SDL2_net
+)
 
 # Setting which header files should be supplied with the library
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
