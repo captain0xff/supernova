@@ -616,6 +616,7 @@ class NetUtils {
 class Mixer {
 	public:
 		void static open_audio_device(int frequency=MIX_DEFAULT_FREQUENCY, Uint16 format=MIX_DEFAULT_FORMAT, int channels=2, int chunksize=2048);
+		void static allocate_channels(int channels);
 };
 
 
@@ -658,8 +659,16 @@ class Sound {
 		Sound() {};
 		// Currently only supports WAV format
 		Sound(const string file);
+		~Sound();
+		Sound(Sound &&snd) noexcept;
+		Sound(const Sound &) = delete;
 
-		void play(int loop=0);
+		Sound& operator=(Sound &&snd) noexcept;
+		Sound& operator=(const Sound &snd) = delete;
+
+		// Pass -1 to the loop for looping infinitely
+		// The first free channel is choosed by default
+		void play(int loop=0, int channel=-1);
 		// Returns the current volume
 		float volume();
 		// The value of the parameter volume should be between 0 to 1

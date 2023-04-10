@@ -1,1 +1,6 @@
 /build/*
+
+# Ignore all files in test except CMakeLists.txt and main.cpp
+/tests/*
+!/tests/main.cpp
+!/test/CMakeLists.txt

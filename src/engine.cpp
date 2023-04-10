@@ -1600,6 +1600,10 @@ void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int ch
 	}
 }
 
+void Mixer::allocate_channels(int channels) {
+	Mix_AllocateChannels(channels);
+}
+
 
 Music::Music(const string &file) {
 	if ((music = Mix_LoadMUS(file.c_str())) == NULL) {
@@ -1643,7 +1647,7 @@ void Music::volume(float volume) {
 
 void Music::pause() {
 	if (is_paused) {
-		SDL_LogWarn(1, "Sound is already paused!");
+		SDL_LogWarn(1, "Music is already paused!");
 	} else {
 		Mix_PauseMusic();
 		is_paused = true;
@@ -1655,7 +1659,7 @@ void Music::resume() {
 		Mix_ResumeMusic();
 		is_paused = false;
 	} else {
-		SDL_LogWarn(1, "Sound is not paused!");
+		SDL_LogWarn(1, "Music is not paused!");
 	}
 }
 
@@ -1669,6 +1673,81 @@ void Music::toggle() {
 
 void Music::destroy() {
 	Mix_FreeMusic(music);
-	SDL_Log("Sound destroyed successfully![%i]", id);
+	SDL_Log("Music destroyed successfully![%i]", id);
 }
 
+
+Sound::Sound(const string file) {
+	if ((sound = Mix_LoadWAV(file.c_str())) == NULL) {
+		SDL_LogError(0, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
+	} else {
+		id = SOUND_ID;
+		SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
+		SOUND_ID++;
+	}
+}
+
+Sound::~Sound() {
+	if (sound != nullptr) destroy(); 
+}
+
+Sound::Sound(Sound &&snd) noexcept {
+	snd.sound = nullptr;
+}
+
+Sound& Sound::operator=(Sound &&snd) noexcept {
+	if (&snd == this) return *this;
+	if (sound != nullptr) destroy();
+	sound = snd.sound;
+	snd.sound = nullptr;
+	return *this;
+}
+
+void Sound::play(int loop, int channel) {
+	// Pass -1 to the loop for looping infinitely
+	// The first free channel is choosed by default
+	if ((channel = Mix_PlayChannel(-1, sound, loop)) < 0) {
+		SDL_LogError(0, "Failed to play sound![%i]: %s", id, Mix_GetError());
+	}
+}
+
+float Sound::volume() {
+	// Returns the current volume
+	return Mix_Volume(channel, -1)/MIX_MAX_VOLUME;
+}
+
+void Sound::volume(float volume) {
+	// The value of the parameter volume should be between 0 to 1
+	Mix_Volume(channel, (int)(volume*MIX_MAX_VOLUME));
+}
+
+void Sound::pause() {
+	if (is_paused) {
+		SDL_LogWarn(1, "Sound is already paused!");
+	} else {
+		Mix_Pause(channel);
+		is_paused = true;
+	}
+}
+
+void Sound::resume() {
+	if (is_paused) {
+		Mix_Resume(channel);
+		is_paused = false;
+	} else {
+		SDL_LogWarn(1, "Sound is not paused!");
+	}
+}
+
+void Sound::toggle() {
+	if (is_paused)
+		Mix_Resume(channel);
+	else
+		Mix_Pause(channel);
+	is_paused = not is_paused;
+}
+
+void Sound::destroy() {
+	Mix_FreeChunk(sound);
+	SDL_Log("Sound destroyed successfully![%i]", id);
+} 
