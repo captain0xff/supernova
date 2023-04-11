@@ -1,6 +1,5 @@
 # Todo
-* Add wrappper around the SDL_Logging methods
+* Check the current status of font class and if we really need use the header only lib.
 * Make the font class a bit more robust
-* Add a mixer class when you need it
+* Add wrappper around the SDL_Logging methods(do this when std::format() is available)
 * Add a sprite class
-~~* Add preprocessor macros for optional sdl libs so that the whole code is not compiled everytime
