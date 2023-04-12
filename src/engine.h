@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #ifndef __ANDROID__
 #include <SDL2/SDL.h>
@@ -40,10 +41,12 @@ struct Finger;
 class Clock;
 class Window;
 class Renderer;
+class Surface;
 class Texture;
 class Mouse;
 class Events;
-class Fonts;
+class Font;
+class FontAtlas;
 class SpriteSheet;
 class AnimatedSprite;
 class States;
@@ -59,6 +62,11 @@ double degrees(const double angle); // Radians to degrees
 
 int randint(const int end); // Generates a random integer b/w 0 to end (0 included and end excluded).
 int randint(const int start, const int end); // Generates a random integer b/w start to end (start included and end excluded).
+
+
+
+// Templates
+template<typename T> using managed_ptr = std::unique_ptr<T, void(*)(T*)>;
 
 
 
@@ -373,6 +381,16 @@ class Events {
 };
 
 
+extern int SURF_ID;
+class Surface {
+	public:
+		int id;
+		managed_ptr<SDL_Surface> surface;
+
+		Surface(SDL_Surface *_surface);
+};
+
+
 extern int TEX_ID;
 class Texture {
 	public:
@@ -382,6 +400,7 @@ class Texture {
 		int w, h;
 
 		Texture() {};
+		Texture(Texture *texture);
 		Texture(Renderer &renderer, const string &file);
 		Texture(Renderer &renderer, SDL_Surface *surface);
 		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
@@ -410,11 +429,6 @@ class Font {
 		int id;
 		TTF_Font *font;
 
-		struct FontAtlas {
-			Texture atlas;
-			unordered_map<char, Rect> data;
-		};
-
 		Font() {};
 		Font(const string &file, const int size);
 		~Font();
@@ -424,11 +438,36 @@ class Font {
 		Font& operator=(Font &&fnt) noexcept;
 		Font& operator=(const Font &fnt) = delete;
 
-		Texture create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality=0, const bool &wrap_text=false, const Uint32 &wrap_length=0, const Colour &background_colour={0, 0, 0, 0});
-		FontAtlas create_atlas(Renderer &renderer, const string chars, const int quality, const Uint8 &alpha);
-		// Alpha value is ignored in the colour argument. It should be set during creation of the atlas.
-		void draw_text(FontAtlas &font_atlas, const string &text, const Colour &colour, const int &x, const int &y, const double size);
+		Texture create_text(
+			Renderer &renderer,
+			const string &text,
+			const Colour &colour,
+			const int &quality=0,
+			const bool &wrap_text=true,
+			const Uint32 &wrap_length=0,
+			const Colour &background_colour={0, 0, 0, 0}
+		);
+		FontAtlas create_atlas(
+			Renderer &renderer,
+			const Colour colour={255, 255, 255, 255},
+			const int quality=0,
+			const string chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.:,;'\"(!?)+-*/= "
+		);
 		void destroy();
+};
+
+
+class FontAtlas {
+	public:
+		Texture atlas;
+		unordered_map<char, Rect> data;
+
+		// FontAtlas() {};
+		// FontAtlas(Texture _atlas);
+
+		void set_colour(const Colour colour);
+		void draw_text(const string &text, const Vector &pos, const double scale=1);
+		void draw_text(const string &text, const Vector &pos, const Colour &colour, const double scale=1);
 };
 
 

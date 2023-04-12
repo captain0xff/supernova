@@ -13,6 +13,7 @@ using namespace std;
 
 // Globals
 double PI = 3.141592653589793238463;
+int SURF_ID = 0;
 int TEX_ID = 0;
 int FONT_ID = 0;
 int MUSIC_ID = 0;
@@ -1018,6 +1019,9 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 }
 
 
+Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {}
+
+
 Texture::Texture(Renderer &renderer, const string &file) {
 	tex_renderer = &renderer;
 	texture = IMG_LoadTexture(tex_renderer -> renderer, file.c_str());
@@ -1035,7 +1039,6 @@ Texture::Texture(Renderer &renderer, const string &file) {
 Texture::Texture(Renderer &renderer, SDL_Surface *surface) {
 	tex_renderer = &renderer;
 	texture = SDL_CreateTextureFromSurface(tex_renderer -> renderer, surface);
-	SDL_FreeSurface(surface);
 	if (texture == NULL)
 		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
 	else {
@@ -1085,7 +1088,8 @@ Rect Texture::get_rect() {
 
 void Texture::set_colour_mod(const Colour &colour) {
 	SDL_SetTextureColorMod(texture, colour.r, colour.g, colour.b);
-	if (colour.a != 255) SDL_SetTextureAlphaMod(texture, colour.a);
+	if (colour.a != 255)
+		SDL_SetTextureAlphaMod(texture, colour.a);
 }
 
 void Texture::set_blend_mode(SDL_BlendMode blend_mode) {
@@ -1125,9 +1129,7 @@ void Texture::destroy() {
 
 
 Font::Font(const string &file, const int size) {
-	font = TTF_OpenFont(file.c_str(), size);
-
-	if (font == NULL)
+	if ((font = TTF_OpenFont(file.c_str(), size)) == NULL)
 		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), TTF_GetError());
 	else {
 		id = FONT_ID;
@@ -1137,7 +1139,8 @@ Font::Font(const string &file, const int size) {
 }
 
 Font::~Font() {
-	if (font != nullptr) destroy(); 
+	if (font != nullptr)
+		destroy(); 
 }
 
 Font::Font(Font &&fnt) noexcept {
@@ -1155,7 +1158,7 @@ Font& Font::operator=(Font &&fnt) noexcept {
 Texture Font::create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality, const bool &wrap_text, const Uint32 &wrap_length, const Colour &background_colour) {
 	SDL_Surface *text_surf;
 	switch (quality) {
-		case 0: 
+		case 0:
 			if (wrap_text) 
 				text_surf = TTF_RenderUTF8_Solid_Wrapped(font, text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
 			else text_surf = TTF_RenderUTF8_Solid(font, text.c_str(), {colour.r, colour.g, colour.b, colour.a});
@@ -1186,40 +1189,46 @@ Texture Font::create_text(Renderer &renderer, const string &text, const Colour &
 	return texture;
 }
 
-Font::FontAtlas Font::create_atlas(Renderer &renderer, const string chars, const int quality, const Uint8 &alpha) {
-	TTF_SetFontKerning(font, 0);
-	
-	FontAtlas font_atlas;
-	font_atlas.atlas = this->create_text(renderer, chars, {255, 255, 255, alpha}, quality);
-	
-	int x = 0;
-	int w;
-	int h;
-	for (int i = 0; i < chars.length(); i++) {
-		char ch[] = { chars[i], '\0' };
-		TTF_SizeUTF8(font, ch, &w, &h);
-		font_atlas.data[chars[i]] = {x, 0, w, font_atlas.atlas.h};
-		x += w;
-	}
-	TTF_SetFontKerning(font, 1);
-
-	return font_atlas;
-}
-
-void Font::draw_text(FontAtlas &font_atlas, const string &text, const Colour &colour, const int &x, const int &y, const double size) {
-	// Alpha value is ignored in the colour argument. It should be set during creation of the atlas.
-	font_atlas.atlas.set_colour_mod(colour);
-	int cx = x;
-	for (auto &ch: text) {
-		Rect *r = &font_atlas.data[ch];
-		font_atlas.atlas.render({cx, y, static_cast<int>(r->w*(size/r->h)), static_cast<int>(size)}, font_atlas.data[ch]);
-		cx += r->w*(size/r->h);
-	}
-}
-
 void Font::destroy() {
 	TTF_CloseFont(font);
 	SDL_Log("Font destroyed successfully![%i]", id);
+}
+
+FontAtlas Font::create_atlas(Renderer &renderer, const Colour colour, const int quality, const string chars) {
+	TTF_SetFontKerning(font, 0);
+	FontAtlas font_atlas;
+	font_atlas.atlas = this->create_text(renderer, chars, {255, 255, 255, 255}, quality);
+	
+	int w, h;
+	for (int i = 0; i < chars.length(); i++) {
+		char ch[] = { chars[i], '\0' };
+		TTF_SizeUTF8(font, ch, &w, &h);
+		font_atlas.data[chars[i]] = {i*w, 0, w, font_atlas.atlas.h};
+	}
+
+	TTF_SetFontKerning(font, 1);
+	return font_atlas;
+}
+
+
+void FontAtlas::set_colour(const Colour colour) {
+	atlas.set_colour_mod(colour);
+}
+
+void FontAtlas::draw_text(const string &text, const Vector &pos, const double scale) {
+	int cx = pos.x;
+	Rect *r;
+	for (auto &ch: text) {
+		r = &data[ch];
+		// atlas.render({cx, static_cast<int>(pos.y), static_cast<int>(r->w*scale), static_cast<int>(r->h*scale)}, data[ch]);
+		atlas.render({0, 0, 100, 100}, {0, 0, 10, 10});
+		cx += r->w*scale;
+	}
+}
+
+void FontAtlas::draw_text(const string &text, const Vector &pos, const Colour &colour, const double scale) {
+	set_colour(colour);
+	draw_text(text, pos, scale);
 }
 
 
