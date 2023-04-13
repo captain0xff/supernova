@@ -238,6 +238,13 @@ static unordered_map<SDL_FingerID, Finger> FINGERS;
 
 
 // Classes
+class Engine {
+	public:
+		Engine();
+		~Engine();
+};
+
+
 class Clock {
 	private:
 		Uint64 current_time, last_tick = 0;
@@ -303,34 +310,21 @@ class IO {
 
 class Window {
 	public:
-		SDL_Window *window;
+		managed_ptr<SDL_Window> window;
 
 		Window(string title, int screen_w, int screen_h, Uint32 flags=0, int posx=SDL_WINDOWPOS_CENTERED, int posy=SDL_WINDOWPOS_CENTERED);
-		~Window();
-		Window(Window &&win) noexcept;
-		Window(const Window &win) = delete;
 
-		Window& operator=(Window &&win) noexcept;
-		Window& operator=(const Window &win) = delete;
-
-
-		void destroy();
+		void static destroy(SDL_Window *window);
 };
 
 
 class Renderer {
 	public:
-		SDL_Renderer *renderer;
+		managed_ptr<SDL_Renderer> renderer;
 
 		Renderer(Window &window, int index=-1, Uint32 flags=SDL_RENDERER_ACCELERATED);
-		~Renderer();
-		Renderer(Renderer &&ren) noexcept;
-		Renderer(const Renderer &ren) = delete;
 
-		Renderer& operator=(Renderer &&ren) noexcept;
-		Renderer& operator=(const Renderer &ren) = delete;
-
-		void destroy();
+		void static destroy(SDL_Renderer *renderer);
 		void set_colour(const Colour &colour);
 		void clear(const Colour &colour);
 		void present();
@@ -395,21 +389,15 @@ extern int TEX_ID;
 class Texture {
 	public:
 		int id;
-		SDL_Texture *texture;
+		managed_ptr<SDL_Texture> texture;
 		Renderer *tex_renderer;
 		int w, h;
 
-		Texture() {};
-		Texture(Texture *texture);
+		Texture(Renderer &renderer, SDL_Texture *_texture);
+		Texture(Texture &&_texture);
 		Texture(Renderer &renderer, const string &file);
-		Texture(Renderer &renderer, SDL_Surface *surface);
+		Texture(Renderer &renderer, Surface surface);
 		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
-		~Texture();
-		Texture(Texture &&tex) noexcept;
-		Texture(const Texture &) = delete;
-
-		Texture& operator=(Texture &&tex) noexcept;
-		Texture& operator=(const Texture &tex) = delete;
 
 		Rect get_rect();
 
@@ -419,7 +407,7 @@ class Texture {
 		void render(const Rect &dst_rect, const Rect &src_rect);
 		void render_ex(const Rect &dst_rect, const double &angle=0, const Vector &center={0, 0}, const SDL_RendererFlip &flip=SDL_FLIP_NONE);
 		void render_ex(const Rect &dst_rect, const Rect &src_rect, const double &angle=0, const Vector &center={0, 0}, const SDL_RendererFlip &flip=SDL_FLIP_NONE);
-		void destroy();
+		// void destroy();
 };
 
 
@@ -427,16 +415,9 @@ extern int FONT_ID;
 class Font {
 	public:
 		int id;
-		TTF_Font *font;
+		managed_ptr<TTF_Font> font;
 
-		Font() {};
 		Font(const string &file, const int size);
-		~Font();
-		Font(Font &&fnt) noexcept;
-		Font(const Font &) = delete;
-
-		Font& operator=(Font &&fnt) noexcept;
-		Font& operator=(const Font &fnt) = delete;
 
 		Texture create_text(
 			Renderer &renderer,
@@ -453,17 +434,16 @@ class Font {
 			const int quality=0,
 			const string chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.:,;'\"(!?)+-*/= "
 		);
-		void destroy();
+		void static destroy(TTF_Font *font);
 };
 
 
-class FontAtlas {
+class FontAtlas{
 	public:
-		Texture atlas;
+		Texture texture;
 		unordered_map<char, Rect> data;
 
-		// FontAtlas() {};
-		// FontAtlas(Texture _atlas);
+		FontAtlas(Texture &&_texture);
 
 		void set_colour(const Colour colour);
 		void draw_text(const string &text, const Vector &pos, const double scale=1);
@@ -477,18 +457,11 @@ class SpriteSheet {
 		Rect src_rect;
 		Texture texture;
 
-		SpriteSheet() {};
 		SpriteSheet(Renderer &renderer, const string &file, const int &column, const int &row);
-		~SpriteSheet();
-		SpriteSheet(SpriteSheet &&ss) noexcept;
-		SpriteSheet(const SpriteSheet &) = delete;
-
-		SpriteSheet& operator=(SpriteSheet &&ss) noexcept;
-		SpriteSheet& operator=(const SpriteSheet &ss) = delete;
 
 		void set_src_rect(const Rect &src_rect);
 		void draw_sprite(const Rect &dst_rect, const int &column, const int &row);
-		void destroy();
+		// void destroy();
 };
 
 
@@ -498,14 +471,7 @@ class AnimatedSprite: public SpriteSheet {
 		double animation_speed; // In animation_frames/sec
 		double animation_index = 0;
 
-		AnimatedSprite() {};
 		AnimatedSprite(Renderer &renderer, const string &file, const int &column, const int &row, const double animation_speed, bool loop=true);
-		// ~AnimatedSprite();
-		// AnimatedSprite(AnimatedSprite &&as) noexcept;
-		// AnimatedSprite(const AnimatedSprite &) = delete;
-
-		// AnimatedSprite& operator=(AnimatedSprite &&as) noexcept;
-		// AnimatedSprite& operator=(const AnimatedSprite &as) = delete;
 
 		// Returns true when the animation has just completed looping once
 		bool update(double dt);
@@ -552,25 +518,18 @@ class Packet {
 	public:
 		char DELIMITER = '|';
 
-		UDPpacket *packet;
+		managed_ptr<UDPpacket> packet;
 		vector<string> data;
 
-		Packet() {};
 		Packet(const int maxlen);
 		Packet(const int maxlen, IPaddress &destination);
-		~Packet();
-		Packet(Packet &&pk) noexcept;
-		Packet(const Packet &) = delete;
-
-		Packet& operator=(Packet &&pk) noexcept;
-		Packet& operator=(const Packet &pk) = delete;
 
 		void clear_data();
 		// This function shouldn't be called explicitly by the user.
 		void ready();
 		// This function shouldn't be called explicitly by the user.
 		void set();
-		void destroy();
+		// void destroy();
 
 		friend Packet& operator<<(Packet &packet, const string val);
 		friend Packet& operator<<(Packet &packet, const char *val);
@@ -596,14 +555,8 @@ class UDPSocket {
 	public:
 		UDPsocket socket;
 
-		UDPSocket() {};
 		UDPSocket(const int port);
 		~UDPSocket();
-		UDPSocket(UDPSocket &&sock) noexcept;
-		UDPSocket(const UDPSocket &) = delete;
-
-		UDPSocket& operator=(UDPSocket &&sock) noexcept;
-		UDPSocket& operator=(const UDPSocket &sock) = delete;
 
 		// Returns true if the packet is sent successfully
 		bool send(Packet &packet, const int chanel=-1);
@@ -623,16 +576,8 @@ class TCPSocket {
 	public:
 		TCPsocket socket;
 
-		TCPSocket() {};
 		TCPSocket(IPaddress &ip);
-		// The buffer used for receiving data
-		// TCPSocket(IPaddress &ip, char buffer[], const int size);
 		~TCPSocket();
-		TCPSocket(TCPSocket &&sock) noexcept;
-		TCPSocket(const TCPSocket &) = delete;
-
-		TCPSocket& operator=(TCPSocket &&sock) noexcept;
-		TCPSocket& operator=(const TCPSocket &sock) = delete;
 
 		// Returns true if connection is accepted successfully
 		bool accept(TCPSocket &sock);
@@ -664,16 +609,9 @@ class Music {
 	public:
 		int id;
 		bool is_paused = false;
-		Mix_Music *music;
+		managed_ptr<Mix_Music> music;
 
-		Music() {};
 		Music(const string &file);
-		~Music();
-		Music(Music &&mus) noexcept;
-		Music(const Music &) = delete;
-
-		Music& operator=(Music &&mus) noexcept;
-		Music& operator=(const Music &mus) = delete;
 
 		void play(int loop=0);
 		// Returns the current volume
@@ -684,7 +622,7 @@ class Music {
 		void resume();
 		// Toogles the music playing i.e resumes if paused and vice-versa
 		void toggle();
-		void destroy();
+		// void destroy();
 };
 
 
@@ -693,17 +631,10 @@ class Sound {
 	public:
 		int id, channel;
 		bool is_paused;
-		Mix_Chunk *sound;
+		managed_ptr<Mix_Chunk> sound;
 
-		Sound() {};
 		// Currently only supports WAV format
 		Sound(const string file);
-		~Sound();
-		Sound(Sound &&snd) noexcept;
-		Sound(const Sound &) = delete;
-
-		Sound& operator=(Sound &&snd) noexcept;
-		Sound& operator=(const Sound &snd) = delete;
 
 		// Pass -1 to the loop for looping infinitely
 		// The first free channel is choosed by default
@@ -716,7 +647,7 @@ class Sound {
 		void resume();
 		// Toogles the music playing i.e resumes if paused and vice-versa
 		void toggle();
-		void destroy();		
+		// void destroy();		
 };
 
 

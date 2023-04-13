@@ -43,28 +43,6 @@ int randint(const int start, const int end) {
 
 
 
-// Main functions
-void Init() {
-	SDL_Init(SDL_INIT_EVERYTHING);
-	IMG_Init(IMG_INIT_PNG);
-	TTF_Init();
-	SDLNet_Init();
-	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-
-	srand((unsigned) time(NULL)); // Create a seed for random number generation
-}
-
-
-void Quit() {
-	IMG_Quit();
-	TTF_Quit();
-	SDLNet_Quit();
-	Mix_Quit();
-	SDL_Quit();
-}
-
-
-
 // General functions
 void start_text_input() {
 	SDL_StartTextInput();
@@ -522,6 +500,27 @@ void Circle::move_ip(const Vector &vec) {
 
 
 // Classes
+Engine::Engine() {
+	SDL_Init(SDL_INIT_EVERYTHING);
+	IMG_Init(IMG_INIT_PNG);
+	TTF_Init();
+	SDLNet_Init();
+	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
+
+	srand((unsigned) time(NULL)); // Create a seed for random number generation
+	SDL_Log("Engine started!");
+}
+
+Engine::~Engine() {
+	IMG_Quit();
+	TTF_Quit();
+	SDLNet_Quit();
+	Mix_Quit();
+	SDL_Quit();
+	SDL_Log("Engine stopped!");
+}
+
+
 double Clock::tick(double target_fps) {
 	// The parameter target_fps should be 0 for unclamped fps
 	if (target_fps) {
@@ -640,141 +639,90 @@ void IO::close() {
 }
 
 
-Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx, int posy) {
-	window = SDL_CreateWindow(
-		title.c_str(),
-		posx,
-		posy,
-		screen_w,
-		screen_h,
-		flags
-	);
-
-	if (window == NULL)
+Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx, int posy):
+	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), posx, posy, screen_w, screen_h, flags), destroy)) {
+	if (window.get() == NULL)
 		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
 	else
 		SDL_Log("Window created successfully!");
 }
 
-Window::~Window() {
-	if (window != nullptr)
-		destroy();
-}
-
-Window::Window(Window &&win) noexcept {
-	win.window = nullptr;
-}
-
-Window& Window::operator=(Window &&win) noexcept {
-	if (&win == this)
-		return *this;
-	if (window != nullptr)
-		destroy();
-	window = win.window;
-	win.window = nullptr;
-	return *this;
-}
-
-void Window::destroy() {
+void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
 	SDL_Log("Window closed successfully!");
 }
 
 
-Renderer::Renderer(Window &window, int index, Uint32 flags) {
-	renderer = SDL_CreateRenderer(window.window, index, flags);
-	if (renderer == NULL)
+Renderer::Renderer(Window &window, int index, Uint32 flags):
+	renderer(managed_ptr<SDL_Renderer>(SDL_CreateRenderer(window.window.get(), index, flags),destroy)) {
+	if (renderer.get() == NULL)
 		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
 	else
 		SDL_Log("Renderer created successfully!");
 }
 
-Renderer::~Renderer() {
-	if (renderer != nullptr)
-		destroy();
-}
-
-Renderer::Renderer(Renderer &&ren) noexcept {
-	ren.renderer = nullptr;
-}
-
-Renderer& Renderer::operator=(Renderer &&ren) noexcept {
-	if (&ren == this)
-		return *this;
-	if (renderer != nullptr)
-		destroy();
-	renderer = ren.renderer;
-	ren.renderer = nullptr;
-	return *this;
-}
-
-void Renderer::destroy() {
-	SDL_DestroyRenderer(renderer);
-	SDL_Log("Renderer destroyed successfully!");
-}
-
 void Renderer::set_colour(const Colour &colour) {
-	SDL_SetRenderDrawColor(renderer, colour.r, colour.g, colour.b, colour.a);
+	SDL_SetRenderDrawColor(renderer.get(), colour.r, colour.g, colour.b, colour.a);
 }
 
 void Renderer::clear(const Colour &colour) {
 	set_colour(colour);
-	SDL_RenderClear(renderer);
+	SDL_RenderClear(renderer.get());
 }
 
 void Renderer::present() {
-	SDL_RenderPresent(renderer);
+	SDL_RenderPresent(renderer.get());
 }
 
 void Renderer::set_blend_mode(SDL_BlendMode blendmode) {
-	SDL_SetRenderDrawBlendMode(renderer, blendmode);
+	SDL_SetRenderDrawBlendMode(renderer.get(), blendmode);
 }
 
 void Renderer::set_target() {
-	SDL_SetRenderTarget(renderer, NULL);
+	SDL_SetRenderTarget(renderer.get(), NULL);
 }
 
 void Renderer::set_target(Texture &tex) {
-	SDL_SetRenderTarget(renderer, tex.texture);
+	SDL_SetRenderTarget(renderer.get(), tex.texture.get());
 }
 
 void Renderer::set_logical_size(const Vector &size) {
-	SDL_RenderSetLogicalSize(renderer, static_cast<int>(size.x), static_cast<int>(size.y));
+	SDL_RenderSetLogicalSize(renderer.get(), static_cast<int>(size.x), static_cast<int>(size.y));
 }
 
 Vector Renderer::get_output_size() {
 	int w, h;
-	SDL_GetRendererOutputSize(renderer, &w, &h);
+	SDL_GetRendererOutputSize(renderer.get(), &w, &h);
 	return {static_cast<double>(w), static_cast<double>(h)};
 }
 
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
 	set_colour(colour);
-	SDL_RenderDrawPoint(renderer, point_pos.x, point_pos.y);
+	SDL_RenderDrawPoint(renderer.get(), point_pos.x, point_pos.y);
 }
 
 void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colour) {
 	set_colour(colour);
-	SDL_RenderDrawLine(renderer, v1.x, v1.y, v2.x, v2.y);
+	SDL_RenderDrawLine(renderer.get(), v1.x, v1.y, v2.x, v2.y);
 }
 
 void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
 	set_colour(colour);
 	if (width == 0) {
 		SDL_Rect r = rect;
-		SDL_RenderFillRect(renderer, &r);
+		SDL_RenderFillRect(renderer.get(), &r);
 	} else if (width == 1) {
 		SDL_Rect r = rect;
-		SDL_RenderDrawRect(renderer, &r);
+		SDL_RenderDrawRect(renderer.get(), &r);
 	} else {
 		SDL_Rect r1 = {rect.x - width, rect.y - width, rect.w + 2*width, width};
 		SDL_Rect r2 = {rect.x - width, rect.y + rect.h, rect.w + 2*width, width};
 		SDL_Rect r3 = {rect.x - width, rect.y, width, rect.h};
 		SDL_Rect r4 = {rect.x + rect.w, rect.y, width, rect.h};
-		SDL_RenderFillRect(renderer, &r1);
-		SDL_RenderFillRect(renderer, &r2);
-		SDL_RenderFillRect(renderer, &r3);
-		SDL_RenderFillRect(renderer, &r4);
+		SDL_RenderFillRect(renderer.get(), &r1);
+		SDL_RenderFillRect(renderer.get(), &r2);
+		SDL_RenderFillRect(renderer.get(), &r3);
+		SDL_RenderFillRect(renderer.get(), &r4);
 	}
 }
 
@@ -806,21 +754,21 @@ void Renderer::draw_circle(const Circle &circle, const Colour &colour, const boo
 			}
 		}
 
-		SDL_RenderGeometry(renderer, NULL, vertices, tris - 3, NULL, tris - 3);
+		SDL_RenderGeometry(renderer.get(), NULL, vertices, tris - 3, NULL, tris - 3);
 
 	} else {
 		int x = circle.r, y = 0;
 
 		// Printing the initial point on the axes
 		// after translation
-		SDL_RenderDrawPoint(renderer, x + circle.x, circle.y);
+		SDL_RenderDrawPoint(renderer.get(), x + circle.x, circle.y);
 
 		// When radius is zero only a single
 		// point will be printed
 		if (circle.r > 0) {
-			SDL_RenderDrawPoint(renderer, -x + circle.x, circle.y);
-			SDL_RenderDrawPoint(renderer, circle.x, -x + circle.y);
-			SDL_RenderDrawPoint(renderer, circle.x, x + circle.y);
+			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, circle.y);
+			SDL_RenderDrawPoint(renderer.get(), circle.x, -x + circle.y);
+			SDL_RenderDrawPoint(renderer.get(), circle.x, x + circle.y);
 		}
 
 		// Initialising the value of P
@@ -843,18 +791,18 @@ void Renderer::draw_circle(const Circle &circle, const Colour &colour, const boo
 
 			// Printing the generated point and its reflection
 			// in the other octants after translation
-			SDL_RenderDrawPoint(renderer, x + circle.x, y + circle.y);
-			SDL_RenderDrawPoint(renderer, -x + circle.x, y + circle.y);
-			SDL_RenderDrawPoint(renderer, x + circle.x, -y + circle.y);
-			SDL_RenderDrawPoint(renderer, -x + circle.x, -y + circle.y);
+			SDL_RenderDrawPoint(renderer.get(), x + circle.x, y + circle.y);
+			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, y + circle.y);
+			SDL_RenderDrawPoint(renderer.get(), x + circle.x, -y + circle.y);
+			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, -y + circle.y);
 
 			// If the generated point is on the line x = y then
 			// the perimeter points have already been printed
 			if (x != y) {
-				SDL_RenderDrawPoint(renderer, y + circle.x, x + circle.y);
-				SDL_RenderDrawPoint(renderer, -y + circle.x, x + circle.y);
-				SDL_RenderDrawPoint(renderer, y + circle.x, -x + circle.y);
-				SDL_RenderDrawPoint(renderer, -y + circle.x, -x + circle.y);
+				SDL_RenderDrawPoint(renderer.get(), y + circle.x, x + circle.y);
+				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, x + circle.y);
+				SDL_RenderDrawPoint(renderer.get(), y + circle.x, -x + circle.y);
+				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, -x + circle.y);
 			}
 		}
 	}
@@ -877,7 +825,7 @@ void Renderer::draw_polygon(const vector<Vector> vertices, const Colour colour, 
 			indices[3*i - 1] = i+1;
 		}
 
-		SDL_RenderGeometry(renderer, NULL, verts, n, indices, (n-2)*3);
+		SDL_RenderGeometry(renderer.get(), NULL, verts, n, indices, (n-2)*3);
 
 
 	} else {
@@ -885,10 +833,15 @@ void Renderer::draw_polygon(const vector<Vector> vertices, const Colour colour, 
 
 		int j = n - 1;
 		for (int i=0; i < n; i++) {
-			SDL_RenderDrawLine(renderer, vertices[j].x, vertices[j].y, vertices[i].x, vertices[i].y);
+			SDL_RenderDrawLine(renderer.get(), vertices[j].x, vertices[j].y, vertices[i].x, vertices[i].y);
 			j = i;
 		}
 	}
+}
+
+void Renderer::destroy(SDL_Renderer *renderer) {
+	SDL_DestroyRenderer(renderer);
+	SDL_Log("Renderer destroyed successfully!");
 }
 
 
@@ -1019,13 +972,44 @@ bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *
 }
 
 
-Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {}
+Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {
+	if (surface.get() == NULL)
+		SDL_LogError(0, "Failed to create surface: %s", IMG_GetError());
+	else {
+		id = SURF_ID;
+		SDL_Log("Surface created successfully![%i]", id);
+		SURF_ID++;
+	}
+}
 
 
-Texture::Texture(Renderer &renderer, const string &file) {
+Texture::Texture(Renderer &renderer, SDL_Texture *_texture):
+	texture(managed_ptr<SDL_Texture>(_texture, SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
-	texture = IMG_LoadTexture(tex_renderer -> renderer, file.c_str());
-	if (texture == NULL)
+	if (texture.get() == NULL)
+		SDL_LogError(0, "Failed to load texture: %s", IMG_GetError());
+	else {
+		id = TEX_ID;
+		SDL_Log("Texture loaded successfully![%i]", id);
+		TEX_ID++;
+	}
+
+	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
+}
+
+Texture::Texture(Texture &&_texture): texture(std::move(_texture.texture)) {
+    tex_renderer = _texture.tex_renderer;
+    _texture.tex_renderer = nullptr;
+    id = _texture.id;
+    _texture.id = -1;
+    w = _texture.w;
+    h = _texture.h;
+}
+
+Texture::Texture(Renderer &renderer, const string &file):
+	texture(managed_ptr<SDL_Texture>(IMG_LoadTexture(renderer.renderer.get(), file.c_str()), SDL_DestroyTexture)) {
+	tex_renderer = &renderer;
+	if (texture.get() == nullptr)
 		SDL_LogError(0, "Failed to load texture! (%s): %s", file.c_str(), IMG_GetError());
 	else {
 		id = TEX_ID;
@@ -1033,13 +1017,13 @@ Texture::Texture(Renderer &renderer, const string &file) {
 		TEX_ID++;
 	}
 
-	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
 
-Texture::Texture(Renderer &renderer, SDL_Surface *surface) {
+Texture::Texture(Renderer &renderer, Surface surface):
+	texture(managed_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
-	texture = SDL_CreateTextureFromSurface(tex_renderer -> renderer, surface);
-	if (texture == NULL)
+	if (texture.get() == nullptr)
 		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
@@ -1047,39 +1031,21 @@ Texture::Texture(Renderer &renderer, SDL_Surface *surface) {
 		TEX_ID++;
 	}
 
-	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
 
-Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, const int access) {
+Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, const int access):
+	texture(managed_ptr<SDL_Texture>(SDL_CreateTexture(renderer.renderer.get(), format, access, size.x, size.y), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	w = size.x;
 	h = size.y;
-	texture = SDL_CreateTexture(tex_renderer -> renderer, format, access, size.x, size.y);
-	if (texture == NULL)
+	if (texture.get() == nullptr)
 		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
 		SDL_Log("Texture created successfully![%i]", id);
 		TEX_ID++;
 	}
-}
-
-Texture::~Texture() {
-	if (texture != nullptr) {
-		destroy();
-	}
-}
-
-Texture::Texture(Texture &&tex) noexcept {
-	tex.texture = nullptr;
-}
-
-Texture& Texture::operator=(Texture &&tex) noexcept {
-	if (&tex == this) return *this;
-	if (texture != nullptr) destroy();
-	texture = tex.texture;
-	tex.texture = nullptr;
-	return *this;
 }
 
 Rect Texture::get_rect() {
@@ -1087,49 +1053,50 @@ Rect Texture::get_rect() {
 }
 
 void Texture::set_colour_mod(const Colour &colour) {
-	SDL_SetTextureColorMod(texture, colour.r, colour.g, colour.b);
+	SDL_SetTextureColorMod(texture.get(), colour.r, colour.g, colour.b);
 	if (colour.a != 255)
-		SDL_SetTextureAlphaMod(texture, colour.a);
+		SDL_SetTextureAlphaMod(texture.get(), colour.a);
 }
 
 void Texture::set_blend_mode(SDL_BlendMode blend_mode) {
-	SDL_SetTextureBlendMode(texture, blend_mode);
+	SDL_SetTextureBlendMode(texture.get(), blend_mode);
 }
 
 void Texture::render(const Rect &dst_rect) {
 	const SDL_Rect src_rect = get_rect();
 	const SDL_Rect r2 = dst_rect;
-	SDL_RenderCopy(tex_renderer -> renderer, texture, &src_rect, &r2);
+	SDL_RenderCopy(tex_renderer -> renderer.get(), texture.get(), &src_rect, &r2);
 }
 
 void Texture::render(const Rect &dst_rect, const Rect &src_rect) {
 	const SDL_Rect r1 = {src_rect.x, src_rect.y, src_rect.w, src_rect.h};
 	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
-	SDL_RenderCopy(tex_renderer -> renderer, texture, &r1, &r2);
+	SDL_RenderCopy(tex_renderer -> renderer.get(), texture.get(), &r1, &r2);
 }
 
 void Texture::render_ex(const Rect &dst_rect, const double &angle, const Vector &center, const SDL_RendererFlip &flip) {
 	const SDL_Rect r1 = {0, 0, w, h};
 	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
 	const SDL_Point p = {(int)center.x, (int)center.y};
-	SDL_RenderCopyEx(tex_renderer -> renderer, texture, &r1, &r2, angle, &p, flip);
+	SDL_RenderCopyEx(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
 }
 
 void Texture::render_ex(const Rect &dst_rect, const Rect &src_rect, const double &angle, const Vector &center, const SDL_RendererFlip &flip) {
 	const SDL_Rect r1 = {src_rect.x, src_rect.y, src_rect.w, src_rect.h};
 	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
 	const SDL_Point p = {(int)center.x, (int)center.y};
-	SDL_RenderCopyEx(tex_renderer -> renderer, texture, &r1, &r2, angle, &p, flip);
+	SDL_RenderCopyEx(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
 }
 
-void Texture::destroy() {
-	SDL_DestroyTexture(texture);
-	SDL_Log("Texture destroyed successfully![%i]", id);
-}
+// void Texture::destroy() {
+// 	SDL_DestroyTexture(texture);
+// 	SDL_Log("Texture destroyed successfully![%i]", id);
+// }
 
 
-Font::Font(const string &file, const int size) {
-	if ((font = TTF_OpenFont(file.c_str(), size)) == NULL)
+Font::Font(const string &file, const int size):
+	font(managed_ptr<TTF_Font>(TTF_OpenFont(file.c_str(), size), TTF_CloseFont)) {
+	if (font.get() == nullptr)
 		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), TTF_GetError());
 	else {
 		id = FONT_ID;
@@ -1138,34 +1105,17 @@ Font::Font(const string &file, const int size) {
 	}
 }
 
-Font::~Font() {
-	if (font != nullptr)
-		destroy(); 
-}
-
-Font::Font(Font &&fnt) noexcept {
-	fnt.font = nullptr;
-}
-
-Font& Font::operator=(Font &&fnt) noexcept {
-	if (&fnt == this) return *this;
-	if (font != nullptr) destroy();
-	font = fnt.font;
-	fnt.font = nullptr;
-	return *this;
-}
-
 Texture Font::create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality, const bool &wrap_text, const Uint32 &wrap_length, const Colour &background_colour) {
 	SDL_Surface *text_surf;
 	switch (quality) {
 		case 0:
 			if (wrap_text) 
-				text_surf = TTF_RenderUTF8_Solid_Wrapped(font, text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
-			else text_surf = TTF_RenderUTF8_Solid(font, text.c_str(), {colour.r, colour.g, colour.b, colour.a});
+				text_surf = TTF_RenderUTF8_Solid_Wrapped(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
+			else text_surf = TTF_RenderUTF8_Solid(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
 		case 1:
 			if (wrap_text)
 				text_surf = TTF_RenderUTF8_Shaded_Wrapped(
-					font,
+					font.get(),
 					text.c_str(),
 					{colour.r, colour.g, colour.b, colour.a},
 					{background_colour.r, background_colour.g, background_colour.b, background_colour.a},
@@ -1173,46 +1123,47 @@ Texture Font::create_text(Renderer &renderer, const string &text, const Colour &
 				);
 			else
 				text_surf = TTF_RenderUTF8_Shaded(
-					font,
+					font.get(),
 					text.c_str(),
 					{colour.r, colour.g, colour.b, colour.a},
 					{background_colour.r, background_colour.g, background_colour.b, background_colour.a}
 				);
 		case 2:
 			if (wrap_text)
-				text_surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
+				text_surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
 			else
-				text_surf = TTF_RenderUTF8_Blended(font, text.c_str(), {colour.r, colour.g, colour.b, colour.a});
+				text_surf = TTF_RenderUTF8_Blended(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
 	}
 
-	Texture texture = Texture(renderer, text_surf);
+	Texture texture = Texture(renderer, Surface(text_surf));
 	return texture;
 }
 
-void Font::destroy() {
+void Font::destroy(TTF_Font *font) {
 	TTF_CloseFont(font);
-	SDL_Log("Font destroyed successfully![%i]", id);
+	// SDL_Log("Font destroyed successfully![%i]", id);
 }
 
 FontAtlas Font::create_atlas(Renderer &renderer, const Colour colour, const int quality, const string chars) {
-	TTF_SetFontKerning(font, 0);
-	FontAtlas font_atlas;
-	font_atlas.atlas = this->create_text(renderer, chars, {255, 255, 255, 255}, quality);
-	
+	TTF_SetFontKerning(font.get(), 0);
+	FontAtlas atlas(std::move(create_text(renderer, chars, colour, quality)));
+
 	int w, h;
 	for (int i = 0; i < chars.length(); i++) {
 		char ch[] = { chars[i], '\0' };
-		TTF_SizeUTF8(font, ch, &w, &h);
-		font_atlas.data[chars[i]] = {i*w, 0, w, font_atlas.atlas.h};
+		TTF_SizeUTF8(font.get(), ch, &w, &h);
+		atlas.data[chars[i]] = {i*w, 0, w, atlas.texture.h};
 	}
 
-	TTF_SetFontKerning(font, 1);
-	return font_atlas;
+	TTF_SetFontKerning(font.get(), 1);
+	return atlas;
 }
 
 
+FontAtlas::FontAtlas(Texture &&_texture): texture(std::move(_texture)) {}
+
 void FontAtlas::set_colour(const Colour colour) {
-	atlas.set_colour_mod(colour);
+	texture.set_colour_mod(colour);
 }
 
 void FontAtlas::draw_text(const string &text, const Vector &pos, const double scale) {
@@ -1220,8 +1171,7 @@ void FontAtlas::draw_text(const string &text, const Vector &pos, const double sc
 	Rect *r;
 	for (auto &ch: text) {
 		r = &data[ch];
-		// atlas.render({cx, static_cast<int>(pos.y), static_cast<int>(r->w*scale), static_cast<int>(r->h*scale)}, data[ch]);
-		atlas.render({0, 0, 100, 100}, {0, 0, 10, 10});
+		texture.render({cx, static_cast<int>(pos.y), static_cast<int>(r->w*scale), static_cast<int>(r->h*scale)}, data[ch]);
 		cx += r->w*scale;
 	}
 }
@@ -1239,22 +1189,6 @@ SpriteSheet::SpriteSheet(Renderer &renderer, const string &file, const int &colu
 	tile_w = src_rect.w/tile_x; tile_h = src_rect.h/tile_y;
 }
 
-SpriteSheet::~SpriteSheet() {
-	if (texture.texture != nullptr) destroy(); 
-}
-
-SpriteSheet::SpriteSheet(SpriteSheet &&ss) noexcept {
-	ss.texture.texture = nullptr;
-}
-
-SpriteSheet& SpriteSheet::operator=(SpriteSheet &&ss) noexcept {
-	if (&ss == this) return *this;
-	if (texture.texture != nullptr) destroy();
-	texture.texture = ss.texture.texture;
-	ss.texture.texture = nullptr;
-	return *this;
-}
-
 void SpriteSheet::set_src_rect(const Rect &src_rect) {
 	this->src_rect = src_rect;
 	tile_w = src_rect.w/tile_x; tile_h = src_rect.h/tile_y;
@@ -1264,9 +1198,9 @@ void SpriteSheet::draw_sprite(const Rect &dst_rect, const int &column, const int
 	texture.render(dst_rect, {src_rect.x + tile_w*column, src_rect.y + tile_h*row, tile_w, tile_h});
 }
 
-void SpriteSheet::destroy() {
-	texture.destroy();
-}
+// void SpriteSheet::destroy() {
+	// texture.destroy();
+// }
 
 
 AnimatedSprite::AnimatedSprite(Renderer &renderer, const string &file, const int &column, const int &row, const double animation_speed, bool loop): SpriteSheet(renderer, file, column, row) {
@@ -1316,36 +1250,18 @@ string States::get_top_state() {
 }
 
 
-Packet::Packet(const int maxlen) {
+Packet::Packet(const int maxlen): packet(managed_ptr<UDPpacket>(SDLNet_AllocPacket(maxlen), SDLNet_FreePacket)) {
 	this->maxlen = maxlen;
-	packet = SDLNet_AllocPacket(maxlen);
 
 	for_sending = false;
 }
 
-Packet::Packet(const int maxlen, IPaddress &destination) {
+Packet::Packet(const int maxlen, IPaddress &destination): packet(managed_ptr<UDPpacket>(SDLNet_AllocPacket(maxlen), SDLNet_FreePacket)) {
 	this->maxlen = maxlen;
-	packet = SDLNet_AllocPacket(maxlen);
 
 	this->destination = destination;
 
 	for_sending = true;
-}
-
-Packet::~Packet() {
-	if (packet != nullptr) destroy(); 
-}
-
-Packet::Packet(Packet &&pk) noexcept {
-	pk.packet = nullptr;
-}
-
-Packet& Packet::operator=(Packet &&pk) noexcept {
-	if (&pk == this) return *this;
-	if (packet != nullptr) destroy();
-	packet = pk.packet;
-	pk.packet = nullptr;
-	return *this;
 }
 
 void Packet::clear_data() {
@@ -1405,9 +1321,9 @@ string Packet::get_next_val() {
 	return _val;
 }
 
-void Packet::destroy() {
-	SDLNet_FreePacket(packet);
-}
+// void Packet::destroy() {
+// 	SDLNet_FreePacket(packet);
+// }
 
 Packet& operator<<(Packet &packet, const string val) {
 	packet.data.push_back(val);
@@ -1495,24 +1411,12 @@ UDPSocket::UDPSocket(const int port) {
 }
 
 UDPSocket::~UDPSocket() {
-	if (socket != nullptr) destroy(); 
-}
-
-UDPSocket::UDPSocket(UDPSocket &&sock) noexcept {
-	sock.socket = nullptr;
-}
-
-UDPSocket& UDPSocket::operator=(UDPSocket &&sock) noexcept {
-	if (&sock == this) return *this;
-	if (socket != nullptr) destroy();
-	socket = sock.socket;
-	sock.socket = nullptr;
-	return *this;
+	destroy();
 }
 
 bool UDPSocket::send(Packet &packet, const int channel) {
 	packet.ready();
-	if (SDLNet_UDP_Send(socket, channel, packet.packet)) {
+	if (SDLNet_UDP_Send(socket, channel, packet.packet.get())) {
 		return true;
 	} else {
 		SDL_LogError(0, "Failed to send packet: %s", SDLNet_GetError());
@@ -1521,7 +1425,7 @@ bool UDPSocket::send(Packet &packet, const int channel) {
 }
 
 bool UDPSocket::recv(Packet &packet) {
-	int val = SDLNet_UDP_Recv(socket, packet.packet);
+	int val = SDLNet_UDP_Recv(socket, packet.packet.get());
 	if (val == 1) {
 		packet.set();
 		return true;
@@ -1545,22 +1449,7 @@ TCPSocket::TCPSocket(IPaddress &ip) {
 }
 
 TCPSocket::~TCPSocket() {
-	if (socket != nullptr)
-		destroy();
-}
-
-TCPSocket::TCPSocket(TCPSocket &&sock) noexcept {
-	sock.socket = nullptr;
-}
-
-TCPSocket& TCPSocket::operator=(TCPSocket &&sock) noexcept {
-	if (&sock == this)
-		return *this;
-	if (socket != nullptr)
-		destroy();
-	socket = sock.socket;
-	sock.socket = nullptr;
-	return *this;
+	destroy();
 }
 
 bool TCPSocket::accept(TCPSocket &sock) {
@@ -1614,8 +1503,8 @@ void Mixer::allocate_channels(int channels) {
 }
 
 
-Music::Music(const string &file) {
-	if ((music = Mix_LoadMUS(file.c_str())) == NULL) {
+Music::Music(const string &file): music(managed_ptr<Mix_Music>(Mix_LoadMUS(file.c_str()), Mix_FreeMusic)) {
+	if (music == NULL) {
 		SDL_LogError(0, "Failed to load music! (%s): %s", file.c_str(), Mix_GetError());
 	} else {
 		id = MUSIC_ID;
@@ -1624,24 +1513,8 @@ Music::Music(const string &file) {
 	}
 }
 
-Music::~Music() {
-	if (music != nullptr) destroy(); 
-}
-
-Music::Music(Music &&mus) noexcept {
-	mus.music = nullptr;
-}
-
-Music& Music::operator=(Music &&mus) noexcept {
-	if (&mus == this) return *this;
-	if (music != nullptr) destroy();
-	music = mus.music;
-	mus.music = nullptr;
-	return *this;
-}
-
 void Music::play(int loop) {
-	Mix_PlayMusic(music, loop);
+	Mix_PlayMusic(music.get(), loop);
 }
 
 float Music::volume() {
@@ -1680,14 +1553,14 @@ void Music::toggle() {
 	is_paused = not is_paused;
 }
 
-void Music::destroy() {
-	Mix_FreeMusic(music);
-	SDL_Log("Music destroyed successfully![%i]", id);
-}
+// void Music::destroy() {
+// 	Mix_FreeMusic(music);
+// 	SDL_Log("Music destroyed successfully![%i]", id);
+// }
 
 
-Sound::Sound(const string file) {
-	if ((sound = Mix_LoadWAV(file.c_str())) == NULL) {
+Sound::Sound(const string file): sound(managed_ptr<Mix_Chunk>(Mix_LoadWAV(file.c_str()), Mix_FreeChunk)) {
+	if (sound == NULL) {
 		SDL_LogError(0, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
 	} else {
 		id = SOUND_ID;
@@ -1696,26 +1569,10 @@ Sound::Sound(const string file) {
 	}
 }
 
-Sound::~Sound() {
-	if (sound != nullptr) destroy(); 
-}
-
-Sound::Sound(Sound &&snd) noexcept {
-	snd.sound = nullptr;
-}
-
-Sound& Sound::operator=(Sound &&snd) noexcept {
-	if (&snd == this) return *this;
-	if (sound != nullptr) destroy();
-	sound = snd.sound;
-	snd.sound = nullptr;
-	return *this;
-}
-
 void Sound::play(int loop, int channel) {
 	// Pass -1 to the loop for looping infinitely
 	// The first free channel is choosed by default
-	if ((channel = Mix_PlayChannel(-1, sound, loop)) < 0) {
+	if ((channel = Mix_PlayChannel(-1, sound.get(), loop)) < 0) {
 		SDL_LogError(0, "Failed to play sound![%i]: %s", id, Mix_GetError());
 	}
 }
@@ -1756,7 +1613,7 @@ void Sound::toggle() {
 	is_paused = not is_paused;
 }
 
-void Sound::destroy() {
-	Mix_FreeChunk(sound);
-	SDL_Log("Sound destroyed successfully![%i]", id);
-} 
+// void Sound::destroy() {
+// 	Mix_FreeChunk(sound);
+// 	SDL_Log("Sound destroyed successfully![%i]", id);
+// }
