@@ -199,6 +199,19 @@ void Vector::clamp_ip(const Circle &circle) {
 	}
 }
 
+Rect::Rect(int x, int y, int w, int h) {
+	this->x = x;
+	this->y = y;
+	this->w = w;
+	this->h = h;
+}
+
+Rect::Rect(const Vector &pos, const Vector &size) {
+	x = static_cast<int>(pos.x);
+	y = static_cast<int>(pos.y);
+	w = static_cast<int>(size.x);
+	h = static_cast<int>(size.y);
+}
 
 ostream& operator<<(ostream &os, Rect const &rect) {
 	cout << rect.to_str();
@@ -425,6 +438,18 @@ void Rect::move_ip(const Vector &vec) {
 	y += vec.y;
 }
 
+
+Circle::Circle(int x, int y, int r) {
+	this->x = x;
+	this->y = y;
+	this->r = r;
+}
+
+Circle::Circle(const Vector &vec, const int radius) {
+	x = static_cast<int>(vec.x);
+	y = static_cast<int>(vec.y);
+	r = radius;
+}
 
 ostream& operator<<(ostream &os, const Circle &circle) {
 	cout << circle.to_str();
@@ -1062,23 +1087,22 @@ void Texture::set_blend_mode(SDL_BlendMode blend_mode) {
 	SDL_SetTextureBlendMode(texture.get(), blend_mode);
 }
 
+void Texture::render(const Vector &vec) {
+	render({vec, get_rect().size()});
+}
+
 void Texture::render(const Rect &dst_rect) {
-	const SDL_Rect src_rect = get_rect();
-	const SDL_Rect r2 = dst_rect;
-	SDL_RenderCopy(tex_renderer -> renderer.get(), texture.get(), &src_rect, &r2);
+	render(dst_rect, get_rect());
 }
 
 void Texture::render(const Rect &dst_rect, const Rect &src_rect) {
-	const SDL_Rect r1 = {src_rect.x, src_rect.y, src_rect.w, src_rect.h};
-	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
+	const SDL_Rect r1 = src_rect;
+	const SDL_Rect r2 = dst_rect;
 	SDL_RenderCopy(tex_renderer -> renderer.get(), texture.get(), &r1, &r2);
 }
 
 void Texture::render_ex(const Rect &dst_rect, const double &angle, const Vector &center, const SDL_RendererFlip &flip) {
-	const SDL_Rect r1 = {0, 0, w, h};
-	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
-	const SDL_Point p = {(int)center.x, (int)center.y};
-	SDL_RenderCopyEx(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
+	render_ex(dst_rect, get_rect(), angle, center, flip);
 }
 
 void Texture::render_ex(const Rect &dst_rect, const Rect &src_rect, const double &angle, const Vector &center, const SDL_RendererFlip &flip) {

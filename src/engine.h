@@ -116,87 +116,93 @@ struct Vector {
 
 
 struct Rect {
-	public:
-		int x, y, w, h;
+	int x, y, w, h;
 
-		friend ostream& operator<<(ostream &os, Rect const &rect);
+	Rect() {};
+	Rect(int x, int y, int w, int h);
+	Rect(const Vector &pos, const Vector &size);
 
-		operator SDL_Rect() const;
+	friend ostream& operator<<(ostream &os, Rect const &rect);
 
-		const string to_str() const;
+	operator SDL_Rect() const;
 
-		Vector size() const;
-		void size(const Vector &vec);
-		void scale(const Vector &vec);
-		// Scales the height and width by the given factor
-		void scale(const double val);
-		double half_width() const;
-		double half_height() const;
-		Vector half_size() const;
+	const string to_str() const;
 
-		double top() const;
-		void top(const double &val);
-		double bottom() const;
-		void bottom(const double &val);
-		double left() const;
-		void left(const double &val);
-		double right() const;
-		void right(const double &val);
-		double centerx() const;
-		void centerx(const double &val);
-		double centery() const;
-		void centery(const double &val);
-		Vector topleft() const;
-		void topleft(const Vector &vec);
-		Vector topright() const;
-		void topright(const Vector &vec);
-		Vector bottomleft() const;
-		void bottomleft(const Vector &vec);
-		Vector bottomright() const;
-		void bottomright(const Vector &vec);
-		Vector center() const;
-		void center(const Vector &vec);
-		Vector midtop() const;
-		void midtop(const Vector &vec);
-		Vector midbottom() const;
-		void midbottom(const Vector &vec);
-		Vector midleft() const;
-		void midleft(const Vector &vec);
-		Vector midright() const;
-		void midright(const Vector &vec);
+	Vector size() const;
+	void size(const Vector &vec);
+	void scale(const Vector &vec);
+	// Scales the height and width by the given factor
+	void scale(const double val);
+	double half_width() const;
+	double half_height() const;
+	Vector half_size() const;
 
-		bool collide_point(const Vector &vec) const;
-		bool collide_rect(const Rect &rect) const;
-		// Clamps the rect within the rect passed
-		Rect clamp(const Rect &rect) const;
-		// Returns if the rect is clamped or not
-		bool clamp_ip(const Rect &rect);
-		Rect move(const Vector &vec) const;
-		void move_ip(const Vector &vec);
+	double top() const;
+	void top(const double &val);
+	double bottom() const;
+	void bottom(const double &val);
+	double left() const;
+	void left(const double &val);
+	double right() const;
+	void right(const double &val);
+	double centerx() const;
+	void centerx(const double &val);
+	double centery() const;
+	void centery(const double &val);
+	Vector topleft() const;
+	void topleft(const Vector &vec);
+	Vector topright() const;
+	void topright(const Vector &vec);
+	Vector bottomleft() const;
+	void bottomleft(const Vector &vec);
+	Vector bottomright() const;
+	void bottomright(const Vector &vec);
+	Vector center() const;
+	void center(const Vector &vec);
+	Vector midtop() const;
+	void midtop(const Vector &vec);
+	Vector midbottom() const;
+	void midbottom(const Vector &vec);
+	Vector midleft() const;
+	void midleft(const Vector &vec);
+	Vector midright() const;
+	void midright(const Vector &vec);
+
+	bool collide_point(const Vector &vec) const;
+	bool collide_rect(const Rect &rect) const;
+	// Clamps the rect within the rect passed
+	Rect clamp(const Rect &rect) const;
+	// Returns if the rect is clamped or not
+	bool clamp_ip(const Rect &rect);
+	Rect move(const Vector &vec) const;
+	void move_ip(const Vector &vec);
 };
 
 
 struct Circle {
-	public:
-		int x, y, r;
+	int x, y, r;
 
-		friend ostream& operator<<(ostream &os, const Circle &circle);
+	Circle() {};
+	Circle(int x, int y, int r);
+	Circle(const Vector &vec, const int radius);
 
-		const string to_str() const;
+	friend ostream& operator<<(ostream &os, const Circle &circle);
 
-		double radius() const;
-		void radius(const double radius);
-		Vector center() const;
-		void center(const Vector &vec);
+	const string to_str() const;
 
-		bool collide_point(const Vector &vec) const;
-		bool collide_circle(const Circle &circle) const;
-		// Clamps the circle within the circle passed
-		Circle clamp(const Circle &circle) const;
-		// Returns if the circle is clamped or not
-		bool clamp_ip(const Circle &circle);
-		Circle move(const Vector &vec) const;
-		void move_ip(const Vector &vec);
+	double radius() const;
+	void radius(const double radius);
+	Vector center() const;
+	void center(const Vector &vec);
+
+	bool collide_point(const Vector &vec) const;
+	bool collide_circle(const Circle &circle) const;
+	// Clamps the circle within the circle passed
+	Circle clamp(const Circle &circle) const;
+	// Returns if the circle is clamped or not
+	bool clamp_ip(const Circle &circle);
+	Circle move(const Vector &vec) const;
+	void move_ip(const Vector &vec);
 };
 
 
@@ -392,6 +398,7 @@ class Texture {
 
 		void set_colour_mod(const Colour &colour);
 		void set_blend_mode(SDL_BlendMode blend_mode);
+		void render(const Vector &vec);
 		void render(const Rect &dst_rect);
 		void render(const Rect &dst_rect, const Rect &src_rect);
 		void render_ex(const Rect &dst_rect, const double &angle=0, const Vector &center={0, 0}, const SDL_RendererFlip &flip=SDL_FLIP_NONE);
