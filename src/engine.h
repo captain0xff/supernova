@@ -26,11 +26,6 @@ using namespace std;
 
 
 
-// Globals
-extern double PI;
-
-
-
 // Forward Declarations
 struct Vector;
 struct Rect;
@@ -67,12 +62,6 @@ int randint(const int start, const int end); // Generates a random integer b/w s
 
 // Templates
 template<typename T> using managed_ptr = std::unique_ptr<T, void(*)(T*)>;
-
-
-
-// Main functions
-void Init();
-void Quit();
 
 
 
@@ -419,6 +408,8 @@ class Font {
 
 		Font(const string &file, const int size);
 
+		int wrap_alignment();
+		void wrap_alignment(const int align);
 		Texture create_text(
 			Renderer &renderer,
 			const string &text,

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdlib>
 
+#include "constants.h"
 #include "engine.h"
 
 
@@ -12,7 +13,6 @@ using namespace std;
 
 
 // Globals
-double PI = 3.141592653589793238463;
 int SURF_ID = 0;
 int TEX_ID = 0;
 int FONT_ID = 0;
@@ -1103,6 +1103,14 @@ Font::Font(const string &file, const int size):
 		SDL_Log("Font loaded successfully![%i] (%s)", id, file.c_str());
 		FONT_ID++;
 	}
+}
+
+int Font::wrap_alignment() {
+	return TTF_GetFontWrappedAlign(font.get());
+}
+
+void Font::wrap_alignment(const int align) {
+	TTF_SetFontWrappedAlign(font.get(), align);
 }
 
 Texture Font::create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality, const bool &wrap_text, const Uint32 &wrap_length, const Colour &background_colour) {

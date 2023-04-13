@@ -4,8 +4,9 @@ project(supernova)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SOURCES src/engine.cpp)
-set(HEADERS src/engine.h)
+set(SRC_PATH src)
+file(GLOB SOURCES ${SRC_PATH}/*.cpp)
+file(GLOB HEADERS ${SRC_PATH}/*.h)
 
 set(CMAKE_INSTALL_PREFIX $ENV{PREFIX})
 include(GNUInstallDirs)
