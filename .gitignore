@@ -1,4 +1,5 @@
 /build/*
+.vscode
 
 # Ignore all files in test except CMakeLists.txt and main.cpp
 /tests/*
