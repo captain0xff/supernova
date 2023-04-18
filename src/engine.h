@@ -1,5 +1,5 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef SUPERNOVA_ENGINE_H
+#define SUPERNOVA_ENGINE_H
 
 
 #include <string>
@@ -649,4 +649,4 @@ class Sound {
 };
 
 
-#endif /* ENGINE_H */
+#endif /* SUPERNOVA_ENGINE_H */

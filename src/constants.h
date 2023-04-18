@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef SUPERNOVA_CONSTANTS_H
+#define SUPERNOVA_CONSTANTS_H
 
 
 
@@ -38,4 +38,4 @@ const double E  = 2.718281828459045235360;
 #define RAYWHITE   (Colour){245, 245, 245, 255}   // Stylish White
 
 
-#endif /* CONSTANTS_H */
+#endif /* SUPERNOVA_CONSTANTS_H */
