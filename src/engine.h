@@ -228,7 +228,7 @@ struct Finger {
 	double pressure;
 };
 
-static unordered_map<SDL_FingerID, Finger> FINGERS;
+extern unordered_map<SDL_FingerID, Finger> FINGERS;
 
 
 

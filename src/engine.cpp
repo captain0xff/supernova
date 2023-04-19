@@ -19,6 +19,9 @@ int FONT_ID = 0;
 int MUSIC_ID = 0;
 int SOUND_ID = 0;
 
+unordered_map<string, EventKey> EVENT_KEYS;
+unordered_map<SDL_FingerID, Finger> FINGERS;
+
 
 
 // Helper functions
