@@ -328,10 +328,12 @@ class Renderer {
 		void set_target(Texture &tex);
 		void set_logical_size(const Vector &size);
 		Vector get_output_size();
+		void draw_point_raw(const Vector &point_pos);
 		void draw_point(const Vector &point_pos, const Colour &colour);
+		void draw_line_raw(const Vector &v1, const Vector &v2);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
+		void draw_rect_raw(const Rect &rect, const int width=0);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
-		// Currently filled circle with alpha is not properly supported
 		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);
 		void draw_polygon(const vector<Vector> vertices, const Colour colour, const bool filled=true);
 };

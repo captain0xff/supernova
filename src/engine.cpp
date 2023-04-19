@@ -724,18 +724,25 @@ Vector Renderer::get_output_size() {
 	return {static_cast<double>(w), static_cast<double>(h)};
 }
 
+void Renderer::draw_point_raw(const Vector &point_pos) {
+	SDL_RenderDrawPoint(renderer.get(), point_pos.x, point_pos.y);
+}
+
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
 	set_colour(colour);
-	SDL_RenderDrawPoint(renderer.get(), point_pos.x, point_pos.y);
+	draw_point_raw(point_pos);
+}
+
+void Renderer::draw_line_raw(const Vector &v1, const Vector &v2) {
+	SDL_RenderDrawLine(renderer.get(), v1.x, v1.y, v2.x, v2.y);
 }
 
 void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colour) {
 	set_colour(colour);
-	SDL_RenderDrawLine(renderer.get(), v1.x, v1.y, v2.x, v2.y);
+	draw_line_raw(v1, v2);
 }
 
-void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
-	set_colour(colour);
+void Renderer::draw_rect_raw(const Rect &rect, int width) {
 	if (width == 0) {
 		SDL_Rect r = rect;
 		SDL_RenderFillRect(renderer.get(), &r);
@@ -752,6 +759,11 @@ void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
 		SDL_RenderFillRect(renderer.get(), &r3);
 		SDL_RenderFillRect(renderer.get(), &r4);
 	}
+}
+
+void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
+	set_colour(colour);
+	draw_rect_raw(rect, width);
 }
 
 void Renderer::draw_circle(const Circle &circle, const Colour &colour, const bool filled) {
