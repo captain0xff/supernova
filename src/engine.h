@@ -211,7 +211,7 @@ struct EventKey {
 	bool pressed = false, released = false, down = false;
 };
 
-static unordered_map<string, EventKey> EVENT_KEYS;
+extern unordered_map<string, EventKey> EVENT_KEYS;
 
 
 struct MouseButton {
