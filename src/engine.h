@@ -86,6 +86,7 @@ struct Vector {
 	friend Vector operator+(const Vector &vec1, const Vector &vec2);
 	friend Vector operator-(const Vector &vec1, const Vector &vec2);
 	friend Vector operator*(const Vector &vec, const double &val);
+	friend Vector operator/(const Vector &vec, const double &val);
 	friend void operator+=(Vector &vec1, const Vector &vec2);
 	friend void operator-=(Vector &vec1, const Vector &vec2);
 	friend void operator*=(Vector &vec1, const Vector &vec2);

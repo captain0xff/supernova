@@ -76,6 +76,10 @@ Vector operator*(const Vector &vec, const double &val) {
 	return {vec.x*val, vec.y*val};
 }
 
+Vector operator/(const Vector &vec, const double &val) {
+	return {vec.x/val, vec.y/val};
+}
+
 void operator+=(Vector &vec1, const Vector &vec2) {
 	vec1.x += vec2.x;
 	vec1.y += vec2.y;
