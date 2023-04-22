@@ -1,4 +1,6 @@
+#include <SDL_render.h>
 #include <cmath>
+#include <cstddef>
 #include <ctime>
 #include <iostream>
 #include <vector>
@@ -881,6 +883,30 @@ void Renderer::draw_polygon(const vector<Vector> vertices, const Colour colour, 
 			j = i;
 		}
 	}
+}
+
+void Renderer::render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices) {
+	SDL_RenderGeometry(renderer.get(), NULL, vertices, num_vertices, indices, num_indices);
+}
+
+void Renderer::render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices, Texture &texture) {
+	SDL_RenderGeometry(renderer.get(), texture.texture.get(), vertices, num_vertices, indices, num_indices);
+}
+
+void Renderer::render_geometry(const vector<SDL_Vertex> &vertices) {
+	render_geometry_raw(vertices.size(), &vertices[0], 0, NULL);
+}
+
+void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices) {
+	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0]);
+}
+
+void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, Texture &texture) {
+	render_geometry_raw(vertices.size(), &vertices[0], 0, NULL, texture);
+}
+
+void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices, Texture &texture) {
+	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0], texture);
 }
 
 void Renderer::destroy(SDL_Renderer *renderer) {

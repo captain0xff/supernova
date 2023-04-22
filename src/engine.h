@@ -2,6 +2,7 @@
 #define SUPERNOVA_ENGINE_H
 
 
+#include <SDL_render.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -337,6 +338,12 @@ class Renderer {
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
 		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);
 		void draw_polygon(const vector<Vector> vertices, const Colour colour, const bool filled=true);
+		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices);
+		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices, Texture &texture);
+		void render_geometry(const vector<SDL_Vertex> &vertices);
+		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices);
+		void render_geometry(const vector<SDL_Vertex> &vertices, Texture &texture);
+		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices, Texture &texture);
 };
 
 
