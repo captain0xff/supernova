@@ -58,6 +58,15 @@ Colour::operator SDL_Color() const {
 	return {r, g, b, a};
 }
 
+Colour Colour::modulate(const double mod_r, const double mod_g, const double mod_b, const double mod_a) {
+	return {
+		static_cast<Uint8>(r*mod_r),
+		static_cast<Uint8>(g*mod_g),
+		static_cast<Uint8>(b*mod_b),
+		static_cast<Uint8>(a*mod_a)
+	};
+}
+
 
 ostream& operator<<(ostream &os, const Vector &vector) {
 	cout << vector.to_str();
@@ -905,6 +914,28 @@ void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, Texture &text
 
 void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices, Texture &texture) {
 	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0], texture);
+}
+
+void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices) {
+	int n = vertices.size();
+	int indices[(n-2)*3];
+	for (int i=1; i < n - 1; i++) {
+		indices[3*(i-1)] = 0;
+		indices[3*i - 2] = i;
+		indices[3*i - 1] = i+1;
+	}
+	SDL_RenderGeometry(renderer.get(), NULL, &vertices[0], n, indices, (n-2)*3);
+}
+
+void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices, Texture &texture) {
+	int n = vertices.size();
+	int indices[(n-2)*3];
+	for (int i=1; i < n - 1; i++) {
+		indices[3*(i-1)] = 0;
+		indices[3*i - 2] = i;
+		indices[3*i - 1] = i+1;
+	}
+	SDL_RenderGeometry(renderer.get(), texture.texture.get(), &vertices[0], n, indices, (n-2)*3);
 }
 
 void Renderer::destroy(SDL_Renderer *renderer) {

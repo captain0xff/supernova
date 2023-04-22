@@ -76,6 +76,9 @@ struct Colour {
 	Uint8 a = 255;
 
 	operator SDL_Color() const;
+
+	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1
+	Colour modulate(const double mod_r=1, const double mod_g=1, const double mod_b=1, const double mod_a=1);
 };
 
 
@@ -343,6 +346,8 @@ class Renderer {
 		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices);
 		void render_geometry(const vector<SDL_Vertex> &vertices, Texture &texture);
 		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices, Texture &texture);
+		void render_geometry_sorted(const vector<SDL_Vertex> &vertices);
+		void render_geometry_sorted(const vector<SDL_Vertex> &vertices, Texture &texture);
 };
 
 
