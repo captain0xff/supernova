@@ -1,6 +1,4 @@
-#include <SDL_render.h>
 #include <cmath>
-#include <cstddef>
 #include <ctime>
 #include <iostream>
 #include <vector>
