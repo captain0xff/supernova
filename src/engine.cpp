@@ -58,7 +58,7 @@ Colour::operator SDL_Color() const {
 	return {r, g, b, a};
 }
 
-Colour Colour::modulate(const double mod_r, const double mod_g, const double mod_b, const double mod_a) {
+Colour Colour::modulate(const double mod_r, const double mod_g, const double mod_b, const double mod_a) const {
 	return {
 		static_cast<Uint8>(r*mod_r),
 		static_cast<Uint8>(g*mod_g),
@@ -169,7 +169,7 @@ double Vector::angle() const {
 	return degrees(angle_rad());
 }
 
-Vector Vector::clamp(const Rect &rect) {
+Vector Vector::clamp(const Rect &rect) const {
 	Vector vec = {x, y};
 
 	if (rect.left() > x)
@@ -185,7 +185,7 @@ Vector Vector::clamp(const Rect &rect) {
 	return vec;
 }
 
-Vector Vector::clamp(const Circle &circle) {
+Vector Vector::clamp(const Circle &circle) const {
 	Vector vec = {x, y};
 
 	if (this->distance_to(circle.center()) > circle.r)
@@ -904,7 +904,7 @@ void Renderer::render_geometry(const vector<SDL_Vertex> &vertices) {
 	render_geometry_raw(vertices.size(), &vertices[0], 0, NULL);
 }
 
-void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices) {
+void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices) {
 	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0]);
 }
 
@@ -912,7 +912,7 @@ void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, Texture &text
 	render_geometry_raw(vertices.size(), &vertices[0], 0, NULL, texture);
 }
 
-void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices, Texture &texture) {
+void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices, Texture &texture) {
 	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0], texture);
 }
 

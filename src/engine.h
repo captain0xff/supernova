@@ -78,7 +78,7 @@ struct Colour {
 	operator SDL_Color() const;
 
 	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1
-	Colour modulate(const double mod_r=1, const double mod_g=1, const double mod_b=1, const double mod_a=1);
+	Colour modulate(const double mod_r=1, const double mod_g=1, const double mod_b=1, const double mod_a=1) const;
 };
 
 
@@ -112,8 +112,8 @@ struct Vector {
 	double distance_to(const Vector &vec) const;
 	double angle_rad() const;
 	double angle() const; // In degrees
-	Vector clamp(const Rect &rect);
-	Vector clamp(const Circle &circle);
+	Vector clamp(const Rect &rect) const;
+	Vector clamp(const Circle &circle) const;
 	void clamp_ip(const Rect &rect);
 	void clamp_ip(const Circle &circle);
 };
@@ -343,9 +343,9 @@ class Renderer {
 		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices);
 		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices, Texture &texture);
 		void render_geometry(const vector<SDL_Vertex> &vertices);
-		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices);
+		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices);
 		void render_geometry(const vector<SDL_Vertex> &vertices, Texture &texture);
-		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> indices, Texture &texture);
+		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices, Texture &texture);
 		void render_geometry_sorted(const vector<SDL_Vertex> &vertices);
 		void render_geometry_sorted(const vector<SDL_Vertex> &vertices, Texture &texture);
 };
