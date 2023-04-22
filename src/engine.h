@@ -2,7 +2,6 @@
 #define SUPERNOVA_ENGINE_H
 
 
-#include <SDL_render.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
