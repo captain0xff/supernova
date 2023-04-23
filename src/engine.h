@@ -314,6 +314,7 @@ class Window {
 		Window(string title, int screen_w, int screen_h, Uint32 flags=0, int posx=SDL_WINDOWPOS_CENTERED, int posy=SDL_WINDOWPOS_CENTERED);
 
 		void static destroy(SDL_Window *window);
+		void wrap_mouse(const Vector &wrap_pos);
 };
 
 
@@ -371,6 +372,8 @@ class Mouse {
 
 		// The vector should contain LEFT, RIGHT, MIDDLE, X1 or/and X2 in any order
 		Mouse(const vector<string> &needed_buttons = {});
+
+		static void set_relative_mode(const bool val);
 };
 
 

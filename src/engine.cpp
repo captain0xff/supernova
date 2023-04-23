@@ -688,6 +688,10 @@ Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx,
 		SDL_Log("Window created successfully!");
 }
 
+void Window::wrap_mouse(const Vector &wrap_pos) {
+	SDL_WarpMouseInWindow(window.get(), static_cast<int>(wrap_pos.x), static_cast<int>(wrap_pos.y));
+}
+
 void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
 	SDL_Log("Window closed successfully!");
@@ -948,6 +952,10 @@ Mouse::Mouse(const vector<string> &needed_buttons) {
 	for (const string &value: needed_buttons) {
 		buttons[value] = {BUTTON_MAP[value]};
 	}
+}
+
+void Mouse::set_relative_mode(const bool val) {
+	SDL_SetRelativeMouseMode(static_cast<SDL_bool>(val));
 }
 
 
