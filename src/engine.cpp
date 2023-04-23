@@ -958,6 +958,12 @@ void Mouse::set_relative_mode(const bool val) {
 	SDL_SetRelativeMouseMode(static_cast<SDL_bool>(val));
 }
 
+void Mouse::wrap_in_window(Window &window, const Vector &wrap_pos) {
+	// The function calls window.wrap_mouse and updates the mouse position to wrap_pos
+	window.wrap_mouse(wrap_pos);
+	pos = wrap_pos;
+}
+
 
 bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *mouse, unordered_map<SDL_FingerID, Finger> *fingers, bool (*event_handler)(SDL_Event &)) {
 	// The function event handler should return true if the engine loop should not be run otherwise true

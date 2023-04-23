@@ -374,6 +374,8 @@ class Mouse {
 		Mouse(const vector<string> &needed_buttons = {});
 
 		static void set_relative_mode(const bool val);
+		// The function calls window.wrap_mouse and updates the mouse position to wrap_pos
+		void wrap_in_window(Window &window, const Vector &wrap_pos);
 };
 
 
