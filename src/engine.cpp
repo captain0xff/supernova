@@ -239,7 +239,7 @@ Rect::operator SDL_Rect() const {
 }
 
 const string Rect::to_str() const {
-	return "Rect(" + to_string(x) + ", " + to_string(y) + to_string(w) + ", " + to_string(h) + ", " + ")";
+	return "Rect(" + to_string(x) + ", " + to_string(y) + ", " + to_string(w) + ", " + to_string(h) + ")";
 }
 
 Vector Rect::size() const {
