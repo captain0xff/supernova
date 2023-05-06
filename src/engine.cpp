@@ -966,7 +966,7 @@ void Mouse::wrap_in_window(Window &window, const Vector &wrap_pos) {
 
 
 bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *mouse, unordered_map<SDL_FingerID, Finger> *fingers, bool (*event_handler)(SDL_Event &)) {
-	// The function event handler should return true if the engine loop should not be run otherwise true
+	// The function event handler should return true if the engine loop should not be run otherwise false
 	if (event_keys) {
 		for (auto &[key, value]: *event_keys) {
 			value.pressed = false;
