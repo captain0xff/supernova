@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #ifndef __ANDROID__
 #include <SDL2/SDL.h>
@@ -215,7 +216,8 @@ struct EventKey {
 	bool pressed = false, released = false, down = false;
 };
 
-extern unordered_map<string, EventKey> EVENT_KEYS;
+typedef unordered_map<string, EventKey> EventKeys;
+extern EventKeys EVENT_KEYS;
 
 
 struct MouseButton {
@@ -232,7 +234,8 @@ struct Finger {
 	double pressure;
 };
 
-extern unordered_map<SDL_FingerID, Finger> FINGERS;
+typedef unordered_map<SDL_FingerID, Finger> Fingers;
+extern Fingers FINGERS;
 
 
 
@@ -385,7 +388,7 @@ class Events {
 		bool running = true;
 
 		// The function event handler should return true if the engine loop should not be run otherwise false
-		bool process_events(unordered_map<string, EventKey> *event_keys = nullptr, Mouse *mouse = nullptr, unordered_map<SDL_FingerID, Finger> *fingers = nullptr, bool (*event_handler)(SDL_Event &) = nullptr);
+		bool process_events(EventKeys *event_keys = nullptr, Mouse *mouse = nullptr, Fingers *fingers = nullptr, function<bool(SDL_Event&)> event_handler = nullptr);
 };
 
 

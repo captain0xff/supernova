@@ -1,40 +1,38 @@
-#include "..\src\engine.h"
+#include <iostream>
 
-using namespace std;
+#include "../src/engine.h"
 
+
+using	namespace	std;
+
+
+
+class my_class {
+	public:
+		int a = 3;
+		bool event_handler(SDL_Event &event);
+};
+
+bool my_class::event_handler(SDL_Event &event) {
+	SDL_Log("cool");
+	return false;
+}
 
 
 int main(int, char**) {
 
-	Engine engine;
-
-	Window window("test", 800, 600);
+	// Engine engine;
+	Window window("cool", 800, 600);
 	Renderer renderer(window);
 
-	Clock clock;
-	Events events;
-
 	bool running = true;
-	double dt, volume;
 
-	Mouse mouse({"LEFT", "RIGHT"});
+	Events events;
+	Clock clock;
 
-	Font font("font.ttf", 20);
-	Texture static_text = font.create_text(renderer, "This is very cool\nI like it", {100, 240, 37}, 1, true);
-	Rect static_text_rect = static_text.get_rect();
-	static_text_rect.topleft({0, 0});
-	FontAtlas atlas(font.create_atlas(renderer, {0, 255, 0, 255}));
+	EVENT_KEYS["UP"] = {SDLK_UP};
+	Mouse mouse;
 
-	while (running) {
-		dt = clock.tick(60);
-
-		running = events.process_events(&EVENT_KEYS, &mouse);
-
-		renderer.clear({255, 0, 0});
-		// static_text.render(static_text_rect);
-		atlas.draw_text("Hello everyone how are you?", {1, 1});
-		renderer.present();
-	}
-
-	return 0;
+	my_class cls;
+	// std::function<bool(SDL_Event&)> event_callback = bind(&my_class::event_handler, &cls, placeholders::_1);
 }

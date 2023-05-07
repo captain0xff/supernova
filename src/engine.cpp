@@ -19,8 +19,8 @@ int FONT_ID = 0;
 int MUSIC_ID = 0;
 int SOUND_ID = 0;
 
-unordered_map<string, EventKey> EVENT_KEYS;
-unordered_map<SDL_FingerID, Finger> FINGERS;
+EventKeys EVENT_KEYS;
+Fingers FINGERS;
 
 
 
@@ -965,7 +965,7 @@ void Mouse::wrap_in_window(Window &window, const Vector &wrap_pos) {
 }
 
 
-bool Events::process_events(unordered_map<string, EventKey> *event_keys, Mouse *mouse, unordered_map<SDL_FingerID, Finger> *fingers, bool (*event_handler)(SDL_Event &)) {
+bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *fingers, function<bool(SDL_Event&)> event_handler) {
 	// The function event handler should return true if the engine loop should not be run otherwise false
 	if (event_keys) {
 		for (auto &[key, value]: *event_keys) {
