@@ -1584,7 +1584,7 @@ IPaddress* TCPSocket::get_peer_address() {
 	return ip;
 }
 
-void TCPSocket::send(const char buffer[], int size) {
+void TCPSocket::send(const void *buffer, int size) {
 	_val = SDLNet_TCP_Send(socket, buffer, size);
 	if (_val < 0)
 		SDL_LogError(0, "Invalid socket: %s", SDLNet_GetError());
@@ -1596,7 +1596,7 @@ void TCPSocket::send(string &data) {
 	send(data.data(), data.length() + 1);
 }
 
-int TCPSocket::recv(char buffer[], const int size) {
+int TCPSocket::recv(void *buffer, const int size) {
 	return SDLNet_TCP_Recv(socket, buffer, size);
 }
 

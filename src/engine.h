@@ -603,10 +603,10 @@ class TCPSocket {
 		bool accept(TCPSocket &sock);
 		// Returns address of the machine connected to the socket
 		IPaddress* get_peer_address();
-		void send(const char buffer[], int size);
+		void send(const void *buffer, int size);
 		void send(string &data);
 		// Returns number of bytes received
-		int recv(char buffer[], const int size);
+		int recv(void *buffer, const int size);
 		void destroy();
 };
 
