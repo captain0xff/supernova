@@ -87,13 +87,13 @@ void* get_jni_env() {
 	return jni;
 }
 
-// Returns if the permission was granted or not
 bool get_permission(const string permission) {
+	// Returns if the permission was granted or not
 	return SDL_AndroidRequestPermission(permission.c_str());
 }
 
-// Set offset only when gravity is non-zero
-void show_toast(const string message, const bool duration=0, const int gravity=0, const int offsetx=0, const int offsety=0) {
+void show_toast(const string message, const bool duration, const int gravity, const int offsetx, const int offsety) {
+	// Set offset only when gravity is non-zero
 	SDL_AndroidShowToast(message.c_str(), duration, gravity, offsetx, offsety);
 }
 
@@ -689,9 +689,13 @@ int IO::read(void *ptr, const int max, const int size) {
 }
 
 string IO::read(const int max) {
+	int size;
 	char buffer[max+1];
-	if (IS_LOADED and read(buffer, max))
+
+	if ((size = read(buffer, max)) >= 0) {
+		buffer[size] = '\0';
 		return string(buffer);
+	}
 	return NULL;
 }
 
