@@ -52,6 +52,54 @@ void start_text_input() {
 }
 
 
+#ifdef __ANDROID__
+void trigger_back_button() {
+	SDL_AndroidBackButton();
+}
+
+void* get_activity() {
+	void *activity;
+	if ((activity = SDL_AndroidGetActivity()) == NULL) {
+		SDL_LogError(0, "Failed to get the android activity: %s", SDL_GetError());
+	}
+
+	return activity;
+}
+
+string get_external_storage_path() {
+	return SDL_AndroidGetExternalStoragePath();
+}
+
+int get_external_storage_state() {
+	return SDL_AndroidGetExternalStorageState();
+}
+
+string get_internal_storage_path() {
+	return SDL_AndroidGetInternalStoragePath();
+}
+
+void* get_jni_env() {
+	void *jni;
+	if ((jni = SDL_AndroidGetJNIEnv()) == 0) {
+		SDL_LogError(0, "Failed to get JNIEnv: %s", SDL_GetError());
+	}
+
+	return jni;
+}
+
+// Returns if the permission was granted or not
+bool get_permission(const string permission) {
+	return SDL_AndroidRequestPermission(permission.c_str());
+}
+
+// Set offset only when gravity is non-zero
+void show_toast(const string message, const bool duration=0, const int gravity=0, const Vector offset={0, 0}) {
+	SDL_AndroidShowToast(message.c_str(), duration, gravity, static_cast<int>(offset.x), static_cast<int>(offset.y));
+}
+
+#endif /* __ANDROID__ */
+
+
 
 // Structs
 Colour::operator SDL_Color() const {

@@ -61,6 +61,25 @@ template<typename T> using managed_ptr = std::unique_ptr<T, void(*)(T*)>;
 // General functions
 void start_text_input();
 
+#ifdef __ANDROID__
+void trigger_back_button();
+
+void* get_activity();
+
+string get_external_storage_path();
+int get_external_storage_state();
+
+string get_internal_storage_path();
+
+void* get_jni_env();
+
+// Returns if the permission was granted or not
+bool get_permission(const string permission);
+
+// Set offset only when gravity is non-zero
+void show_toast(const string message, const bool duration=0, const int gravity=0, const Vector offset={0, 0});
+#endif /* __ANDROID__ */
+
 
 
 // Structs
