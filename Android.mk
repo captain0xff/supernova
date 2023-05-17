@@ -4,7 +4,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := supernova
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/src
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/src \
+					$(LOCAL_PATH)/../headers
+
 LOCAL_CFLAGS :=
 
 LOCAL_SRC_FILES := $(LOCAL_PATH)/src/engine.cpp
