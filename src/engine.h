@@ -76,8 +76,8 @@ void* get_jni_env();
 // Returns if the permission was granted or not
 bool get_permission(const string permission);
 
-// Set offset only when gravity is non-zero
-void show_toast(const string message, const bool duration=0, const int gravity=0, const Vector offset={0, 0});
+// Set offsetx and offsety only when gravity is non-zero
+void show_toast(const string message, const bool duration=0, const int gravity=0, const int offsetx=0, const int offsety=0);
 #endif /* __ANDROID__ */
 
 

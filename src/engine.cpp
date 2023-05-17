@@ -93,8 +93,8 @@ bool get_permission(const string permission) {
 }
 
 // Set offset only when gravity is non-zero
-void show_toast(const string message, const bool duration=0, const int gravity=0, const Vector offset={0, 0}) {
-	SDL_AndroidShowToast(message.c_str(), duration, gravity, static_cast<int>(offset.x), static_cast<int>(offset.y));
+void show_toast(const string message, const bool duration=0, const int gravity=0, const int offsetx=0, const int offsety=0) {
+	SDL_AndroidShowToast(message.c_str(), duration, gravity, offsetx, offsety);
 }
 
 #endif /* __ANDROID__ */
