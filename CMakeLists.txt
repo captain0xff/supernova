@@ -4,28 +4,55 @@ project(supernova)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SRC_PATH src)
-file(GLOB SOURCES ${SRC_PATH}/*.cpp)
-file(GLOB HEADERS ${SRC_PATH}/*.h)
+option(ENABLE_IMAGE "Enables SDL_image support." ON)
+option(ENABLE_MIXER "Enables SDL_mixer support." ON)
+option(ENABLE_TTF "Enables SDL_ttf support." ON)
+option(ENABLE_NET "Enables SDL_net support." ON)
 
 set(CMAKE_INSTALL_PREFIX $ENV{PREFIX})
 include(GNUInstallDirs)
 
+set(SRC_PATH src)
+set(HEADERS ${SRC_PATH}/engine.h ${SRC_PATH}/core.h ${SRC_PATH}/constants.h)
+set(SOURCES ${SRC_PATH}/core.cpp)
+
+set(LIBS SDL2::SDL2)
+
 find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_mixer REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(SDL2_net REQUIRED)
+
+if (ENABLE_IMAGE)
+	find_package(SDL2_image REQUIRED)
+	list(APPEND LIBS SDL2_image::SDL2_image)
+	add_compile_definitions(${PROJECT_NAME} IMAGE_ENABLED)
+endif()
+
+if (ENABLE_MIXER)
+	find_package(SDL2_mixer REQUIRED)
+	list(APPEND LIBS SDL2_mixer::SDL2_mixer)
+	add_compile_definitions(${PROJECT_NAME} MIXER_ENABLED)
+	list(APPEND SOURCES ${SRC_PATH}/mixer.cpp)
+	list(APPEND HEADERS ${SRC_PATH}/mixer.h)
+endif()
+
+if (ENABLE_TTF)
+	find_package(SDL2_ttf REQUIRED)
+	list(APPEND LIBS SDL2_ttf::SDL2_ttf)
+	add_compile_definitions(${PROJECT_NAME} TTF_ENABLED)
+	list(APPEND SOURCES ${SRC_PATH}/font.cpp)
+	list(APPEND HEADERS ${SRC_PATH}/font.h)
+endif()
+
+if (ENABLE_NET)
+	find_package(SDL2_net REQUIRED)
+	list(APPEND LIBS SDL2_net::SDL2_net)
+	add_compile_definitions(${PROJECT_NAME} NET_ENABLED)
+	list(APPEND SOURCES ${SRC_PATH}/networking.cpp)
+	list(APPEND HEADERS ${SRC_PATH}/networking.h)
+endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-	SDL2::SDL2
-	SDL2_image::SDL2_image
-	SDL2_mixer::SDL2_mixer
-	SDL2_ttf::SDL2_ttf
-	SDL2_net::SDL2_net
-)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBS})
 
 # Setting which header files should be supplied with the library
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")

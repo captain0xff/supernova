@@ -1,38 +1,32 @@
-#include <iostream>
-
-#include "../src/engine.h"
-
-
-using	namespace	std;
+#include "../src/core.h"
+#include "../src/constants.h"
 
 
-
-class my_class {
-	public:
-		int a = 3;
-		bool event_handler(SDL_Event &event);
-};
-
-bool my_class::event_handler(SDL_Event &event) {
-	SDL_Log("cool");
-	return false;
-}
+using namespace std;
 
 
-int main(int, char**) {
 
-	// Engine engine;
-	Window window("cool", 800, 600);
+int main(int argc, char* argv[]) {
+
+	Engine engine;
+
+	Window window("", 800, 600);
 	Renderer renderer(window);
 
-	bool running = true;
-
-	Events events;
 	Clock clock;
+	Events events;
 
-	EVENT_KEYS["UP"] = {SDLK_UP};
-	Mouse mouse;
+	bool running = true;
+	double dt;
 
-	my_class cls;
-	// std::function<bool(SDL_Event&)> event_callback = bind(&my_class::event_handler, &cls, placeholders::_1);
+	while (running) {
+		dt = clock.tick(60);
+
+		running = events.process_events(&EVENT_KEYS);
+
+		renderer.clear(WHITE);
+		renderer.present();
+	}
+
+	return 0;
 }

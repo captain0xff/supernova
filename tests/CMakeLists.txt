@@ -10,4 +10,7 @@ else ()
 	link_libraries(SDL2 SDL2_image SDL2_mixer SDL2_ttf SDL2_net)
 endif()
 
-add_executable(main main.cpp ../src/engine.cpp)
+set(SRC_PATH ../src)
+file(GLOB SOURCES ${SRC_PATH}/*cpp)
+
+add_executable(main main.cpp ${SOURCES})

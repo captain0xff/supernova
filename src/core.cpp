@@ -5,7 +5,16 @@
 #include <cstdlib>
 
 #include "constants.h"
-#include "engine.h"
+#include "core.h"
+#ifdef MIXER_ENABLED
+#include "SDL2/SDL_mixer.h"
+#endif /* MIXER_ENABLED */
+#ifdef TTF_ENABLED
+#include "SDL2/SDL_ttf.h"
+#endif /* TTF_ENABLED */
+#ifdef NET_ENABLED
+#include "SDL2/SDL_net.h"
+#endif /* NET_ENABLED */
 
 
 using namespace std;
@@ -15,9 +24,6 @@ using namespace std;
 // Globals
 int SURF_ID = 0;
 int TEX_ID = 0;
-int FONT_ID = 0;
-int MUSIC_ID = 0;
-int SOUND_ID = 0;
 
 EventKeys EVENT_KEYS;
 Fingers FINGERS;
@@ -591,20 +597,35 @@ void Circle::move_ip(const Vector &vec) {
 // Classes
 Engine::Engine() {
 	SDL_Init(SDL_INIT_EVERYTHING);
+#ifdef IMAGE_ENABLED
 	IMG_Init(IMG_INIT_PNG);
+#endif /* IMAGE_ENABLED */
+#ifdef TTF_ENABLED
 	TTF_Init();
+#endif /* TTF_ENABLED */
+#ifdef NET_ENABLED
 	SDLNet_Init();
+#endif /* TTF_ENABLED */
+#ifdef NET_ENABLED
 	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-
+#endif /* NET_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
 	SDL_Log("Engine started!");
 }
 
 Engine::~Engine() {
+#ifdef IMAGE_ENABLED
 	IMG_Quit();
+#endif /* IMAGE_ENABLED */
+#ifdef TTF_ENABLED
 	TTF_Quit();
+#endif /* TTF_ENABLED */
+#ifdef NET_ENABLED
 	SDLNet_Quit();
+#endif /* TTF_ENABLED */
+#ifdef NET_ENABLED
 	Mix_Quit();
+#endif /* NET_ENABLED */
 	SDL_Quit();
 	SDL_Log("Engine stopped!");
 }
@@ -1171,6 +1192,7 @@ Texture::Texture(Texture &&_texture): texture(std::move(_texture.texture)) {
     h = _texture.h;
 }
 
+#ifdef IMAGE_ENABLED
 Texture::Texture(Renderer &renderer, const string &file):
 	texture(managed_ptr<SDL_Texture>(IMG_LoadTexture(renderer.renderer.get(), file.c_str()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
@@ -1184,6 +1206,7 @@ Texture::Texture(Renderer &renderer, const string &file):
 
 	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
+#endif /* IMAGE_ENABLED */
 
 Texture::Texture(Renderer &renderer, Surface surface):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()), SDL_DestroyTexture)) {
@@ -1252,108 +1275,7 @@ void Texture::render_ex(const Rect &dst_rect, const Rect &src_rect, const double
 	SDL_RenderCopyEx(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
 }
 
-// void Texture::destroy() {
-// 	SDL_DestroyTexture(texture);
-// 	SDL_Log("Texture destroyed successfully![%i]", id);
-// }
-
-
-Font::Font(const string &file, const int size):
-	font(managed_ptr<TTF_Font>(TTF_OpenFont(file.c_str(), size), TTF_CloseFont)) {
-	if (font.get() == nullptr)
-		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), TTF_GetError());
-	else {
-		id = FONT_ID;
-		SDL_Log("Font loaded successfully![%i] (%s)", id, file.c_str());
-		FONT_ID++;
-	}
-}
-
-int Font::wrap_alignment() {
-	return TTF_GetFontWrappedAlign(font.get());
-}
-
-void Font::wrap_alignment(const int align) {
-	TTF_SetFontWrappedAlign(font.get(), align);
-}
-
-Texture Font::create_text(Renderer &renderer, const string &text, const Colour &colour, const int &quality, const bool &wrap_text, const Uint32 &wrap_length, const Colour &background_colour) {
-	SDL_Surface *text_surf;
-	switch (quality) {
-		case 0:
-			if (wrap_text) 
-				text_surf = TTF_RenderUTF8_Solid_Wrapped(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
-			else text_surf = TTF_RenderUTF8_Solid(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
-		case 1:
-			if (wrap_text)
-				text_surf = TTF_RenderUTF8_Shaded_Wrapped(
-					font.get(),
-					text.c_str(),
-					{colour.r, colour.g, colour.b, colour.a},
-					{background_colour.r, background_colour.g, background_colour.b, background_colour.a},
-					wrap_length
-				);
-			else
-				text_surf = TTF_RenderUTF8_Shaded(
-					font.get(),
-					text.c_str(),
-					{colour.r, colour.g, colour.b, colour.a},
-					{background_colour.r, background_colour.g, background_colour.b, background_colour.a}
-				);
-		case 2:
-			if (wrap_text)
-				text_surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
-			else
-				text_surf = TTF_RenderUTF8_Blended(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
-	}
-
-	Texture texture = Texture(renderer, Surface(text_surf));
-	return texture;
-}
-
-void Font::destroy(TTF_Font *font) {
-	TTF_CloseFont(font);
-	// SDL_Log("Font destroyed successfully![%i]", id);
-}
-
-FontAtlas Font::create_atlas(Renderer &renderer, const Colour colour, const int quality, const string chars) {
-	TTF_SetFontKerning(font.get(), 0);
-	FontAtlas atlas(std::move(create_text(renderer, chars, colour, quality)));
-
-	int w, h;
-	for (int i = 0; i < chars.length(); i++) {
-		char ch[] = { chars[i], '\0' };
-		TTF_SizeUTF8(font.get(), ch, &w, &h);
-		atlas.data[chars[i]] = {i*w, 0, w, atlas.texture.h};
-	}
-
-	TTF_SetFontKerning(font.get(), 1);
-	return atlas;
-}
-
-
-FontAtlas::FontAtlas(Texture &&_texture): texture(std::move(_texture)) {}
-
-void FontAtlas::set_colour(const Colour colour) {
-	texture.set_colour_mod(colour);
-}
-
-void FontAtlas::draw_text(const string &text, const Vector &pos, const double scale) {
-	int cx = pos.x;
-	Rect *r;
-	for (auto &ch: text) {
-		r = &data[ch];
-		texture.render({cx, static_cast<int>(pos.y), static_cast<int>(r->w*scale), static_cast<int>(r->h*scale)}, data[ch]);
-		cx += r->w*scale;
-	}
-}
-
-void FontAtlas::draw_text(const string &text, const Vector &pos, const Colour &colour, const double scale) {
-	set_colour(colour);
-	draw_text(text, pos, scale);
-}
-
-
+/*
 SpriteSheet::SpriteSheet(Renderer &renderer, const string &file, const int &column, const int &row): texture(Texture(renderer, file)) {
 	tile_x = column; tile_y = row;
 	total_tiles = tile_x*tile_y;
@@ -1369,10 +1291,6 @@ void SpriteSheet::set_src_rect(const Rect &src_rect) {
 void SpriteSheet::draw_sprite(const Rect &dst_rect, const int &column, const int &row) {
 	texture.render(dst_rect, {src_rect.x + tile_w*column, src_rect.y + tile_h*row, tile_w, tile_h});
 }
-
-// void SpriteSheet::destroy() {
-	// texture.destroy();
-// }
 
 
 AnimatedSprite::AnimatedSprite(Renderer &renderer, const string &file, const int &column, const int &row, const double animation_speed, bool loop): SpriteSheet(renderer, file, column, row) {
@@ -1420,372 +1338,4 @@ string States::get_top_state() {
 	}
 	return state;
 }
-
-
-Packet::Packet(const int maxlen): packet(managed_ptr<UDPpacket>(SDLNet_AllocPacket(maxlen), SDLNet_FreePacket)) {
-	this->maxlen = maxlen;
-
-	for_sending = false;
-}
-
-Packet::Packet(const int maxlen, IPaddress &destination): packet(managed_ptr<UDPpacket>(SDLNet_AllocPacket(maxlen), SDLNet_FreePacket)) {
-	this->maxlen = maxlen;
-
-	this->destination = destination;
-
-	for_sending = true;
-}
-
-void Packet::clear_data() {
-	data.clear();
-}
-
-void Packet::set_data(char *val) {
-	clear_data();
-	_serialized_data = string(val);
-	int end = 0;
-	for (int i = 0; i < _serialized_data.size(); i++) {
-		if (_serialized_data[i] == DELIMITER) {
-			data.push_back(_serialized_data.substr(end, i - end));
-			end = i + 1;
-		}
-	}
-}
-
-Uint8* Packet::get_data() {
-	// Every time this function is called the data becomes empty
-
-	_serialized_data = "";
-	for (string val: data) {
-		_serialized_data += val + DELIMITER;
-	}
-	clear_data();
-	if (_serialized_data.size() > maxlen)
-		SDL_LogError(0, "Packet overflow! Data won't be send.");
-
-	return (Uint8 *)_serialized_data.c_str();
-}
-
-void Packet::ready() {
-	// This function shouldn't be called explicitly by the user.
-
-	if (for_sending) {
-		packet->address.host = destination.host;
-		packet->address.port = destination.port;
-		packet->data = get_data();
-		packet->len = strlen((char *)packet->data) + 1;
-	} else
-		SDL_LogError(0, "This packet is not for sending.");
-}
-
-void Packet::set() {
-	// This function shouldn't be called explicitly by the user.
-
-	if (for_sending)
-		SDL_LogError(0, "This packet is not for receiving.");
-	else
-		set_data((char *)packet->data);
-}
-
-string Packet::get_next_val() {
-	_val = data.front();
-	data.erase(data.begin());
-	return _val;
-}
-
-// void Packet::destroy() {
-// 	SDLNet_FreePacket(packet);
-// }
-
-Packet& operator<<(Packet &packet, const string val) {
-	packet.data.push_back(val);
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const char *val) {
-	packet << string(val);
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const int val) {
-	packet << to_string(val);
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const double val) {
-	packet << to_string(val);
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const Uint8 val) {
-	packet << to_string(val);
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const Colour &colour) {
-	packet << colour.r << colour.g << colour.b << colour.a;
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const Vector &vec) {
-	packet << vec.x << vec.y;
-	return packet;
-}
-
-Packet& operator<<(Packet &packet, const Rect &rect) {
-	packet << rect.x << rect.y << rect.w << rect.h;
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, string &val) {
-	val = packet.get_next_val();
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, char *val) {
-	val = const_cast<char *>(packet.get_next_val().c_str());
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, int &val) {
-	val = stoi(packet.get_next_val());
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, double &val) {
-	val = stod(packet.get_next_val());
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, Uint8 &val) {
-	val = stoi(packet.get_next_val());
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, Colour &colour) {
-	packet >> colour.r >> colour.g >> colour.b >> colour.a;
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, Vector &vec) {
-	packet >> vec.x >> vec.y;
-	return packet;
-}
-
-Packet& operator>>(Packet &packet, Rect &rect) {
-	packet >> rect.x >> rect.y >> rect.w >> rect.h;
-	return packet;
-}
-
-
-UDPSocket::UDPSocket(const int port) {
-	socket = SDLNet_UDP_Open(port);
-}
-
-UDPSocket::~UDPSocket() {
-	destroy();
-}
-
-bool UDPSocket::send(Packet &packet, const int channel) {
-	packet.ready();
-	if (SDLNet_UDP_Send(socket, channel, packet.packet.get())) {
-		return true;
-	} else {
-		SDL_LogError(0, "Failed to send packet: %s", SDLNet_GetError());
-		return false;
-	}
-}
-
-bool UDPSocket::recv(Packet &packet) {
-	int val = SDLNet_UDP_Recv(socket, packet.packet.get());
-	if (val == 1) {
-		packet.set();
-		return true;
-	} else if (val == 0)
-		return false;
-	else
-		SDL_LogError(0, "Packet not received: %s", SDLNet_GetError());
-	return false;
-}
-
-void UDPSocket::destroy() {
-	SDLNet_UDP_Close(socket);
-}
-
-
-TCPSocket::TCPSocket(IPaddress &ip) {
-	if ((socket = SDLNet_TCP_Open(&ip)) == NULL)
-		SDL_LogError(0, "Failed to create socket: %s", SDLNet_GetError());
-	else
-		SDL_Log("Socket created successfully!");
-}
-
-TCPSocket::~TCPSocket() {
-	destroy();
-}
-
-bool TCPSocket::accept(TCPSocket &sock) {
-	if ((sock.socket = SDLNet_TCP_Accept(socket)))
-		return 1;
-	return 0;
-}
-
-IPaddress* TCPSocket::get_peer_address() {
-	if (!(ip = SDLNet_TCP_GetPeerAddress(socket)))
-		SDL_LogError(0, "Failed to get peer address: %s", SDLNet_GetError());
-	return ip;
-}
-
-void TCPSocket::send(const void *buffer, int size) {
-	_val = SDLNet_TCP_Send(socket, buffer, size);
-	if (_val < 0)
-		SDL_LogError(0, "Invalid socket: %s", SDLNet_GetError());
-	else if (_val < size)
-		SDL_LogWarn(1, "Full data not sent: %s", SDLNet_GetError());
-}
-
-void TCPSocket::send(string &data) {
-	send(data.data(), data.length() + 1);
-}
-
-int TCPSocket::recv(void *buffer, const int size) {
-	return SDLNet_TCP_Recv(socket, buffer, size);
-}
-
-void TCPSocket::destroy() {
-	SDLNet_TCP_Close(socket);
-	SDL_Log("Socket closed successfully!");
-}
-
-
-void NetUtils::resolve_host(IPaddress &IP, const int port, const string host) {
-	if (SDLNet_ResolveHost(&IP, host.c_str(), port) < 0)
-		SDL_LogError(0, "Failed to resolve host: %s", SDL_GetError());
-}
-
-
-void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int chunksize) {
-	if (Mix_OpenAudio(frequency, format, channels, chunksize) < 0) {
-		SDL_LogError(0, "Failed to open audio device: %s", Mix_GetError());
-	}
-}
-
-void Mixer::allocate_channels(int channels) {
-	Mix_AllocateChannels(channels);
-}
-
-
-Music::Music(const string &file): music(managed_ptr<Mix_Music>(Mix_LoadMUS(file.c_str()), Mix_FreeMusic)) {
-	if (music == NULL) {
-		SDL_LogError(0, "Failed to load music! (%s): %s", file.c_str(), Mix_GetError());
-	} else {
-		id = MUSIC_ID;
-		SDL_Log("Music loaded successfully![%i] (%s)", id, file.c_str());
-		MUSIC_ID++;
-	}
-}
-
-void Music::play(int loop) {
-	Mix_PlayMusic(music.get(), loop);
-}
-
-float Music::volume() {
-	// Returns the current volume
-	return Mix_VolumeMusic(-1)/MIX_MAX_VOLUME;
-}
-
-void Music::volume(float volume) {
-	// The value of the parameter volume should be between 0 to 1
-	Mix_VolumeMusic((int)(volume*MIX_MAX_VOLUME));
-}
-
-void Music::pause() {
-	if (is_paused) {
-		SDL_LogWarn(1, "Music is already paused!");
-	} else {
-		Mix_PauseMusic();
-		is_paused = true;
-	}
-}
-
-void Music::resume() {
-	if (is_paused) {
-		Mix_ResumeMusic();
-		is_paused = false;
-	} else {
-		SDL_LogWarn(1, "Music is not paused!");
-	}
-}
-
-void Music::toggle() {
-	if (is_paused)
-		Mix_ResumeMusic();
-	else
-		Mix_PauseMusic();
-	is_paused = not is_paused;
-}
-
-// void Music::destroy() {
-// 	Mix_FreeMusic(music);
-// 	SDL_Log("Music destroyed successfully![%i]", id);
-// }
-
-
-Sound::Sound(const string file): sound(managed_ptr<Mix_Chunk>(Mix_LoadWAV(file.c_str()), Mix_FreeChunk)) {
-	if (sound == NULL) {
-		SDL_LogError(0, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
-	} else {
-		id = SOUND_ID;
-		SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
-		SOUND_ID++;
-	}
-}
-
-void Sound::play(int loop, int channel) {
-	// Pass -1 to the loop for looping infinitely
-	// The first free channel is choosed by default
-	if ((channel = Mix_PlayChannel(-1, sound.get(), loop)) < 0) {
-		SDL_LogError(0, "Failed to play sound![%i]: %s", id, Mix_GetError());
-	}
-}
-
-float Sound::volume() {
-	// Returns the current volume
-	return Mix_Volume(channel, -1)/MIX_MAX_VOLUME;
-}
-
-void Sound::volume(float volume) {
-	// The value of the parameter volume should be between 0 to 1
-	Mix_Volume(channel, (int)(volume*MIX_MAX_VOLUME));
-}
-
-void Sound::pause() {
-	if (is_paused) {
-		SDL_LogWarn(1, "Sound is already paused!");
-	} else {
-		Mix_Pause(channel);
-		is_paused = true;
-	}
-}
-
-void Sound::resume() {
-	if (is_paused) {
-		Mix_Resume(channel);
-		is_paused = false;
-	} else {
-		SDL_LogWarn(1, "Sound is not paused!");
-	}
-}
-
-void Sound::toggle() {
-	if (is_paused)
-		Mix_Resume(channel);
-	else
-		Mix_Pause(channel);
-	is_paused = not is_paused;
-}
-
-// void Sound::destroy() {
-// 	Mix_FreeChunk(sound);
-// 	SDL_Log("Sound destroyed successfully![%i]", id);
-// }
+*/
