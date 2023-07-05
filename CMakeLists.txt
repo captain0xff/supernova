@@ -24,6 +24,8 @@ if (ENABLE_IMAGE)
 	find_package(SDL2_image REQUIRED)
 	list(APPEND LIBS SDL2_image::SDL2_image)
 	add_compile_definitions(${PROJECT_NAME} IMAGE_ENABLED)
+	list(APPEND SOURCES ${SRC_PATH}/graphics.cpp)
+	list(APPEND HEADERS ${SRC_PATH}/graphics.h)
 endif()
 
 if (ENABLE_MIXER)

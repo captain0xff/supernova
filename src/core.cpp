@@ -6,14 +6,17 @@
 
 #include "constants.h"
 #include "core.h"
+#ifdef IMAGE_ENABLED
+#include <SDL2/SDL_image.h>
+#endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
-#include "SDL2/SDL_mixer.h"
+#include <SDL2/SDL_mixer.h>
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
-#include "SDL2/SDL_ttf.h"
+#include <SDL2/SDL_ttf.h>
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-#include "SDL2/SDL_net.h"
+#include <SDL2/SDL_net.h>
 #endif /* NET_ENABLED */
 
 
@@ -1276,42 +1279,6 @@ void Texture::render_ex(const Rect &dst_rect, const Rect &src_rect, const double
 }
 
 /*
-SpriteSheet::SpriteSheet(Renderer &renderer, const string &file, const int &column, const int &row): texture(Texture(renderer, file)) {
-	tile_x = column; tile_y = row;
-	total_tiles = tile_x*tile_y;
-	src_rect = {0, 0, texture.w, texture.h};
-	tile_w = src_rect.w/tile_x; tile_h = src_rect.h/tile_y;
-}
-
-void SpriteSheet::set_src_rect(const Rect &src_rect) {
-	this->src_rect = src_rect;
-	tile_w = src_rect.w/tile_x; tile_h = src_rect.h/tile_y;
-}
-
-void SpriteSheet::draw_sprite(const Rect &dst_rect, const int &column, const int &row) {
-	texture.render(dst_rect, {src_rect.x + tile_w*column, src_rect.y + tile_h*row, tile_w, tile_h});
-}
-
-
-AnimatedSprite::AnimatedSprite(Renderer &renderer, const string &file, const int &column, const int &row, const double animation_speed, bool loop): SpriteSheet(renderer, file, column, row) {
-	this->loop = loop;
-	this->animation_speed = animation_speed;
-}
-
-bool AnimatedSprite::update(double dt) {
-	// Returns true when the animation has just completed looping once
-	animation_index += animation_speed*dt;
-	if (animation_index > total_tiles) {
-		animation_index -= total_tiles;
-		return true;
-	} else return false;
-}
-
-void AnimatedSprite::render(const Rect &dst_rect) {
-	draw_sprite(dst_rect, fmod((int)animation_index, tile_x), floor((int)animation_index/tile_x));
-}
-
-
 States::States(vector<State> &states) {
 	for (State &state: states) {
 		this->states[state.name] = state;

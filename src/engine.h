@@ -4,6 +4,10 @@
 
 #include "core.h"
 
+#ifdef IMAGE_ENABLED
+#include "graphics.h"
+#endif /* IMAGE_ENABLED */
+
 #ifdef MIXER_ENABLED
 #include "mixer.h"
 #endif /* MIXER_ENABLED */
