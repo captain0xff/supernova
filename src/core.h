@@ -10,6 +10,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "enums.h"
+
 
 using namespace std;
 
@@ -359,25 +361,15 @@ class Renderer {
 
 
 class Mouse {
-	private:
-		unordered_map<string, Uint8> BUTTON_MAP = {
-			{"LEFT", SDL_BUTTON_LEFT},
-			{"RIGHT", SDL_BUTTON_RIGHT},
-			{"MIDDLE", SDL_BUTTON_MIDDLE},
-			{"X1", SDL_BUTTON_X1},
-			{"X2", SDL_BUTTON_X2}
-		};
-
 	public:
 		Vector pos = {0, 0};
-		unordered_map<string, MouseButton> buttons;
+		unordered_map<int, MouseButton> buttons;
 		// The amount scrolled vertically, positive away from the user and negative towards the user
 		double vert_wheel = 0;
 		// The amount scrolled horizontally, positive to the right and negative to the left
 		double horz_wheel = 0;
 
-		// The vector should contain LEFT, RIGHT, MIDDLE, X1 or/and X2 in any order
-		Mouse(const vector<string> &needed_buttons = {});
+		Mouse(const int needed_buttons = 0);
 
 		static void set_relative_mode(const bool val);
 		// The function calls window.wrap_mouse and updates the mouse position to wrap_pos

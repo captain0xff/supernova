@@ -1024,9 +1024,12 @@ void Renderer::destroy(SDL_Renderer *renderer) {
 }
 
 
-Mouse::Mouse(const vector<string> &needed_buttons) {
-	for (const string &value: needed_buttons) {
-		buttons[value] = {BUTTON_MAP[value]};
+Mouse::Mouse(const int needed_buttons) {
+	int button;
+	for (int i = 0; i < 5; i++) {
+		if ((button = pow(2, i)) & needed_buttons) {
+			buttons[button] = {static_cast<Uint8>(i + 1)};
+		}
 	}
 }
 
@@ -1163,7 +1166,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 
 Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {
 	if (surface.get() == NULL)
-		SDL_LogError(0, "Failed to create surface: %s", IMG_GetError());
+		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
 	else {
 		id = SURF_ID;
 		SDL_Log("Surface created successfully![%i]", id);
@@ -1176,7 +1179,7 @@ Texture::Texture(Renderer &renderer, SDL_Texture *_texture):
 	texture(managed_ptr<SDL_Texture>(_texture, SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == NULL)
-		SDL_LogError(0, "Failed to load texture: %s", IMG_GetError());
+		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
 		SDL_Log("Texture loaded successfully![%i]", id);

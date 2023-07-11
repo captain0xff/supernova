@@ -11,6 +11,6 @@ else ()
 endif()
 
 set(SRC_PATH ../src)
-file(GLOB SOURCES ${SRC_PATH}/*cpp)
+file(GLOB SOURCES ${SRC_PATH}/core.cpp)
 
 add_executable(main main.cpp ${SOURCES})
