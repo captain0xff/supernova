@@ -88,6 +88,11 @@ struct Colour {
 };
 
 
+struct IVector {
+	int x, y;
+};
+
+
 struct Vector {
 	double x, y;
 
