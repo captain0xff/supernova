@@ -712,9 +712,25 @@ int IO::read(void *ptr, const int max, const int size) {
 	return -1;
 }
 
-string IO::read(const int max) {
+string IO::read() {
+	// Reads the whole file at once to a string
 	int size;
-	char buffer[max+1];
+	const int file_size = seek(0, RW_SEEK_END);
+	SDL_Log("%i", file_size);
+	char buffer[file_size + 1];
+	seek(0, RW_SEEK_SET);
+
+	if ((size = read(buffer, file_size)) == file_size) {
+		buffer[size] = '\0';
+		return string(buffer);
+	}
+	return NULL;
+}
+
+string IO::read(const int max) {
+	// Reads the next max number of chars from the file to a string
+	int size;
+	char buffer[max + 1];
 
 	if ((size = read(buffer, max)) >= 0) {
 		buffer[size] = '\0';

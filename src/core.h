@@ -307,7 +307,10 @@ class IO {
 		// and the max parameter takes the maximum number of objects to read
 		// Returns the number of objects read or -1 on error
 		int read(void *ptr, const int max, const int size=1);
-		string read(const int max=1024);
+		// Reads the whole file at once to a string
+		string read();
+		// Reads the next max number of chars from the file to a string
+		string read(const int max);
 		// The size parameter takes the size of the object to read in bytes
 		// and the num parameter takes the number of objects to write
 		// Returns the numer of objects written
