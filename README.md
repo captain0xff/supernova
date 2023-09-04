@@ -1,6 +1,8 @@
 # Supernova engine
+![](res/banner.png)
 
 ## Building
+Clone this repository and run the these commands in the project root.
 ```
 mkdir build
 cd build
