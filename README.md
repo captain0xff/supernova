@@ -1,5 +1,7 @@
 # Supernova engine
-![](res/banner.png)
+<p align="center">
+  <img src="res/banner.png" />
+</p>
 
 ## Building
 Clone this repository and run the these commands in the project root.
