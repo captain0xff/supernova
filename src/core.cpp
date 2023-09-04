@@ -125,6 +125,64 @@ Colour Colour::modulate(const double mod_r, const double mod_g, const double mod
 }
 
 
+ostream& operator<<(ostream &os, IVector const &ivector) {
+	cout << ivector.to_str();
+		return os;
+}
+
+IVector operator+(const IVector &ivec1, const IVector &ivec2) {
+	return {ivec1.x + ivec2.x, ivec1.y + ivec2.y};
+}
+
+IVector operator-(const IVector &ivec1, const IVector &ivec2) {
+	return {ivec1.x - ivec2.x, ivec1.y - ivec2.y};
+}
+
+IVector operator*(const IVector &ivec, const double &val) {
+	return {static_cast<int>(ivec.x*val), static_cast<int>(ivec.y*val)};
+}
+
+IVector operator/(const IVector &ivec, const double &val) {
+	return {static_cast<int>(ivec.x/val), static_cast<int>(ivec.y/val)};
+}
+
+void operator+=(IVector &ivec1, const IVector &ivec2) {
+	ivec1.x += ivec2.x;
+	ivec1.y += ivec2.y;
+}
+
+void operator-=(IVector &ivec1, const IVector &ivec2) {
+	ivec1.x -= ivec2.x;
+	ivec1.y -= ivec2.y;
+}
+
+void operator*=(IVector &ivec1, const IVector &ivec2) {
+	ivec1.x *= ivec2.x;
+	ivec1.y *= ivec2.y;
+}
+
+void operator/=(IVector &ivec1, const IVector &ivec2) {
+	ivec1.x /= ivec2.x;
+	ivec1.y /= ivec2.y;
+}
+
+IVector::operator Vector() const {
+	return {static_cast<double>(x), static_cast<double>(y)};
+}
+
+IVector::operator SDL_Point() const {
+	return {x, y};
+}
+
+IVector::operator SDL_FPoint() const {
+	return {static_cast<float>(x), static_cast<float>(y)};
+}
+
+const string IVector::to_str() const {
+	return "IVector(" + to_string(x) + ", " + to_string(y) + ")";
+}
+
+
 ostream& operator<<(ostream &os, const Vector &vector) {
 	cout << vector.to_str();
 	return os;
@@ -164,6 +222,10 @@ void operator*=(Vector &vec1, const Vector &vec2) {
 void operator/=(Vector &vec1, const Vector &vec2) {
 	vec1.x /= vec2.x;
 	vec1.y /= vec2.y;
+}
+
+Vector::operator IVector() const {
+	return {static_cast<int>(x), static_cast<int>(y)};
 }
 
 Vector::operator SDL_Point() const {

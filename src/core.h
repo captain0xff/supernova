@@ -90,6 +90,22 @@ struct Colour {
 
 struct IVector {
 	int x, y;
+
+	friend ostream& operator<<(ostream &os, IVector const &ivector);
+	friend IVector operator+(const IVector &ivec1, const IVector &ivec2);
+	friend IVector operator-(const IVector &ivec1, const IVector &ivec2);
+	friend IVector operator*(const IVector &ivec, const double &val);
+	friend IVector operator/(const IVector &ivec, const double &val);
+	friend void operator+=(IVector &ivec1, const IVector &ivec2);
+	friend void operator-=(IVector &ivec1, const IVector &ivec2);
+	friend void operator*=(IVector &ivec1, const IVector &ivec2);
+	friend void operator/=(IVector &ivec1, const IVector &ivec2);
+
+	operator Vector() const;
+	operator SDL_Point() const;
+	operator SDL_FPoint() const;
+
+	const string to_str() const;
 };
 
 
@@ -106,6 +122,7 @@ struct Vector {
 	friend void operator*=(Vector &vec1, const Vector &vec2);
 	friend void operator/=(Vector &vec1, const Vector &vec2);
 
+	operator IVector() const;
 	operator SDL_Point() const;
 	operator SDL_FPoint() const;
 	
