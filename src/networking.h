@@ -1,6 +1,10 @@
 #ifndef SUPERNOVA_NETWORKING_H
 #define SUPERNOVA_NETWORKING_H
 
+#ifndef NET_ENABLED
+#define NET_ENABLED
+#endif /* NET_ENABLED */
+
 
 #include <SDL2/SDL_net.h>
 

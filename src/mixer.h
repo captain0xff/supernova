@@ -1,6 +1,10 @@
 #ifndef SUPERNOVA_MIXER_H
 #define SUPERNOVA_MIXER_H
 
+#ifndef MIXER_ENABLED
+#define MIXER_ENABLED
+#endif /* MIXER_ENABLED */
+
 
 #include <SDL2/SDL_mixer.h>
 

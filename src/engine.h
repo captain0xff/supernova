@@ -2,22 +2,28 @@
 #define SUPERNOVA_ENGINE_H
 
 
+#if __has_include("graphics.h")
+#ifndef IMAGE_ENABLED
+#define IMAGE_ENABLED
+#endif /* IMAGE_ENABLED */
+#endif /* __has_include("graphics.h") */
+
 #include "core.h"
 
-#ifdef IMAGE_ENABLED
+#if __has_include("graphics.h")
 #include "graphics.h"
-#endif /* IMAGE_ENABLED */
+#endif /* __has_include("graphics.h") */
 
-#ifdef MIXER_ENABLED
+#if __has_include("mixer.h")
 #include "mixer.h"
-#endif /* MIXER_ENABLED */
+#endif /* __has_include("mixer.h") */
 
-#ifdef TTF_ENABLED
+#if __has_include("font.h")
 #include "font.h"
-#endif /* TTF_ENABLED */
+#endif /* __has_include("font.h") */
 
-#ifdef NET_ENABLED
+#if __has_include("networking.h")
 #include "networking.h"
-#endif /* NET_ENABLED */
+#endif /* __has_include("networking.h") */
 
 #endif /* SUPERNOVA_ENGINE_H */

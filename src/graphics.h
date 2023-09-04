@@ -1,6 +1,10 @@
 #ifndef SUPERNOVA_GRAPHICS_H
 #define SUPERNOVA_GRAPHICS_H
 
+#ifndef IMAGE_ENABLED
+#define IMAGE_ENABLED
+#endif /* IMAGE_ENABLED */
+
 
 #include "core.h"
 

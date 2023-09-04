@@ -1,6 +1,10 @@
 #ifndef SUPERNOVA_FONT_H
 #define SUPERNOVA_FONT_H
 
+#ifndef TTF_ENABLED
+#define TTF_ENABLED
+#endif /* TTF_ENABLED */
+
 
 #include <SDL2/SDL_ttf.h>
 
