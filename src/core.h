@@ -348,6 +348,8 @@ class Window {
 
 		void static destroy(SDL_Window *window);
 		void wrap_mouse(const Vector &wrap_pos);
+		// This function should be only used if the renderer is created with an SDL_RENDERER_SOFTWARE flag
+		Surface get_window_surface();
 };
 
 
@@ -355,7 +357,7 @@ class Renderer {
 	public:
 		managed_ptr<SDL_Renderer> renderer;
 
-		Renderer(Window &window, int index=-1, Uint32 flags=SDL_RENDERER_ACCELERATED);
+		Renderer(Window &window, Uint32 flags=0, int index=-1);
 
 		void static destroy(SDL_Renderer *renderer);
 		void set_colour(const Colour &colour);
@@ -418,7 +420,20 @@ class Surface {
 		int id;
 		managed_ptr<SDL_Surface> surface;
 
+		Surface(const int width, const int height, const Uint32 flag=0, const int depth=32, const Uint32 format=SDL_PIXELFORMAT_RGBA8888);
 		Surface(SDL_Surface *_surface);
+
+		void set_blend_mode(const SDL_BlendMode blend_mode);
+		void set_colour_key(const Uint32 key, const bool enable=true);
+		// Blits the surface on another surface
+		void blit(Surface &dst_surface, const IVector &ivec);
+		void blit(Surface &dst_surface, const Rect &dst_rect);
+		void blit(Surface &dst_surface, const Rect &dst_rect, const Rect &src_rect);
+		// This function saves the surface as png
+		void save(const string &file);
+		// This function saves the surface as jpg
+		// quality should be between 0 to 100
+		void save(const string &file, const int quality);
 };
 
 
@@ -441,7 +456,7 @@ class Texture {
 		Rect get_rect();
 
 		void set_colour_mod(const Colour &colour);
-		void set_blend_mode(SDL_BlendMode blend_mode);
+		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void render(const Vector &vec);
 		void render(const Rect &dst_rect);
 		void render(const Rect &dst_rect, const Rect &src_rect);

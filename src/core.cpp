@@ -846,13 +846,17 @@ void Window::wrap_mouse(const Vector &wrap_pos) {
 	SDL_WarpMouseInWindow(window.get(), static_cast<int>(wrap_pos.x), static_cast<int>(wrap_pos.y));
 }
 
+Surface Window::get_window_surface() {
+	return Surface(SDL_GetWindowSurface(window.get()));
+}
+
 void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
 	SDL_Log("Window closed successfully!");
 }
 
 
-Renderer::Renderer(Window &window, int index, Uint32 flags):
+Renderer::Renderer(Window &window, Uint32 flags, int index):
 	renderer(managed_ptr<SDL_Renderer>(SDL_CreateRenderer(window.window.get(), index, flags),destroy)) {
 	if (renderer.get() == NULL)
 		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
@@ -1242,6 +1246,9 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 }
 
 
+Surface::Surface(const int width, const int height, const Uint32 flag, const int depth, const Uint32 format):
+	surface(managed_ptr<SDL_Surface>(SDL_CreateRGBSurfaceWithFormat(flag, width, height, depth, format), SDL_FreeSurface)) {}
+
 Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {
 	if (surface.get() == NULL)
 		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
@@ -1250,6 +1257,46 @@ Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surfa
 		SDL_Log("Surface created successfully![%i]", id);
 		SURF_ID++;
 	}
+}
+
+void Surface::set_blend_mode(const SDL_BlendMode blend_mode) {
+	SDL_SetSurfaceBlendMode(surface.get(), blend_mode);
+}
+
+void Surface::set_colour_key(const Uint32 key, const bool enable) {
+	SDL_SetColorKey(surface.get(), enable, key);
+}
+
+void Surface::blit(Surface &dst_surface, const IVector &ivec) {
+	SDL_Rect src_rect = {0, 0, surface.get()->w, surface.get()->h};
+	SDL_Rect dst_rect = {ivec.x, ivec.y, dst_surface.surface.get()->w, dst_surface.surface.get()->h};
+
+	SDL_BlitSurface(surface.get(), &src_rect, dst_surface.surface.get(), &dst_rect);
+}
+
+void Surface::blit(Surface &dst_surface, const Rect &dst_rect) {
+	SDL_Rect src_rect = {0, 0, surface.get()->w, surface.get()->h};
+	SDL_Rect _dst_rect = dst_rect;
+
+	SDL_BlitSurface(surface.get(), &src_rect, dst_surface.surface.get(), &_dst_rect);
+}
+
+void Surface::blit(Surface &dst_surface, const Rect &dst_rect, const Rect &src_rect) {
+	SDL_Rect _src_rect = src_rect;
+	SDL_Rect _dst_rect = dst_rect;
+
+	SDL_BlitSurface(surface.get(), &_src_rect, dst_surface.surface.get(), &_dst_rect);
+}
+
+void Surface::save(const string &file) {
+	// This function saves the surface as png
+	IMG_SavePNG(surface.get(), file.c_str());
+}
+
+void Surface::save(const string &file, const int quality) {
+	// This function saves the surface as jpg
+	// quality should be between 0 to 100
+	IMG_SaveJPG(surface.get(), file.c_str(), quality);
 }
 
 
