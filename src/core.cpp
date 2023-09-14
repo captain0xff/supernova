@@ -778,7 +778,6 @@ string IO::read() {
 	// Reads the whole file at once to a string
 	int size;
 	const int file_size = seek(0, RW_SEEK_END);
-	SDL_Log("%i", file_size);
 	char buffer[file_size + 1];
 	seek(0, RW_SEEK_SET);
 
