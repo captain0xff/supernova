@@ -244,3 +244,12 @@ void NetUtils::resolve_host(IPaddress &IP, const int port, const string host) {
 	if (SDLNet_ResolveHost(&IP, host.c_str(), port) < 0)
 		SDL_LogError(0, "Failed to resolve host: %s", SDL_GetError());
 }
+
+string NetUtils::get_formatted_ipv4_host(const Uint32 host) {
+	string formatted_host;
+	formatted_host += to_string(host - ((host >> 8) << 8)) + ".";
+	formatted_host += to_string((host >> 8) - ((host >> 16) << 8)) + ".";
+	formatted_host += to_string((host >> 16) - ((host >> 24) << 8)) + ".";
+	formatted_host += to_string(host >> 24);
+	return formatted_host;
+}

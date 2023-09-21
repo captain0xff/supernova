@@ -100,6 +100,7 @@ class TCPSocket {
 	public:
 		TCPsocket socket;
 
+		TCPSocket() {};
 		TCPSocket(IPaddress &ip);
 		~TCPSocket();
 
@@ -118,6 +119,7 @@ class TCPSocket {
 class NetUtils {
 	public:
 		void static resolve_host(IPaddress &IP, const int port, const string host="0.0.0.0");
+		string static get_formatted_ipv4_host(const Uint32 host);
 };
 
 
