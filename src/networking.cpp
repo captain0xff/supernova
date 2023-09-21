@@ -37,7 +37,7 @@ void Packet::set_data(char *val) {
 	}
 }
 
-Uint8* Packet::get_data() {
+char* Packet::get_data() {
 	// Every time this function is called the data becomes empty
 
 	_serialized_data = "";
@@ -48,7 +48,7 @@ Uint8* Packet::get_data() {
 	if (_serialized_data.size() > maxlen)
 		SDL_LogError(0, "Packet overflow! Data won't be send.");
 
-	return (Uint8 *)_serialized_data.c_str();
+	return (char *)_serialized_data.c_str();
 }
 
 void Packet::ready() {
@@ -57,7 +57,7 @@ void Packet::ready() {
 	if (for_sending) {
 		packet->address.host = destination.host;
 		packet->address.port = destination.port;
-		packet->data = get_data();
+		packet->data = (Uint8 *)strdup(get_data());
 		packet->len = strlen((char *)packet->data) + 1;
 	} else
 		SDL_LogError(0, "This packet is not for sending.");
@@ -203,6 +203,7 @@ TCPSocket::TCPSocket(IPaddress &ip) {
 
 TCPSocket::~TCPSocket() {
 	destroy();
+	SDL_Log("Socket closed successfully!");
 }
 
 bool TCPSocket::accept(TCPSocket &sock) {

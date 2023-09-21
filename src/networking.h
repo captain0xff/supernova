@@ -36,7 +36,7 @@ class Packet {
 		
 		string get_next_val();
 		// Every time this function is called the data becomes empty
-		Uint8* get_data();
+		char* get_data();
 		void set_data(char *val);
 
 	public:

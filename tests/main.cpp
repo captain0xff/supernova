@@ -1,32 +1,21 @@
-#include "../src/core.h"
-#include "../src/constants.h"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
+#include <supernova/core.h>
+#include <supernova/networking.h>
 
 using namespace std;
 
 
+int main(int argc, char **argv) {
+	Engine engine;
+	
+	UDPSocket socket(0);
+	IPaddress srvadd;
 
-int main(int argc, char* argv[]) {
+	NetUtils::resolve_host(srvadd, 3940, "255.255.255.255");
 
-	IO file("test.txt");
-	string text = file.read();
-	cout << text << endl;
-	file.close();
+	Packet packet(512, srvadd);
+	packet << "data";
 
-	ifstream file2("test.txt");
-	if (file2) {
-		ostringstream ss;
-		ss << file2.rdbuf();
-		text = ss.str();
-	}
-	cout << "No. of chars: " << text.length() << endl;
-	cout << text << endl;
-	file2.close();
+	socket.send(packet);
 
 	return 0;
 }
