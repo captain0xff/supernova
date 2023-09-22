@@ -88,7 +88,7 @@ class UDPSocket {
 		bool recv(Packet &packet);
 		void bind(const IPaddress &ip, const int channel=-1);
 		void unbind(const int channel);
-		void destroy();
+		// void destroy();
 };
 
 
@@ -100,7 +100,7 @@ class TCPSocket {
 	public:
 		TCPsocket socket;
 
-		TCPSocket() {};
+		TCPSocket();
 		TCPSocket(IPaddress &ip);
 		~TCPSocket();
 
@@ -112,7 +112,7 @@ class TCPSocket {
 		void send(string &data);
 		// Returns number of bytes received
 		int recv(void *buffer, const int size);
-		void destroy();
+		// void destroy();
 };
 
 

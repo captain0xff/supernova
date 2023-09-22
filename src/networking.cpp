@@ -161,10 +161,12 @@ Packet& operator>>(Packet &packet, Rect &rect) {
 
 UDPSocket::UDPSocket(const int port) {
 	socket = SDLNet_UDP_Open(port);
+	SDL_Log("UDPSocket created successfully!");
 }
 
 UDPSocket::~UDPSocket() {
-	destroy();
+	SDLNet_UDP_Close(socket);
+	SDL_Log("UDPSocket closed successfully!");
 }
 
 bool UDPSocket::send(Packet &packet, const int channel) {
@@ -189,21 +191,21 @@ bool UDPSocket::recv(Packet &packet) {
 	return false;
 }
 
-void UDPSocket::destroy() {
-	SDLNet_UDP_Close(socket);
-}
 
+TCPSocket::TCPSocket() {
+	SDL_Log("TCPSocket created successfully!");
+}
 
 TCPSocket::TCPSocket(IPaddress &ip) {
 	if ((socket = SDLNet_TCP_Open(&ip)) == NULL)
 		SDL_LogError(0, "Failed to create socket: %s", SDLNet_GetError());
 	else
-		SDL_Log("Socket created successfully!");
+		SDL_Log("TCPSocket created successfully!");
 }
 
 TCPSocket::~TCPSocket() {
-	destroy();
-	SDL_Log("Socket closed successfully!");
+	SDLNet_TCP_Close(socket);
+	SDL_Log("TCPSocket closed successfully!");
 }
 
 bool TCPSocket::accept(TCPSocket &sock) {
@@ -232,11 +234,6 @@ void TCPSocket::send(string &data) {
 
 int TCPSocket::recv(void *buffer, const int size) {
 	return SDLNet_TCP_Recv(socket, buffer, size);
-}
-
-void TCPSocket::destroy() {
-	SDLNet_TCP_Close(socket);
-	SDL_Log("Socket closed successfully!");
 }
 
 
