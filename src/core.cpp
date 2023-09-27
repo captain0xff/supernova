@@ -1246,7 +1246,15 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 
 
 Surface::Surface(const int width, const int height, const Uint32 flag, const int depth, const Uint32 format):
-	surface(managed_ptr<SDL_Surface>(SDL_CreateRGBSurfaceWithFormat(flag, width, height, depth, format), SDL_FreeSurface)) {}
+	surface(managed_ptr<SDL_Surface>(SDL_CreateRGBSurfaceWithFormat(flag, width, height, depth, format), SDL_FreeSurface)) {
+	if (surface.get() == NULL)
+		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
+	else {
+		id = SURF_ID;
+		SDL_Log("Surface created successfully![%i]", id);
+		SURF_ID++;
+	}
+}
 
 Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {
 	if (surface.get() == NULL)
@@ -1257,6 +1265,18 @@ Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surfa
 		SURF_ID++;
 	}
 }
+
+#ifdef IMAGE_ENABLED
+Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_FreeSurface)) {
+	if (surface.get() == NULL)
+		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
+	else {
+		id = SURF_ID;
+		SDL_Log("Surface created successfully![%i]", id);
+		SURF_ID++;
+	}
+}
+#endif /* IMAGE_ENABLED */
 
 void Surface::set_blend_mode(const SDL_BlendMode blend_mode) {
 	SDL_SetSurfaceBlendMode(surface.get(), blend_mode);
@@ -1287,6 +1307,7 @@ void Surface::blit(Surface &dst_surface, const Rect &dst_rect, const Rect &src_r
 	SDL_BlitSurface(surface.get(), &_src_rect, dst_surface.surface.get(), &_dst_rect);
 }
 
+#ifdef IMAGE_ENABLED
 void Surface::save(const string &file) {
 	// This function saves the surface as png
 	IMG_SavePNG(surface.get(), file.c_str());
@@ -1297,6 +1318,7 @@ void Surface::save(const string &file, const int quality) {
 	// quality should be between 0 to 100
 	IMG_SaveJPG(surface.get(), file.c_str(), quality);
 }
+#endif /* IMAGE_ENABLED */
 
 
 Texture::Texture(Renderer &renderer, SDL_Texture *_texture):

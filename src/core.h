@@ -10,8 +10,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "enums.h"
-
 
 using namespace std;
 
@@ -422,6 +420,9 @@ class Surface {
 
 		Surface(const int width, const int height, const Uint32 flag=0, const int depth=32, const Uint32 format=SDL_PIXELFORMAT_RGBA8888);
 		Surface(SDL_Surface *_surface);
+#ifdef IMAGE_ENABLED
+		Surface(const string &file);
+#endif /* IMAGE_ENABLED */
 
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_colour_key(const Uint32 key, const bool enable=true);
@@ -429,11 +430,13 @@ class Surface {
 		void blit(Surface &dst_surface, const IVector &ivec);
 		void blit(Surface &dst_surface, const Rect &dst_rect);
 		void blit(Surface &dst_surface, const Rect &dst_rect, const Rect &src_rect);
+#ifdef IMAGE_ENABLED
 		// This function saves the surface as png
 		void save(const string &file);
 		// This function saves the surface as jpg
 		// quality should be between 0 to 100
 		void save(const string &file, const int quality);
+#endif /* IMAGE_ENABLED */
 };
 
 
