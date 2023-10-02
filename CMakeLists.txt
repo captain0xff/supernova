@@ -66,6 +66,8 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
 
+target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic)
+
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBS})
 
 # Setting which header files should be supplied with the library
