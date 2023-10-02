@@ -329,7 +329,7 @@ class IO {
 		// The size parameter takes the size of the object to read in bytes
 		// and the num parameter takes the number of objects to write
 		// Returns the numer of objects written
-		void write(const void *ptr, const int num, const int size=1);
+		void write(const void *ptr, const size_t num, const int size=1);
 		void write(const string &data);
 		Sint64 tell();
 		// The parameter whence can be any of RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END

@@ -778,12 +778,12 @@ string IO::read() {
 	// Reads the whole file at once to a string
 	int size;
 	const int file_size = seek(0, RW_SEEK_END);
-	char buffer[file_size + 1];
+	vector<char> buffer(file_size + 1);
 	seek(0, RW_SEEK_SET);
 
-	if ((size = read(buffer, file_size)) == file_size) {
+	if ((size = read(buffer.data(), file_size)) == file_size) {
 		buffer[size] = '\0';
-		return string(buffer);
+		return string(buffer.data());
 	}
 	return NULL;
 }
@@ -791,16 +791,16 @@ string IO::read() {
 string IO::read(const int max) {
 	// Reads the next max number of chars from the file to a string
 	int size;
-	char buffer[max + 1];
+	vector<char> buffer(max + 1);
 
-	if ((size = read(buffer, max)) >= 0) {
+	if ((size = read(buffer.data(), max)) >= 0) {
 		buffer[size] = '\0';
-		return string(buffer);
+		return string(buffer.data());
 	}
 	return NULL;
 }
 
-void IO::write(const void *ptr, const int num, const int size) {
+void IO::write(const void *ptr, const size_t num, const int size) {
 	// The size parameter takes the size of the object to read in bytes
 	// and the num parameter takes the number of objects to write
 	// Returns the numer of objects written
@@ -946,7 +946,7 @@ void Renderer::draw_circle(const Circle &circle, const Colour &colour, const boo
 	if (filled) {
 		constexpr int tris = 225; // Amount of triangles
 		float mirror = 2.0f * static_cast<float>(PI); // 2*PI
-		SDL_Vertex vertices[tris] = {0};
+		SDL_Vertex vertices[tris];
 
 		for (int i = 0; i < tris; i += 3) {
 			// The upper bound of the triangle
@@ -1026,20 +1026,20 @@ void Renderer::draw_polygon(const vector<Vector> vertices, const Colour colour, 
 	int n = vertices.size();
 
 	if (filled) {
-		SDL_Vertex verts[n];
+		vector<SDL_Vertex> verts(n);
 		for (int i=0; i < n; i++) {
 			verts[i].position = vertices[i];
 			verts[i].color = colour;
 		}
 
-		int indices[(n-2)*3];
+		vector<int> indices((n-2)*3);
 		for (int i=1; i < n - 1; i++) {
 			indices[3*(i-1)] = 0;
 			indices[3*i - 2] = i;
 			indices[3*i - 1] = i+1;
 		}
 
-		SDL_RenderGeometry(renderer.get(), NULL, verts, n, indices, (n-2)*3);
+		SDL_RenderGeometry(renderer.get(), NULL, verts.data(), n, indices.data(), (n-2)*3);
 
 
 	} else {
@@ -1079,24 +1079,24 @@ void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<
 
 void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices) {
 	int n = vertices.size();
-	int indices[(n-2)*3];
+	vector<int> indices((n-2)*3);
 	for (int i=1; i < n - 1; i++) {
 		indices[3*(i-1)] = 0;
 		indices[3*i - 2] = i;
 		indices[3*i - 1] = i+1;
 	}
-	SDL_RenderGeometry(renderer.get(), NULL, &vertices[0], n, indices, (n-2)*3);
+	SDL_RenderGeometry(renderer.get(), NULL, vertices.data(), n, indices.data(), (n-2)*3);
 }
 
 void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices, Texture &texture) {
 	int n = vertices.size();
-	int indices[(n-2)*3];
+	vector<int> indices((n-2)*3);
 	for (int i=1; i < n - 1; i++) {
 		indices[3*(i-1)] = 0;
 		indices[3*i - 2] = i;
 		indices[3*i - 1] = i+1;
 	}
-	SDL_RenderGeometry(renderer.get(), texture.texture.get(), &vertices[0], n, indices, (n-2)*3);
+	SDL_RenderGeometry(renderer.get(), texture.texture.get(), vertices.data(), n, indices.data(), (n-2)*3);
 }
 
 void Renderer::destroy(SDL_Renderer *renderer) {
@@ -1184,6 +1184,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						mouse->pos.y = event.button.y;
 						break;
 					}
+					break;
 				case SDL_MOUSEBUTTONDOWN:
 					if (mouse) {
 						for (auto &[key, value]: mouse->buttons) {

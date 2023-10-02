@@ -34,8 +34,15 @@ Texture Font::create_text(Renderer &renderer, const string &text, const Colour &
 	switch (quality) {
 		case 0:
 			if (wrap_text) 
-				text_surf = TTF_RenderUTF8_Solid_Wrapped(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
-			else text_surf = TTF_RenderUTF8_Solid(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
+				text_surf = TTF_RenderUTF8_Solid_Wrapped(
+					font.get(),
+					text.c_str(),
+					{colour.r,colour.g, colour.b, colour.a},
+					wrap_length
+				);
+			else
+				text_surf = TTF_RenderUTF8_Solid(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
+			break;
 		case 1:
 			if (wrap_text)
 				text_surf = TTF_RenderUTF8_Shaded_Wrapped(
@@ -52,15 +59,25 @@ Texture Font::create_text(Renderer &renderer, const string &text, const Colour &
 					{colour.r, colour.g, colour.b, colour.a},
 					{background_colour.r, background_colour.g, background_colour.b, background_colour.a}
 				);
+			break;
 		case 2:
 			if (wrap_text)
-				text_surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a}, wrap_length);
+				text_surf = TTF_RenderUTF8_Blended_Wrapped(
+					font.get(),
+					text.c_str(),
+					{colour.r, colour.g, colour.b, colour.a},
+					wrap_length
+				);
 			else
-				text_surf = TTF_RenderUTF8_Blended(font.get(), text.c_str(), {colour.r, colour.g, colour.b, colour.a});
+				text_surf = TTF_RenderUTF8_Blended(
+					font.get(),
+					text.c_str(),
+					{colour.r,colour.g, colour.b, colour.a}
+				);
+			break;
 	}
 
-	Texture texture = Texture(renderer, Surface(text_surf));
-	return texture;
+	return Texture(renderer, Surface(text_surf));;
 }
 
 void Font::destroy(TTF_Font *font) {
@@ -70,10 +87,10 @@ void Font::destroy(TTF_Font *font) {
 
 FontAtlas Font::create_atlas(Renderer &renderer, const Colour colour, const int quality, const string chars) {
 	TTF_SetFontKerning(font.get(), 0);
-	FontAtlas atlas(std::move(create_text(renderer, chars, colour, quality)));
+	FontAtlas atlas(create_text(renderer, chars, colour, quality));
 
 	int w, h;
-	for (int i = 0; i < chars.length(); i++) {
+	for (int i = 0; i < static_cast<int>(chars.length()); i++) {
 		char ch[] = { chars[i], '\0' };
 		TTF_SizeUTF8(font.get(), ch, &w, &h);
 		atlas.data[chars[i]] = {i*w, 0, w, atlas.texture.h};

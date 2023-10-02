@@ -1,5 +1,6 @@
-#include "networking.h"
+#include <cstring>
 
+#include "networking.h"
 
 
 using namespace std;
@@ -13,7 +14,8 @@ Packet::Packet(const int maxlen): packet(managed_ptr<UDPpacket>(SDLNet_AllocPack
 	for_sending = false;
 }
 
-Packet::Packet(const int maxlen, IPaddress &destination): packet(managed_ptr<UDPpacket>(SDLNet_AllocPacket(maxlen), SDLNet_FreePacket)) {
+Packet::Packet(const int maxlen, IPaddress &destination):
+	packet(managed_ptr<UDPpacket>(SDLNet_AllocPacket(maxlen), SDLNet_FreePacket)) {
 	this->maxlen = maxlen;
 
 	this->destination = destination;
@@ -29,7 +31,7 @@ void Packet::set_data(char *val) {
 	clear_data();
 	_serialized_data = string(val);
 	int end = 0;
-	for (int i = 0; i < _serialized_data.size(); i++) {
+	for (int i = 0; i < static_cast<int>(_serialized_data.size()); i++) {
 		if (_serialized_data[i] == DELIMITER) {
 			data.push_back(_serialized_data.substr(end, i - end));
 			end = i + 1;
@@ -45,7 +47,7 @@ char* Packet::get_data() {
 		_serialized_data += val + DELIMITER;
 	}
 	clear_data();
-	if (_serialized_data.size() > maxlen)
+	if (static_cast<int>(_serialized_data.size()) > maxlen)
 		SDL_LogError(0, "Packet overflow! Data won't be send.");
 
 	return (char *)_serialized_data.c_str();
@@ -124,7 +126,7 @@ Packet& operator>>(Packet &packet, string &val) {
 }
 
 Packet& operator>>(Packet &packet, char *val) {
-	val = const_cast<char *>(packet.get_next_val().c_str());
+	strcpy(val, packet.get_next_val().c_str());
 	return packet;
 }
 
