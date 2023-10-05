@@ -1257,23 +1257,15 @@ Surface::Surface(const int width, const int height, const Uint32 flag, const int
 	}
 }
 
-Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {
-	if (surface.get() == NULL)
-		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
-	else {
-		id = SURF_ID;
-		SDL_Log("Surface created successfully![%i]", id);
-		SURF_ID++;
-	}
-}
+Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {}
 
 #ifdef IMAGE_ENABLED
 Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_FreeSurface)) {
 	if (surface.get() == NULL)
-		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
+		SDL_LogError(0, "Failed to load surface: %s", SDL_GetError());
 	else {
 		id = SURF_ID;
-		SDL_Log("Surface created successfully![%i]", id);
+		SDL_Log("Surface loaded successfully![%i]", id);
 		SURF_ID++;
 	}
 }
@@ -1325,13 +1317,6 @@ void Surface::save(const string &file, const int quality) {
 Texture::Texture(Renderer &renderer, SDL_Texture *_texture):
 	texture(managed_ptr<SDL_Texture>(_texture, SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
-	if (texture.get() == NULL)
-		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
-	else {
-		id = TEX_ID;
-		SDL_Log("Texture loaded successfully![%i]", id);
-		TEX_ID++;
-	}
 
 	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
@@ -1365,7 +1350,7 @@ Texture::Texture(Renderer &renderer, Surface surface):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
+		SDL_LogError(0, "Failed to create texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
 		SDL_Log("Texture created successfully![%i]", id);
@@ -1381,7 +1366,7 @@ Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, co
 	w = size.x;
 	h = size.y;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to load texture: %s", SDL_GetError());
+		SDL_LogError(0, "Failed to created texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
 		SDL_Log("Texture created successfully![%i]", id);
