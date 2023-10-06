@@ -5,6 +5,7 @@
 
 // Mouse buttons
 enum MOUSEBUTTON: int {
+	NONE = 0,
 	LEFT = 1,
 	MIDDLE = 2,
 	RIGHT = 4,
@@ -13,8 +14,18 @@ enum MOUSEBUTTON: int {
 };
 
 
+// Font qualities
+enum FONTQUALITY: int {
+	SOLID,
+	SHADED,
+	BLENDED,
+	LCD
+};
+
+
 
 // Typedefs
 typedef MOUSEBUTTON MB;
+typedef FONTQUALITY FQ;
 
 #endif /* SUPERNOVA_ENUMS_H */
