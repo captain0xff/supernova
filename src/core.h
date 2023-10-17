@@ -267,7 +267,7 @@ extern Fingers FINGERS;
 // Classes
 class Engine {
 	public:
-		Engine();
+		Engine(const unsigned int sdl_init_flags=62001, const int img_init_flags=2, const int mix_init_flags=24);
 		~Engine();
 };
 

@@ -660,20 +660,25 @@ void Circle::move_ip(const Vector &vec) {
 
 
 // Classes
-Engine::Engine() {
-	SDL_Init(SDL_INIT_EVERYTHING);
+Engine::Engine(const unsigned int sdl_init_flags, const int img_init_flags, const int mix_init_flags) {
+	if (SDL_Init(sdl_init_flags) < 0)
+		SDL_LogError(0, "Failed to initialize SDL: %s", SDL_GetError());
 #ifdef IMAGE_ENABLED
-	IMG_Init(IMG_INIT_PNG);
+	if (IMG_Init(img_init_flags) != img_init_flags)
+		SDL_LogError(0, "Failed to initialize SDL_image: %s", IMG_GetError());
 #endif /* IMAGE_ENABLED */
+#ifdef MIXER_ENABLED
+	if (Mix_Init(mix_init_flags) != mix_init_flags)
+		SDL_LogError(0, "Failed to initialize SDL_mixer: %s", IMG_GetError());
+#endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
-	TTF_Init();
+	if (TTF_Init() < 0)
+		SDL_LogError(0, "Failed to initialize SDL_ttf: %s", TTF_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-	SDLNet_Init();
+	if (SDLNet_Init() < 0)
+		SDL_LogError(0, "Failed to initialize SDL_net: %s", SDLNet_GetError());
 #endif /* TTF_ENABLED */
-#ifdef NET_ENABLED
-	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-#endif /* NET_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
 	SDL_Log("Engine started!");
 }
