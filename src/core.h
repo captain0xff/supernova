@@ -310,14 +310,16 @@ class Timer {
 
 
 class IO {
-	public:
+	private:
 		// Used to detect if the file exists and loaded properly
 		bool IS_LOADED = false;
 
+	public:
 		SDL_RWops *io;
 
 		IO(const string &file, const string access_mode="r");
-		
+
+		Sint64 get_file_size();
 		// The size parameter takes the size of the object to read in bytes
 		// and the max parameter takes the maximum number of objects to read
 		// Returns the number of objects read or -1 on error

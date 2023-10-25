@@ -769,6 +769,14 @@ IO::IO(const string &file, const string access_mode) {
 		IS_LOADED = true;
 }
 
+Sint64 IO::get_file_size() {
+	const Sint64 file_pos = tell();
+	const Sint64 file_size = seek(0, RW_SEEK_END);
+	seek(file_pos, RW_SEEK_SET);
+
+	return file_size;
+}
+
 int IO::read(void *ptr, const int max, const int size) {
 	// The size parameter takes the size of the object to read in bytes
 	// and the max parameter takes the maximum number of objects to read
@@ -782,9 +790,8 @@ int IO::read(void *ptr, const int max, const int size) {
 string IO::read() {
 	// Reads the whole file at once to a string
 	int size;
-	const int file_size = seek(0, RW_SEEK_END);
+	Sint64 file_size = get_file_size();
 	vector<char> buffer(file_size + 1);
-	seek(0, RW_SEEK_SET);
 
 	if ((size = read(buffer.data(), file_size)) == file_size) {
 		buffer[size] = '\0';
