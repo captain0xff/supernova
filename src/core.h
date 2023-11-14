@@ -29,10 +29,6 @@ class Surface;
 class Texture;
 class Mouse;
 class Events;
-class SpriteSheet;
-class AnimatedSprite;
-class States;
-
 
 
 
