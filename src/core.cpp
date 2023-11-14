@@ -888,7 +888,7 @@ void Renderer::present() {
 	SDL_RenderPresent(renderer.get());
 }
 
-void Renderer::set_blend_mode(SDL_BlendMode blendmode) {
+void Renderer::set_blend_mode(const SDL_BlendMode blendmode) {
 	SDL_SetRenderDrawBlendMode(renderer.get(), blendmode);
 }
 

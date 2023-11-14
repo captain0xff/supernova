@@ -363,7 +363,7 @@ class Renderer {
 		void set_colour(const Colour &colour);
 		void clear(const Colour &colour);
 		void present();
-		void set_blend_mode(SDL_BlendMode blend_mode);
+		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
 		void set_logical_size(const Vector &size);
