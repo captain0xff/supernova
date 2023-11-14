@@ -845,8 +845,8 @@ void IO::close() {
 }
 
 
-Window::Window(string title, int screen_w, int screen_h, Uint32 flags, int posx, int posy):
-	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), posx, posy, screen_w, screen_h, flags), destroy)) {
+Window::Window(const string title, const IVector size, const Uint32 flags, const int posx, const int posy):
+	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), posx, posy, size.x,size.y, flags), destroy)) {
 	if (window.get() == NULL)
 		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
 	else

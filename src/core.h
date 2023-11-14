@@ -344,7 +344,7 @@ class Window {
 	public:
 		managed_ptr<SDL_Window> window;
 
-		Window(string title, int screen_w, int screen_h, Uint32 flags=0, int posx=SDL_WINDOWPOS_CENTERED, int posy=SDL_WINDOWPOS_CENTERED);
+		Window(const string title, const IVector size, const Uint32 flags=0, const int posx=SDL_WINDOWPOS_CENTERED, const int posy=SDL_WINDOWPOS_CENTERED);
 
 		void static destroy(SDL_Window *window);
 		void wrap_mouse(const Vector &wrap_pos);
