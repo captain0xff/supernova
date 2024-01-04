@@ -15,14 +15,14 @@ struct PrintArgs {
 
 // Functions
 template <typename Arg, typename... Args>
-inline void print(const PrintArgs &print_args, Arg&& arg, Args&&... args) {
+void print(const PrintArgs &print_args, Arg&& arg, Args&&... args) {
     std::cout << std::forward<Arg>(arg);
     ((std::cout << print_args.sep << std::forward<Args>(args)), ...);
     std::cout << print_args.end;
 }
 
 template <typename Arg, typename... Args>
-inline void print(Arg&& arg, Args&&... args) {
+void print(Arg&& arg, Args&&... args) {
     std::cout << std::forward<Arg>(arg);
     ((std::cout << ' ' << std::forward<Args>(args)), ...);
     std::cout << '\n';
