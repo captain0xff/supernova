@@ -15,7 +15,13 @@ if (NOT ANDROID)
 endif()
 
 set(SRC_PATH src)
-set(HEADERS ${SRC_PATH}/engine.h ${SRC_PATH}/core.h ${SRC_PATH}/constants.h ${SRC_PATH}/enums.h)
+set(HEADERS
+	${SRC_PATH}/engine.h
+	${SRC_PATH}/core.h
+	${SRC_PATH}/constants.h
+	${SRC_PATH}/enums.h
+	${SRC_PATH}/print.h
+)
 set(SOURCES ${SRC_PATH}/core.cpp)
 
 set(LIBS SDL2::SDL2)
