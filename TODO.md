@@ -1,4 +1,5 @@
 # Todo
+* Optimize the circle and collisions and use IVector everywhere.
 * Add some docs.
 * Add contributing guide and code style.
 * Add wrappper around the SDL_Logging methods(do this when std::format() is available).
