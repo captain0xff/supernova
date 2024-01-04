@@ -131,6 +131,7 @@ struct Vector {
 	void rotate_rad_ip(const double &angle);
 	Vector rotate(const double &angle) const; // In degrees
 	void rotate_ip(const double &angle); // In degrees
+	double distance_to_squared(const Vector &vec) const;
 	double distance_to(const Vector &vec) const;
 	double angle_rad() const;
 	double angle() const; // In degrees

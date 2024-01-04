@@ -43,6 +43,7 @@ double degrees(const double angle) {
 	return angle * (180 / PI);
 }
 
+
 int randint(const int end) {
 	// Generates a random integer b/w 0 to end (0 included and end excluded).
 	return rand()%end;
@@ -275,8 +276,12 @@ void Vector::rotate_ip(const double &angle) {
 	rotate_rad_ip(radians(angle));
 }
 
+double Vector::distance_to_squared(const Vector &vec) const {
+	return pow(vec.x - x, 2) + pow(vec.y - y, 2);
+}
+
 double Vector::distance_to(const Vector &vec) const {
-	return sqrt(pow(vec.x - x, 2) + pow(vec.y - y, 2));
+	return sqrt(distance_to_squared(vec));
 }
 
 double Vector::angle_rad() const {
@@ -613,14 +618,14 @@ void Circle::center(const Vector &vec) {
 }
 
 bool Circle::collide_point(const Vector &vec) const {
-	if (center().distance_to(vec) > r)
+	if (center().distance_to_squared(vec) > pow(r, 2))
 		return false;
 	else
 		return true;
 }
 
 bool Circle::collide_circle(const Circle &circle) const {
-	if (circle.center().distance_to(center()) > circle.r + r)
+	if (circle.center().distance_to_squared(center()) > pow(circle.r + r, 2))
 		return false;
 	else
 		return true;
