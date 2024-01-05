@@ -315,6 +315,7 @@ class IO {
 		SDL_RWops *io;
 
 		IO(const string &file, const string access_mode="r");
+		~IO();
 
 		Sint64 get_file_size();
 		// The size parameter takes the size of the object to read in bytes

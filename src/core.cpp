@@ -774,6 +774,10 @@ IO::IO(const string &file, const string access_mode) {
 		IS_LOADED = true;
 }
 
+IO::~IO() {
+	close();
+}
+
 Sint64 IO::get_file_size() {
 	const Sint64 file_pos = tell();
 	const Sint64 file_size = seek(0, RW_SEEK_END);
