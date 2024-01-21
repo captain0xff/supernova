@@ -789,7 +789,7 @@ int IO::read(void *ptr, const int max, const int size) {
 	// Returns the number of objects read or -1 on error
 	if (IS_LOADED)
 		return SDL_RWread(io, ptr, size, max);
-	SDL_LogWarn(1, "%s", "Failed to read: file not loaded successfully!");
+	SDL_LogWarn(0, "%s", "Failed to read: file not loaded successfully!");
 	return -1;
 }
 
@@ -823,7 +823,7 @@ void IO::write(const void *ptr, const size_t num, const int size) {
 	// and the num parameter takes the number of objects to write
 	// Returns the numer of objects written
 	if (!IS_LOADED)
-		SDL_LogWarn(1, "%s", "Failed to write: file not loaded successfully!");
+		SDL_LogWarn(0, "%s", "Failed to write: file not loaded successfully!");
 	else if (SDL_RWwrite(io, ptr, size, num) < num)
 		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
 }
@@ -835,14 +835,14 @@ void IO::write(const string &data) {
 Sint64 IO::tell() {
 	if (IS_LOADED)
 		return SDL_RWtell(io);
-	SDL_LogWarn(1, "%s", "Failed to tell: file not loaded successfully!");
+	SDL_LogWarn(0, "%s", "Failed to tell: file not loaded successfully!");
 	return -1;
 }
 
 Sint64 IO::seek(Sint64 offset, int whence) {
 	if (IS_LOADED)
 		return SDL_RWseek(io, offset, whence);
-	SDL_LogWarn(1, "%s", "Failed to seek: file not loaded successfully!");
+	SDL_LogWarn(0, "%s", "Failed to seek: file not loaded successfully!");
 	return -1;
 }
 
