@@ -11,7 +11,7 @@
 #include <SDL2/SDL.h>
 
 
-using namespace std;
+using string = std::string;
 
 
 
@@ -85,7 +85,7 @@ struct Colour {
 struct IVector {
 	int x, y;
 
-	friend ostream& operator<<(ostream &os, IVector const &ivector);
+	friend std::ostream& operator<<(std::ostream &os, IVector const &ivector);
 	friend IVector operator+(const IVector &ivec1, const IVector &ivec2);
 	friend IVector operator-(const IVector &ivec1, const IVector &ivec2);
 	friend IVector operator*(const IVector &ivec, const double &val);
@@ -106,7 +106,7 @@ struct IVector {
 struct Vector {
 	double x, y;
 
-	friend ostream& operator<<(ostream &os, Vector const &vector);
+	friend std::ostream& operator<<(std::ostream &os, Vector const &vector);
 	friend Vector operator+(const Vector &vec1, const Vector &vec2);
 	friend Vector operator-(const Vector &vec1, const Vector &vec2);
 	friend Vector operator*(const Vector &vec, const double &val);
@@ -149,7 +149,7 @@ struct Rect {
 	Rect(int x, int y, int w, int h);
 	Rect(const Vector &pos, const Vector &size);
 
-	friend ostream& operator<<(ostream &os, Rect const &rect);
+	friend std::ostream& operator<<(std::ostream &os, Rect const &rect);
 
 	operator SDL_Rect() const;
 
@@ -213,7 +213,7 @@ struct Circle {
 	Circle(int x, int y, int r);
 	Circle(const Vector &vec, const int radius);
 
-	friend ostream& operator<<(ostream &os, const Circle &circle);
+	friend std::ostream& operator<<(std::ostream &os, const Circle &circle);
 
 	const string to_str() const;
 
@@ -238,7 +238,7 @@ struct EventKey {
 	bool pressed = false, released = false, down = false;
 };
 
-typedef unordered_map<string, EventKey> EventKeys;
+typedef std::unordered_map<string, EventKey> EventKeys;
 extern EventKeys EVENT_KEYS;
 
 
@@ -256,7 +256,7 @@ struct Finger {
 	double pressure;
 };
 
-typedef unordered_map<SDL_FingerID, Finger> Fingers;
+typedef std::unordered_map<SDL_FingerID, Finger> Fingers;
 extern Fingers FINGERS;
 
 
@@ -373,22 +373,22 @@ class Renderer {
 		void draw_rect_raw(const Rect &rect, const int width=0);
 		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
 		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);
-		void draw_polygon(const vector<Vector> vertices, const Colour colour, const bool filled=true);
+		void draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled=true);
 		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices);
 		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices, Texture &texture);
-		void render_geometry(const vector<SDL_Vertex> &vertices);
-		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices);
-		void render_geometry(const vector<SDL_Vertex> &vertices, Texture &texture);
-		void render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices, Texture &texture);
-		void render_geometry_sorted(const vector<SDL_Vertex> &vertices);
-		void render_geometry_sorted(const vector<SDL_Vertex> &vertices, Texture &texture);
+		void render_geometry(const std::vector<SDL_Vertex> &vertices);
+		void render_geometry(const std::vector<SDL_Vertex> &vertices, const std::vector<int> &indices);
+		void render_geometry(const std::vector<SDL_Vertex> &vertices, Texture &texture);
+		void render_geometry(const std::vector<SDL_Vertex> &vertices, const std::vector<int> &indices, Texture &texture);
+		void render_geometry_sorted(const std::vector<SDL_Vertex> &vertices);
+		void render_geometry_sorted(const std::vector<SDL_Vertex> &vertices, Texture &texture);
 };
 
 
 class Mouse {
 	public:
 		Vector pos = {0, 0};
-		unordered_map<int, MouseButton> buttons;
+		std::unordered_map<int, MouseButton> buttons;
 		// The amount scrolled vertically, positive away from the user and negative towards the user
 		double vert_wheel = 0;
 		// The amount scrolled horizontally, positive to the right and negative to the left
@@ -408,7 +408,7 @@ class Events {
 		bool running = true;
 
 		// The function event handler should return true if the engine loop should not be run otherwise false
-		bool process_events(EventKeys *event_keys = nullptr, Mouse *mouse = nullptr, Fingers *fingers = nullptr, function<bool(SDL_Event&)> event_handler = nullptr);
+		bool process_events(EventKeys *event_keys = nullptr, Mouse *mouse = nullptr, Fingers *fingers = nullptr, std::function<bool(SDL_Event&)> event_handler = nullptr);
 };
 
 

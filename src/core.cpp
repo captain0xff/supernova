@@ -20,9 +20,6 @@
 #endif /* NET_ENABLED */
 
 
-using namespace std;
-
-
 
 // Globals
 int SURF_ID = 0;
@@ -126,8 +123,8 @@ Colour Colour::modulate(const double mod_r, const double mod_g, const double mod
 }
 
 
-ostream& operator<<(ostream &os, IVector const &ivector) {
-	cout << ivector.to_str();
+std::ostream& operator<<(std::ostream &os, IVector const &ivector) {
+	std::cout << ivector.to_str();
 		return os;
 }
 
@@ -180,12 +177,12 @@ IVector::operator SDL_FPoint() const {
 }
 
 const string IVector::to_str() const {
-	return "IVector(" + to_string(x) + ", " + to_string(y) + ")";
+	return "IVector(" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
 
-ostream& operator<<(ostream &os, const Vector &vector) {
-	cout << vector.to_str();
+std::ostream& operator<<(std::ostream &os, const Vector &vector) {
+	std::cout << vector.to_str();
 	return os;
 }
 
@@ -238,7 +235,7 @@ Vector::operator SDL_FPoint() const {
 }
 
 const string Vector::to_str() const {
-	return "Vector(" + to_string(x) + ", " + to_string(y) + ")";
+	return "Vector(" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
 double Vector::magnitude_squared() const {
@@ -353,8 +350,8 @@ Rect::Rect(const Vector &pos, const Vector &size) {
 	h = static_cast<int>(size.y);
 }
 
-ostream& operator<<(ostream &os, Rect const &rect) {
-	cout << rect.to_str();
+std::ostream& operator<<(std::ostream &os, Rect const &rect) {
+	std::cout << rect.to_str();
 	return os;
 }
 
@@ -363,7 +360,7 @@ Rect::operator SDL_Rect() const {
 }
 
 const string Rect::to_str() const {
-	return "Rect(" + to_string(x) + ", " + to_string(y) + ", " + to_string(w) + ", " + to_string(h) + ")";
+	return "Rect(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(w) + ", " + std::to_string(h) + ")";
 }
 
 Vector Rect::size() const {
@@ -591,13 +588,13 @@ Circle::Circle(const Vector &vec, const int radius) {
 	r = radius;
 }
 
-ostream& operator<<(ostream &os, const Circle &circle) {
-	cout << circle.to_str();
+std::ostream& operator<<(std::ostream &os, const Circle &circle) {
+	std::cout << circle.to_str();
 	return os;
 }
 
 const string Circle::to_str() const {
-	return "Circle(" + to_string(x) + ", " + to_string(y) + to_string(r) + ")";
+	return "Circle(" + std::to_string(x) + ", " + std::to_string(y) + std::to_string(r) + ")";
 }
 
 double Circle::radius() const {
@@ -800,7 +797,7 @@ string IO::read() {
 	// Reads the whole file at once to a string
 	int size;
 	Sint64 file_size = get_file_size();
-	vector<char> buffer(file_size + 1);
+	std::vector<char> buffer(file_size + 1);
 
 	if ((size = read(buffer.data(), file_size)) == file_size) {
 		buffer[size] = '\0';
@@ -812,7 +809,7 @@ string IO::read() {
 string IO::read(const int max) {
 	// Reads the next max number of chars from the file to a string
 	int size;
-	vector<char> buffer(max + 1);
+	std::vector<char> buffer(max + 1);
 
 	if ((size = read(buffer.data(), max)) >= 0) {
 		buffer[size] = '\0';
@@ -1043,17 +1040,17 @@ void Renderer::draw_circle(const Circle &circle, const Colour &colour, const boo
 	}
 }
 
-void Renderer::draw_polygon(const vector<Vector> vertices, const Colour colour, const bool filled) {
+void Renderer::draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled) {
 	int n = vertices.size();
 
 	if (filled) {
-		vector<SDL_Vertex> verts(n);
+		std::vector<SDL_Vertex> verts(n);
 		for (int i=0; i < n; i++) {
 			verts[i].position = vertices[i];
 			verts[i].color = colour;
 		}
 
-		vector<int> indices((n-2)*3);
+		std::vector<int> indices((n-2)*3);
 		for (int i=1; i < n - 1; i++) {
 			indices[3*(i-1)] = 0;
 			indices[3*i - 2] = i;
@@ -1082,25 +1079,25 @@ void Renderer::render_geometry_raw(const int num_vertices, const SDL_Vertex *ver
 	SDL_RenderGeometry(renderer.get(), texture.texture.get(), vertices, num_vertices, indices, num_indices);
 }
 
-void Renderer::render_geometry(const vector<SDL_Vertex> &vertices) {
+void Renderer::render_geometry(const std::vector<SDL_Vertex> &vertices) {
 	render_geometry_raw(vertices.size(), &vertices[0], 0, NULL);
 }
 
-void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices) {
+void Renderer::render_geometry(const std::vector<SDL_Vertex> &vertices, const std::vector<int> &indices) {
 	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0]);
 }
 
-void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, Texture &texture) {
+void Renderer::render_geometry(const std::vector<SDL_Vertex> &vertices, Texture &texture) {
 	render_geometry_raw(vertices.size(), &vertices[0], 0, NULL, texture);
 }
 
-void Renderer::render_geometry(const vector<SDL_Vertex> &vertices, const vector<int> &indices, Texture &texture) {
+void Renderer::render_geometry(const std::vector<SDL_Vertex> &vertices, const std::vector<int> &indices, Texture &texture) {
 	render_geometry_raw(vertices.size(), &vertices[0], indices.size(), &indices[0], texture);
 }
 
-void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices) {
+void Renderer::render_geometry_sorted(const std::vector<SDL_Vertex> &vertices) {
 	int n = vertices.size();
-	vector<int> indices((n-2)*3);
+	std::vector<int> indices((n-2)*3);
 	for (int i=1; i < n - 1; i++) {
 		indices[3*(i-1)] = 0;
 		indices[3*i - 2] = i;
@@ -1109,9 +1106,9 @@ void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices) {
 	SDL_RenderGeometry(renderer.get(), NULL, vertices.data(), n, indices.data(), (n-2)*3);
 }
 
-void Renderer::render_geometry_sorted(const vector<SDL_Vertex> &vertices, Texture &texture) {
+void Renderer::render_geometry_sorted(const std::vector<SDL_Vertex> &vertices, Texture &texture) {
 	int n = vertices.size();
-	vector<int> indices((n-2)*3);
+	std::vector<int> indices((n-2)*3);
 	for (int i=1; i < n - 1; i++) {
 		indices[3*(i-1)] = 0;
 		indices[3*i - 2] = i;
@@ -1146,7 +1143,7 @@ void Mouse::wrap_in_window(Window &window, const Vector &wrap_pos) {
 }
 
 
-bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *fingers, function<bool(SDL_Event&)> event_handler) {
+bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *fingers, std::function<bool(SDL_Event&)> event_handler) {
 	// The function event handler should return true if the engine loop should not be run otherwise false
 	if (event_keys) {
 		for (auto &[key, value]: *event_keys) {
