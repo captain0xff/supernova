@@ -6,7 +6,7 @@ All contributions are welcome but please keep these things in mind before contri
 * All classes and structs should named in PascalCase.
 * Enums should be named in all caps.
 * Similar types should be together like globals, structs and classes, separated by 3 empty lines.
-* Tab/4 spaces should be used for indentation.
+* Tab should be used for indentation.
 * Separate different preprocessor directives by two empty lines.
 * Similar includes should be kept together.
 * Standard library headers should be a the top, followed by global headers and finally locals one.
