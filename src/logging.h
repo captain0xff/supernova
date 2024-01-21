@@ -20,7 +20,7 @@ std::string log_to_string(Arg&& arg, Args&&... args) {
 }
 
 template <typename Arg, typename... Args>
-void log_info(Arg&& arg, Args&&... args) {
+void log(Arg&& arg, Args&&... args) {
 	SDL_Log("%s", log_to_string(arg, args...).c_str());
 }
 
