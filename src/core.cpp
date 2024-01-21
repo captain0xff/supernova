@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include "constants.h"
+#include "logging.h"
 #include "core.h"
 #ifdef IMAGE_ENABLED
 #include <SDL2/SDL_image.h>
@@ -67,7 +68,7 @@ void trigger_back_button() {
 void* get_activity() {
 	void *activity;
 	if ((activity = SDL_AndroidGetActivity()) == NULL) {
-		SDL_LogError(0, "Failed to get the android activity: %s", SDL_GetError());
+		log_error("Failed to get the android activity: ", SDL_GetError());
 	}
 
 	return activity;
@@ -88,7 +89,7 @@ string get_internal_storage_path() {
 void* get_jni_env() {
 	void *jni;
 	if ((jni = SDL_AndroidGetJNIEnv()) == 0) {
-		SDL_LogError(0, "Failed to get JNIEnv: %s", SDL_GetError());
+		log_error("Failed to get JNIEnv: ", SDL_GetError());
 	}
 
 	return jni;
@@ -664,25 +665,25 @@ void Circle::move_ip(const Vector &vec) {
 // Classes
 Engine::Engine(const unsigned int sdl_init_flags, const int img_init_flags, const int mix_init_flags) {
 	if (SDL_Init(sdl_init_flags) < 0)
-		SDL_LogError(0, "Failed to initialize SDL: %s", SDL_GetError());
+		log_error("Failed to initialize SDL: ", SDL_GetError());
 #ifdef IMAGE_ENABLED
 	if (IMG_Init(img_init_flags) != img_init_flags)
-		SDL_LogError(0, "Failed to initialize SDL_image: %s", IMG_GetError());
+		log_error("Failed to initialize SDL: ", IMG_GetError());
 #endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
 	if (Mix_Init(mix_init_flags) != mix_init_flags)
-		SDL_LogError(0, "Failed to initialize SDL_mixer: %s", IMG_GetError());
+		log_error("Failed to initialize SDL: ", Mix_GetError());
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
 	if (TTF_Init() < 0)
-		SDL_LogError(0, "Failed to initialize SDL_ttf: %s", TTF_GetError());
+		log_error("Failed to initialize SDL: ", TTF_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
 	if (SDLNet_Init() < 0)
-		SDL_LogError(0, "Failed to initialize SDL_net: %s", SDLNet_GetError());
+		log_error("Failed to initialize SDL: ", SDLNet_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
-	SDL_Log("Engine started!");
+	log_info("Engine started!");
 }
 
 Engine::~Engine() {
@@ -699,7 +700,7 @@ Engine::~Engine() {
 	Mix_Quit();
 #endif /* NET_ENABLED */
 	SDL_Quit();
-	SDL_Log("Engine stopped!");
+	log_info("Engine stopped!");
 }
 
 
@@ -766,7 +767,7 @@ IO::IO(const string &file, const string access_mode) {
 	io = SDL_RWFromFile(file.c_str(), access_mode.c_str());
 
 	if (io == NULL)
-		SDL_LogError(0, "Failed to load file! (%s): %s", file.c_str(), SDL_GetError());
+		log_error("Failed to load file! (", file.c_str(), "): ", SDL_GetError());
 	else
 		IS_LOADED = true;
 }
@@ -789,7 +790,7 @@ int IO::read(void *ptr, const int max, const int size) {
 	// Returns the number of objects read or -1 on error
 	if (IS_LOADED)
 		return SDL_RWread(io, ptr, size, max);
-	SDL_LogWarn(1, "%s", "Failed to read: file not loaded successfully!");
+	log_warn("Failed to read: file not loaded successfully!");
 	return -1;
 }
 
@@ -823,9 +824,9 @@ void IO::write(const void *ptr, const size_t num, const int size) {
 	// and the num parameter takes the number of objects to write
 	// Returns the numer of objects written
 	if (!IS_LOADED)
-		SDL_LogWarn(1, "%s", "Failed to write: file not loaded successfully!");
+		log_warn("Failed to write: file not loaded successfully!");
 	else if (SDL_RWwrite(io, ptr, size, num) < num)
-		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
+		log_warn("Failed to write all the objects: ", SDL_GetError());
 }
 
 void IO::write(const string &data) {
@@ -835,14 +836,14 @@ void IO::write(const string &data) {
 Sint64 IO::tell() {
 	if (IS_LOADED)
 		return SDL_RWtell(io);
-	SDL_LogWarn(1, "%s", "Failed to tell: file not loaded successfully!");
+	log_warn("Failed to tell: file not loaded successfully!");
 	return -1;
 }
 
 Sint64 IO::seek(Sint64 offset, int whence) {
 	if (IS_LOADED)
 		return SDL_RWseek(io, offset, whence);
-	SDL_LogWarn(1, "%s", "Failed to seek: file not loaded successfully!");
+	log_warn("Failed to seek: file not loaded successfully!");
 	return -1;
 }
 
@@ -854,9 +855,9 @@ void IO::close() {
 Window::Window(const string title, const IVector size, const Uint32 flags, const int posx, const int posy):
 	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), posx, posy, size.x,size.y, flags), destroy)) {
 	if (window.get() == NULL)
-		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
+		log_error("Failed to create window: ", SDL_GetError());
 	else
-		SDL_Log("Window created successfully!");
+		log_info("Window created successfully!");
 }
 
 void Window::wrap_mouse(const Vector &wrap_pos) {
@@ -869,16 +870,16 @@ Surface Window::get_window_surface() {
 
 void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
-	SDL_Log("Window closed successfully!");
+	log_info("Window closed successfully!");
 }
 
 
 Renderer::Renderer(Window &window, Uint32 flags, int index):
 	renderer(managed_ptr<SDL_Renderer>(SDL_CreateRenderer(window.window.get(), index, flags),destroy)) {
 	if (renderer.get() == NULL)
-		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
+		log_error("Failed to create renderer: ", SDL_GetError());
 	else
-		SDL_Log("Renderer created successfully!");
+		log_info("Renderer created successfully!");
 }
 
 void Renderer::set_colour(const Colour &colour) {
@@ -1119,7 +1120,7 @@ void Renderer::render_geometry_sorted(const std::vector<SDL_Vertex> &vertices, T
 
 void Renderer::destroy(SDL_Renderer *renderer) {
 	SDL_DestroyRenderer(renderer);
-	SDL_Log("Renderer destroyed successfully!");
+	log_info("Renderer destroyed successfully!");
 }
 
 
@@ -1267,10 +1268,10 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 Surface::Surface(const int width, const int height, const Uint32 flag, const int depth, const Uint32 format):
 	surface(managed_ptr<SDL_Surface>(SDL_CreateRGBSurfaceWithFormat(flag, width, height, depth, format), SDL_FreeSurface)) {
 	if (surface.get() == NULL)
-		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
+		log_error("Failed to create surface: ", SDL_GetError());
 	else {
 		id = SURF_ID;
-		SDL_Log("Surface created successfully![%i]", id);
+		log_info("Surface created successfully![", id, "]");
 		SURF_ID++;
 	}
 }
@@ -1280,10 +1281,10 @@ Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surfa
 #ifdef IMAGE_ENABLED
 Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_FreeSurface)) {
 	if (surface.get() == NULL)
-		SDL_LogError(0, "Failed to load surface: %s", SDL_GetError());
+		log_error("Failed to load surface: ", SDL_GetError());
 	else {
 		id = SURF_ID;
-		SDL_Log("Surface loaded successfully![%i]", id);
+		log_info("Surface loaded successfully![", id, "]");
 		SURF_ID++;
 	}
 }
@@ -1353,10 +1354,10 @@ Texture::Texture(Renderer &renderer, const string &file):
 	texture(managed_ptr<SDL_Texture>(IMG_LoadTexture(renderer.renderer.get(), file.c_str()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to load texture! (%s): %s", file.c_str(), IMG_GetError());
+		log_error("Failed to load texture! (", file, "): ", IMG_GetError());
 	else {
 		id = TEX_ID;
-		SDL_Log("Texture loaded successfully![%i] (%s)", id, file.c_str());
+		log_info("Texture loaded successfully![", id, "] (", file, ")");
 		TEX_ID++;
 	}
 
@@ -1368,10 +1369,10 @@ Texture::Texture(Renderer &renderer, Surface surface):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to create texture: %s", SDL_GetError());
+		log_error("Failed to create texture: ", SDL_GetError());
 	else {
 		id = TEX_ID;
-		SDL_Log("Texture created successfully![%i]", id);
+		log_info("Texture created successfully![", id, "]");
 		TEX_ID++;
 	}
 
@@ -1384,10 +1385,10 @@ Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, co
 	w = size.x;
 	h = size.y;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to created texture: %s", SDL_GetError());
+		log_error("Failed to created texture: ", SDL_GetError());
 	else {
 		id = TEX_ID;
-		SDL_Log("Texture created successfully![%i]", id);
+		log_info("Texture created successfully![", id, "]");
 		TEX_ID++;
 	}
 }
