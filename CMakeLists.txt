@@ -21,6 +21,7 @@ set(HEADERS
 	${SRC_PATH}/constants.h
 	${SRC_PATH}/enums.h
 	${SRC_PATH}/print.h
+	${SRC_PATH}/logging.h
 )
 set(SOURCES ${SRC_PATH}/core.cpp)
 
