@@ -847,7 +847,11 @@ Sint64 IO::seek(Sint64 offset, int whence) {
 }
 
 void IO::close() {
-	SDL_RWclose(io);
+	if (io != nullptr) {
+		SDL_RWclose(io);
+		io = nullptr;
+		IS_LOADED = false;
+	}
 }
 
 
