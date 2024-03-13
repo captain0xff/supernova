@@ -373,13 +373,13 @@ void Rect::size(const Vector &vec) {
 }
 
 void Rect::scale(const Vector &vec) {
-	w = w*vec.x;
-	h = h*vec.y;
+	w *= vec.x;
+	h *= vec.y;
 }
 
 void Rect::scale(const double val) {
-	w = w*val;
-	h = h*val;
+	w *= val;
+	h *= val;
 }
 
 double Rect::half_width() const {
