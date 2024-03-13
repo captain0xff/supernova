@@ -910,14 +910,14 @@ void Renderer::set_target(Texture &tex) {
 	SDL_SetRenderTarget(renderer.get(), tex.texture.get());
 }
 
-void Renderer::set_logical_size(const Vector &size) {
-	SDL_RenderSetLogicalSize(renderer.get(), static_cast<int>(size.x), static_cast<int>(size.y));
+void Renderer::set_logical_size(const IVector &size) {
+	SDL_RenderSetLogicalSize(renderer.get(), size.x, size.y);
 }
 
-Vector Renderer::get_output_size() {
+IVector Renderer::get_output_size() {
 	int w, h;
 	SDL_GetRendererOutputSize(renderer.get(), &w, &h);
-	return {static_cast<double>(w), static_cast<double>(h)};
+	return {w, h};
 }
 
 void Renderer::draw_point_raw(const Vector &point_pos) {
@@ -1382,7 +1382,7 @@ Texture::Texture(Renderer &renderer, Surface surface):
 	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
 
-Texture::Texture(Renderer &renderer, const Vector &size, const Uint32 format, const int access):
+Texture::Texture(Renderer &renderer, const IVector &size, const Uint32 format, const int access):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTexture(renderer.renderer.get(), format, access, size.x, size.y), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	w = size.x;

@@ -370,8 +370,8 @@ class Renderer {
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
-		void set_logical_size(const Vector &size);
-		Vector get_output_size();
+		void set_logical_size(const IVector &size);
+		IVector get_output_size();
 		void draw_point_raw(const Vector &point_pos);
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line_raw(const Vector &v1, const Vector &v2);
@@ -460,7 +460,7 @@ class Texture {
 		Texture(Renderer &renderer, const string &file);
 #endif /* IMAGE_ENABLED */
 		Texture(Renderer &renderer, Surface surface);
-		Texture(Renderer &renderer, const Vector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
+		Texture(Renderer &renderer, const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
 
 		Rect get_rect();
 
