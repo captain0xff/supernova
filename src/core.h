@@ -1,6 +1,12 @@
 #ifndef SUPERNOVA_CORE_H
 #define SUPERNOVA_CORE_H
 
+#if __has_include("graphics.h")
+#ifndef IMAGE_ENABLED
+#define IMAGE_ENABLED
+#endif /* IMAGE_ENABLED */
+#endif /* __has_include("graphics.h") */
+
 
 #include <string>
 #include <unordered_map>
