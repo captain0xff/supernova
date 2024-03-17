@@ -7,16 +7,16 @@
 #include "constants.h"
 #include "core.h"
 #ifdef IMAGE_ENABLED
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL_image.h>
 #endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
-#include <SDL2/SDL_mixer.h>
+#include <SDL3/SDL_mixer.h>
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL_ttf.h>
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-#include <SDL2/SDL_net.h>
+#include <SDL3/SDL_net.h>
 #endif /* NET_ENABLED */
 
 
@@ -707,14 +707,14 @@ double Clock::tick(double target_fps) {
 	// The parameter target_fps should be 0 for unclamped fps
 	if (target_fps) {
 		target_ft = 1000/target_fps;
-		raw_time = SDL_GetTicks64() - last_tick;
+		raw_time = SDL_GetTicks() - last_tick;
 		delay = target_ft - raw_time;
 
 		if (delay > 0)
 			SDL_Delay((Uint32)delay);
 	}
 
-	current_time = SDL_GetTicks64();
+	current_time = SDL_GetTicks();
 	frame_time = current_time - last_tick;
 	last_tick = current_time;
 
@@ -777,18 +777,17 @@ IO::~IO() {
 
 Sint64 IO::get_file_size() {
 	const Sint64 file_pos = tell();
-	const Sint64 file_size = seek(0, RW_SEEK_END);
-	seek(file_pos, RW_SEEK_SET);
+	const Sint64 file_size = seek(0, SDL_RW_SEEK_END);
+	seek(file_pos, SDL_RW_SEEK_SET);
 
 	return file_size;
 }
 
-int IO::read(void *ptr, const int max, const int size) {
-	// The size parameter takes the size of the object to read in bytes
-	// and the max parameter takes the maximum number of objects to read
+int IO::read(void *ptr, const int max) {
+	// The parameter takes the maximum number of bytes to read
 	// Returns the number of objects read or -1 on error
 	if (IS_LOADED)
-		return SDL_RWread(io, ptr, size, max);
+		return SDL_RWread(io, ptr, max);
 	SDL_LogWarn(0, "%s", "Failed to read: file not loaded successfully!");
 	return -1;
 }
@@ -818,13 +817,12 @@ string IO::read(const int max) {
 	return NULL;
 }
 
-void IO::write(const void *ptr, const size_t num, const int size) {
-	// The size parameter takes the size of the object to read in bytes
-	// and the num parameter takes the number of objects to write
+void IO::write(const void *ptr, const size_t num) {
+	// The num parameter takes the number of objects to write
 	// Returns the numer of objects written
 	if (!IS_LOADED)
 		SDL_LogWarn(0, "%s", "Failed to write: file not loaded successfully!");
-	else if (SDL_RWwrite(io, ptr, size, num) < num)
+	else if (SDL_RWwrite(io, ptr, num) < num)
 		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
 }
 
@@ -855,8 +853,8 @@ void IO::close() {
 }
 
 
-Window::Window(const string title, const IVector size, const Uint32 flags, const int posx, const int posy):
-	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), posx, posy, size.x,size.y, flags), destroy)) {
+Window::Window(const string &title, const IVector &size, const Uint32 flags):
+	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), size.x,size.y, flags), destroy)) {
 	if (window.get() == NULL)
 		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
 	else
@@ -877,8 +875,8 @@ void Window::destroy(SDL_Window *window) {
 }
 
 
-Renderer::Renderer(Window &window, Uint32 flags, int index):
-	renderer(managed_ptr<SDL_Renderer>(SDL_CreateRenderer(window.window.get(), index, flags),destroy)) {
+Renderer::Renderer(Window &window, const SDL_RendererFlags flags, const string &driver):
+	renderer(managed_ptr<SDL_Renderer>(SDL_CreateRenderer(window.window.get(), driver.c_str(), flags),destroy)) {
 	if (renderer.get() == NULL)
 		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
 	else
@@ -910,18 +908,18 @@ void Renderer::set_target(Texture &tex) {
 	SDL_SetRenderTarget(renderer.get(), tex.texture.get());
 }
 
-void Renderer::set_logical_size(const IVector &size) {
-	SDL_RenderSetLogicalSize(renderer.get(), size.x, size.y);
+void Renderer::set_logical_presentation(const IVector &size, const SDL_RendererLogicalPresentation mode, SDL_ScaleMode scale_mode) {
+	SDL_SetRenderLogicalPresentation(renderer.get(), size.x, size.y, mode, scale_mode);
 }
 
 IVector Renderer::get_output_size() {
 	int w, h;
-	SDL_GetRendererOutputSize(renderer.get(), &w, &h);
+	SDL_GetCurrentRenderOutputSize(renderer.get(), &w, &h);
 	return {w, h};
 }
 
 void Renderer::draw_point_raw(const Vector &point_pos) {
-	SDL_RenderDrawPoint(renderer.get(), point_pos.x, point_pos.y);
+	SDL_RenderPoint(renderer.get(), point_pos.x, point_pos.y);
 }
 
 void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
@@ -930,7 +928,7 @@ void Renderer::draw_point(const Vector &point_pos, const Colour &colour) {
 }
 
 void Renderer::draw_line_raw(const Vector &v1, const Vector &v2) {
-	SDL_RenderDrawLine(renderer.get(), v1.x, v1.y, v2.x, v2.y);
+	SDL_RenderLine(renderer.get(), v1.x, v1.y, v2.x, v2.y);
 }
 
 void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colour) {
@@ -938,111 +936,111 @@ void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colou
 	draw_line_raw(v1, v2);
 }
 
-void Renderer::draw_rect_raw(const Rect &rect, int width) {
-	if (width == 0) {
-		SDL_Rect r = rect;
-		SDL_RenderFillRect(renderer.get(), &r);
-	} else if (width == 1) {
-		SDL_Rect r = rect;
-		SDL_RenderDrawRect(renderer.get(), &r);
-	} else {
-		SDL_Rect r1 = {rect.x - width, rect.y - width, rect.w + 2*width, width};
-		SDL_Rect r2 = {rect.x - width, rect.y + rect.h, rect.w + 2*width, width};
-		SDL_Rect r3 = {rect.x - width, rect.y, width, rect.h};
-		SDL_Rect r4 = {rect.x + rect.w, rect.y, width, rect.h};
-		SDL_RenderFillRect(renderer.get(), &r1);
-		SDL_RenderFillRect(renderer.get(), &r2);
-		SDL_RenderFillRect(renderer.get(), &r3);
-		SDL_RenderFillRect(renderer.get(), &r4);
-	}
-}
+// void Renderer::draw_rect_raw(const Rect &rect, int width) {
+// 	if (width == 0) {
+// 		SDL_Rect r = rect;
+// 		SDL_RenderRect(renderer.get(), &r);
+// 	} else if (width == 1) {
+// 		SDL_Rect r = rect;
+// 		SDL_RenderDrawRect(renderer.get(), &r);
+// 	} else {
+// 		SDL_Rect r1 = {rect.x - width, rect.y - width, rect.w + 2*width, width};
+// 		SDL_Rect r2 = {rect.x - width, rect.y + rect.h, rect.w + 2*width, width};
+// 		SDL_Rect r3 = {rect.x - width, rect.y, width, rect.h};
+// 		SDL_Rect r4 = {rect.x + rect.w, rect.y, width, rect.h};
+// 		SDL_RenderFillRect(renderer.get(), &r1);
+// 		SDL_RenderFillRect(renderer.get(), &r2);
+// 		SDL_RenderFillRect(renderer.get(), &r3);
+// 		SDL_RenderFillRect(renderer.get(), &r4);
+// 	}
+// }
 
-void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
-	set_colour(colour);
-	draw_rect_raw(rect, width);
-}
+// void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
+// 	set_colour(colour);
+// 	draw_rect_raw(rect, width);
+// }
 
-void Renderer::draw_circle(const Circle &circle, const Colour &colour, const bool filled) {
-	set_colour(colour);
+// void Renderer::draw_circle(const Circle &circle, const Colour &colour, const bool filled) {
+// 	set_colour(colour);
 
-	if (filled) {
-		constexpr int tris = 225; // Amount of triangles
-		float mirror = 2.0f * static_cast<float>(PI); // 2*PI
-		SDL_Vertex vertices[tris];
+// 	if (filled) {
+// 		constexpr int tris = 225; // Amount of triangles
+// 		float mirror = 2.0f * static_cast<float>(PI); // 2*PI
+// 		SDL_Vertex vertices[tris];
 
-		for (int i = 0; i < tris; i += 3) {
-			// The upper bound of the triangle
-			vertices[i].position = circle.center(); // 0, 3, 6, 9
-			vertices[i].color = colour;
+// 		for (int i = 0; i < tris; i += 3) {
+// 			// The upper bound of the triangle
+// 			vertices[i].position = circle.center(); // 0, 3, 6, 9
+// 			vertices[i].color = colour;
 
-			// Subtract 3 from tris so we don't operate on a triangle that is out of bounds
+// 			// Subtract 3 from tris so we don't operate on a triangle that is out of bounds
 
-			// The lower right bound of the triangle
-			vertices[i + 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 1, 4, 7, 10
-			vertices[i + 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
-			vertices[i + 1].color = colour;
+// 			// The lower right bound of the triangle
+// 			vertices[i + 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 1, 4, 7, 10
+// 			vertices[i + 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
+// 			vertices[i + 1].color = colour;
 
-			// The lower left bound of the triangle
-			if (i > 0) {
-				vertices[i - 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 2, 5, 8, 11
-				vertices[i - 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
-				vertices[i - 1].color = colour;
-			}
-		}
+// 			// The lower left bound of the triangle
+// 			if (i > 0) {
+// 				vertices[i - 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 2, 5, 8, 11
+// 				vertices[i - 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
+// 				vertices[i - 1].color = colour;
+// 			}
+// 		}
 
-		SDL_RenderGeometry(renderer.get(), NULL, vertices, tris - 3, NULL, tris - 3);
+// 		SDL_RenderGeometry(renderer.get(), NULL, vertices, tris - 3, NULL, tris - 3);
 
-	} else {
-		int x = circle.r, y = 0;
+// 	} else {
+// 		int x = circle.r, y = 0;
 
-		// Printing the initial point on the axes
-		// after translation
-		SDL_RenderDrawPoint(renderer.get(), x + circle.x, circle.y);
+// 		// Printing the initial point on the axes
+// 		// after translation
+// 		SDL_RenderDrawPoint(renderer.get(), x + circle.x, circle.y);
 
-		// When radius is zero only a single
-		// point will be printed
-		if (circle.r > 0) {
-			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, circle.y);
-			SDL_RenderDrawPoint(renderer.get(), circle.x, -x + circle.y);
-			SDL_RenderDrawPoint(renderer.get(), circle.x, x + circle.y);
-		}
+// 		// When radius is zero only a single
+// 		// point will be printed
+// 		if (circle.r > 0) {
+// 			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, circle.y);
+// 			SDL_RenderDrawPoint(renderer.get(), circle.x, -x + circle.y);
+// 			SDL_RenderDrawPoint(renderer.get(), circle.x, x + circle.y);
+// 		}
 
-		// Initialising the value of P
-		int P = 1 - circle.r;
-		while (x > y) {
-			y++;
+// 		// Initialising the value of P
+// 		int P = 1 - circle.r;
+// 		while (x > y) {
+// 			y++;
 
-			// Mid-point is inside or on the perimeter
-			if (P <= 0)
-				P = P + 2*y + 1;
-			// Mid-point is outside the perimeter
-			else {
-				x--;
-				P = P + 2*y - 2*x + 1;
-			}
+// 			// Mid-point is inside or on the perimeter
+// 			if (P <= 0)
+// 				P = P + 2*y + 1;
+// 			// Mid-point is outside the perimeter
+// 			else {
+// 				x--;
+// 				P = P + 2*y - 2*x + 1;
+// 			}
 
-			// All the perimeter points have already been printed
-			if (x < y)
-				break;
+// 			// All the perimeter points have already been printed
+// 			if (x < y)
+// 				break;
 
-			// Printing the generated point and its reflection
-			// in the other octants after translation
-			SDL_RenderDrawPoint(renderer.get(), x + circle.x, y + circle.y);
-			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, y + circle.y);
-			SDL_RenderDrawPoint(renderer.get(), x + circle.x, -y + circle.y);
-			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, -y + circle.y);
+// 			// Printing the generated point and its reflection
+// 			// in the other octants after translation
+// 			SDL_RenderDrawPoint(renderer.get(), x + circle.x, y + circle.y);
+// 			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, y + circle.y);
+// 			SDL_RenderDrawPoint(renderer.get(), x + circle.x, -y + circle.y);
+// 			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, -y + circle.y);
 
-			// If the generated point is on the line x = y then
-			// the perimeter points have already been printed
-			if (x != y) {
-				SDL_RenderDrawPoint(renderer.get(), y + circle.x, x + circle.y);
-				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, x + circle.y);
-				SDL_RenderDrawPoint(renderer.get(), y + circle.x, -x + circle.y);
-				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, -x + circle.y);
-			}
-		}
-	}
-}
+// 			// If the generated point is on the line x = y then
+// 			// the perimeter points have already been printed
+// 			if (x != y) {
+// 				SDL_RenderDrawPoint(renderer.get(), y + circle.x, x + circle.y);
+// 				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, x + circle.y);
+// 				SDL_RenderDrawPoint(renderer.get(), y + circle.x, -x + circle.y);
+// 				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, -x + circle.y);
+// 			}
+// 		}
+// 	}
+// }
 
 void Renderer::draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled) {
 	int n = vertices.size();
@@ -1173,10 +1171,10 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 	while (SDL_PollEvent(&event)) {
 		if (!(event_handler and event_handler(event))) {
 			switch (event.type) {
-				case SDL_QUIT:
+				case SDL_EVENT_QUIT:
 					running = false;
 					break;
-				case SDL_KEYDOWN:
+				case SDL_EVENT_KEY_DOWN:
 					if (event_keys) {
 						if (!event.key.repeat) {
 							for (auto &[key, value]: *event_keys) {
@@ -1188,7 +1186,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						}
 					}
 					break;
-				case SDL_KEYUP:
+				case SDL_EVENT_KEY_UP:
 					if (event_keys) {
 						if (!event.key.repeat) {
 							for (auto &[key, value]: *event_keys) {
@@ -1200,14 +1198,14 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						}
 					}
 					break;
-				case SDL_MOUSEMOTION:
+				case SDL_EVENT_MOUSE_MOTION:
 					if (mouse) {
 						mouse->pos.x = event.button.x;
 						mouse->pos.y = event.button.y;
 						break;
 					}
 					break;
-				case SDL_MOUSEBUTTONDOWN:
+				case SDL_EVENT_MOUSE_BUTTON_DOWN:
 					if (mouse) {
 						for (auto &[key, value]: mouse->buttons) {
 							if (event.button.button == value.id) {
@@ -1217,7 +1215,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						}
 					}
 					break;
-				case SDL_MOUSEBUTTONUP:
+				case SDL_EVENT_MOUSE_BUTTON_UP:
 					if (mouse) {
 						for (auto &[key, value]: mouse->buttons) {
 							if (event.button.button == value.id) {
@@ -1227,16 +1225,16 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						}
 					}
 					break;
-				case SDL_MOUSEWHEEL:
+				case SDL_EVENT_MOUSE_WHEEL:
 					if (mouse) {
-						mouse->vert_wheel = event.wheel.preciseY;
-						mouse->horz_wheel = event.wheel.preciseX;
+						mouse->vert_wheel = event.wheel.y;
+						mouse->horz_wheel = event.wheel.x;
 					}
 					break;
-				case SDL_FINGERMOTION:
+				case SDL_EVENT_FINGER_MOTION:
 					if (fingers) {
-						(*fingers)[event.tfinger.fingerId] = {
-							event.tfinger.fingerId,
+						(*fingers)[event.tfinger.fingerID] = {
+							event.tfinger.fingerID,
 							{event.tfinger.x, event.tfinger.y},
 							{event.tfinger.dx, event.tfinger.dy},
 							false,
@@ -1244,10 +1242,10 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						};
 					}
 					break;
-				case SDL_FINGERDOWN:
+				case SDL_EVENT_FINGER_DOWN:
 					if (fingers) {
-						(*fingers)[event.tfinger.fingerId] = {
-							event.tfinger.fingerId,
+						(*fingers)[event.tfinger.fingerID] = {
+							event.tfinger.fingerID,
 							{event.tfinger.x, event.tfinger.y},
 							{event.tfinger.dx, event.tfinger.dy},
 							true,
@@ -1255,9 +1253,9 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 						};
 					}
 					break;
-				case SDL_FINGERUP:
+				case SDL_EVENT_FINGER_UP:
 					if (fingers) {
-						fingers->erase(event.tfinger.fingerId);
+						fingers->erase(event.tfinger.fingerID);
 					}
 					break;
 			}
@@ -1268,8 +1266,8 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 }
 
 
-Surface::Surface(const int width, const int height, const Uint32 flag, const int depth, const Uint32 format):
-	surface(managed_ptr<SDL_Surface>(SDL_CreateRGBSurfaceWithFormat(flag, width, height, depth, format), SDL_FreeSurface)) {
+Surface::Surface(const IVector &size, const Uint32 format):
+	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, format), SDL_DestroySurface)) {
 	if (surface.get() == NULL)
 		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
 	else {
@@ -1279,10 +1277,10 @@ Surface::Surface(const int width, const int height, const Uint32 flag, const int
 	}
 }
 
-Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_FreeSurface)) {}
+Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_DestroySurface)) {}
 
 #ifdef IMAGE_ENABLED
-Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_FreeSurface)) {
+Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
 	if (surface.get() == NULL)
 		SDL_LogError(0, "Failed to load surface: %s", SDL_GetError());
 	else {
@@ -1298,7 +1296,7 @@ void Surface::set_blend_mode(const SDL_BlendMode blend_mode) {
 }
 
 void Surface::set_colour_key(const Uint32 key, const bool enable) {
-	SDL_SetColorKey(surface.get(), enable, key);
+	SDL_SetSurfaceColorKey(surface.get(), enable, key);
 }
 
 void Surface::blit(Surface &dst_surface, const IVector &ivec) {
@@ -1421,18 +1419,18 @@ void Texture::render(const Rect &dst_rect) {
 void Texture::render(const Rect &dst_rect, const Rect &src_rect) {
 	const SDL_Rect r1 = src_rect;
 	const SDL_Rect r2 = dst_rect;
-	SDL_RenderCopy(tex_renderer -> renderer.get(), texture.get(), &r1, &r2);
+	SDL_RenderTexture(tex_renderer -> renderer.get(), texture.get(), &r1, &r2);
 }
 
-void Texture::render_ex(const Rect &dst_rect, const double &angle, const Vector &center, const SDL_RendererFlip &flip) {
-	render_ex(dst_rect, get_rect(), angle, center, flip);
+void Texture::render_rot(const Rect &dst_rect, const double angle, const Vector &center, const SDL_FlipMode flip) {
+	render_rot(dst_rect, get_rect(), angle, center, flip);
 }
 
-void Texture::render_ex(const Rect &dst_rect, const Rect &src_rect, const double &angle, const Vector &center, const SDL_RendererFlip &flip) {
+void Texture::render_rot(const Rect &dst_rect, const Rect &src_rect, const double angle, const Vector &center, const SDL_FlipMode flip) {
 	const SDL_Rect r1 = {src_rect.x, src_rect.y, src_rect.w, src_rect.h};
 	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
 	const SDL_Point p = {(int)center.x, (int)center.y};
-	SDL_RenderCopyEx(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
+	SDL_RenderTextureRotated(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
 }
 
 /*

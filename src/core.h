@@ -1,12 +1,6 @@
 #ifndef SUPERNOVA_CORE_H
 #define SUPERNOVA_CORE_H
 
-#if __has_include("graphics.h")
-#ifndef IMAGE_ENABLED
-#define IMAGE_ENABLED
-#endif /* IMAGE_ENABLED */
-#endif /* __has_include("graphics.h") */
-
 
 #include <string>
 #include <unordered_map>
@@ -14,7 +8,7 @@
 #include <memory>
 #include <functional>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 
 using string = std::string;
@@ -327,7 +321,7 @@ class IO {
 		// The size parameter takes the size of the object to read in bytes
 		// and the max parameter takes the maximum number of objects to read
 		// Returns the number of objects read or -1 on error
-		int read(void *ptr, const int max, const int size=1);
+		int read(void *ptr, const int max);
 		// Reads the whole file at once to a string
 		string read();
 		// Reads the next max number of chars from the file to a string
@@ -335,11 +329,11 @@ class IO {
 		// The size parameter takes the size of the object to read in bytes
 		// and the num parameter takes the number of objects to write
 		// Returns the numer of objects written
-		void write(const void *ptr, const size_t num, const int size=1);
+		void write(const void *ptr, const size_t num);
 		void write(const string &data);
 		Sint64 tell();
 		// The parameter whence can be any of RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
-		Sint64 seek(Sint64 offset, int whence=RW_SEEK_CUR);
+		Sint64 seek(Sint64 offset, int whence=SDL_RW_SEEK_CUR);
 		void close();
 };
 
@@ -348,7 +342,7 @@ class Window {
 	public:
 		managed_ptr<SDL_Window> window;
 
-		Window(const string title, const IVector size, const Uint32 flags=0, const int posx=SDL_WINDOWPOS_CENTERED, const int posy=SDL_WINDOWPOS_CENTERED);
+		Window(const string &title, const IVector &size, const Uint32 flags=0);
 
 		void static destroy(SDL_Window *window);
 		void wrap_mouse(const Vector &wrap_pos);
@@ -361,7 +355,7 @@ class Renderer {
 	public:
 		managed_ptr<SDL_Renderer> renderer;
 
-		Renderer(Window &window, Uint32 flags=0, int index=-1);
+		Renderer(Window &window, const SDL_RendererFlags flags=(SDL_RendererFlags)0, const string &driver=NULL);
 
 		void static destroy(SDL_Renderer *renderer);
 		void set_colour(const Colour &colour);
@@ -370,7 +364,7 @@ class Renderer {
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
-		void set_logical_size(const IVector &size);
+		void set_logical_presentation(const IVector &size, const SDL_RendererLogicalPresentation mode=SDL_LOGICAL_PRESENTATION_DISABLED, const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST);
 		IVector get_output_size();
 		void draw_point_raw(const Vector &point_pos);
 		void draw_point(const Vector &point_pos, const Colour &colour);
@@ -424,7 +418,7 @@ class Surface {
 		int id;
 		managed_ptr<SDL_Surface> surface;
 
-		Surface(const int width, const int height, const Uint32 flag=0, const int depth=32, const Uint32 format=SDL_PIXELFORMAT_RGBA8888);
+		Surface(const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA8888);
 		Surface(SDL_Surface *_surface);
 #ifdef IMAGE_ENABLED
 		Surface(const string &file);
@@ -469,9 +463,8 @@ class Texture {
 		void render(const Vector &vec);
 		void render(const Rect &dst_rect);
 		void render(const Rect &dst_rect, const Rect &src_rect);
-		void render_ex(const Rect &dst_rect, const double &angle=0, const Vector &center={0, 0}, const SDL_RendererFlip &flip=SDL_FLIP_NONE);
-		void render_ex(const Rect &dst_rect, const Rect &src_rect, const double &angle=0, const Vector &center={0, 0}, const SDL_RendererFlip &flip=SDL_FLIP_NONE);
-		// void destroy();
+		void render_rot(const Rect &dst_rect, const double angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
+		void render_rot(const Rect &dst_rect, const Rect &src_rect, const double angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
 };
 
 /*
