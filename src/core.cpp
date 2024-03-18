@@ -109,16 +109,130 @@ void show_toast(const string message, const bool duration, const int gravity, co
 
 
 // Structs
+std::ostream& operator<<(std::ostream &os, Colour const &colour) {
+	std::cout << colour.to_str();
+		return os;
+}
+
+Colour operator*(const Colour &colour, const float val) {
+	return {
+		static_cast<Uint8>(colour.r*val),
+		static_cast<Uint8>(colour.g*val),
+		static_cast<Uint8>(colour.b*val),
+		static_cast<Uint8>(colour.a*val)
+	};
+}
+
+Colour operator/(const Colour &colour, const float val) {
+	return {
+		static_cast<Uint8>(colour.r/val),
+		static_cast<Uint8>(colour.g/val),
+		static_cast<Uint8>(colour.b/val),
+		static_cast<Uint8>(colour.a/val)
+	};
+}
+
+void operator*=(Colour &colour, const float val) {
+	colour.r *= val;
+	colour.g *= val;
+	colour.b *= val;
+	colour.a *= val;
+}
+
+void operator/=(Colour &colour, const float val) {
+	colour.r /= val;
+	colour.g /= val;
+	colour.b /= val;
+	colour.a /= val;
+}
+
+Colour::operator FColour() const{
+	return {
+		static_cast<float>(r/255.0f),
+		static_cast<float>(g/255.0f),
+		static_cast<float>(b/255.0f),
+		static_cast<float>(a/255.0f)
+	};
+}
+
 Colour::operator SDL_Color() const {
 	return {r, g, b, a};
 }
 
-Colour Colour::modulate(const double mod_r, const double mod_g, const double mod_b, const double mod_a) const {
+const string Colour::to_str() const {
+	return "Colour(" + std::to_string(r) + ", " + std::to_string(g) + std::to_string(b) + std::to_string(a) + ")";
+}
+
+Colour Colour::modulate(const float mod_r, const float mod_g, const float mod_b, const float mod_a) const {
 	return {
 		static_cast<Uint8>(r*mod_r),
 		static_cast<Uint8>(g*mod_g),
 		static_cast<Uint8>(b*mod_b),
 		static_cast<Uint8>(a*mod_a)
+	};
+}
+
+
+std::ostream& operator<<(std::ostream &os, const FColour &fcolour) {
+	std::cout << fcolour.to_str();
+		return os;
+}
+
+FColour operator*(const FColour &fcolour, const float val) {
+	return {
+		fcolour.r*val,
+		fcolour.g*val,
+		fcolour.b*val,
+		fcolour.a*val
+	};
+}
+
+FColour operator/(const FColour &fcolour, const float val) {
+	return {
+		fcolour.r/val,
+		fcolour.g/val,
+		fcolour.b/val,
+		fcolour.a/val
+	};
+}
+
+void operator*=(FColour &fcolour, const float val) {
+	fcolour.r *= val;
+	fcolour.g *= val;
+	fcolour.b *= val;
+	fcolour.a *= val;
+}
+
+void operator/=(FColour &fcolour, const float val) {
+	fcolour.r /= val;
+	fcolour.g /= val;
+	fcolour.b /= val;
+	fcolour.a /= val;
+}
+
+FColour::operator Colour() const{
+	return {
+		static_cast<Uint8>(r*255),
+		static_cast<Uint8>(g*255),
+		static_cast<Uint8>(b*255),
+		static_cast<Uint8>(a*255)
+	};
+}
+
+FColour::operator SDL_FColor() const {
+	return {r, g, b, a};
+}
+
+const string FColour::to_str() const {
+	return "FColour(" + std::to_string(r) + ", " + std::to_string(g) + std::to_string(b) + std::to_string(a) + ")";
+}
+
+FColour FColour::modulate(const float mod_r, const float mod_g, const float mod_b, const float mod_a) const {
+	return {
+		r*mod_r,
+		g*mod_g,
+		b*mod_b,
+		a*mod_a
 	};
 }
 
@@ -136,11 +250,11 @@ IVector operator-(const IVector &ivec1, const IVector &ivec2) {
 	return {ivec1.x - ivec2.x, ivec1.y - ivec2.y};
 }
 
-IVector operator*(const IVector &ivec, const double &val) {
+IVector operator*(const IVector &ivec, const float &val) {
 	return {static_cast<int>(ivec.x*val), static_cast<int>(ivec.y*val)};
 }
 
-IVector operator/(const IVector &ivec, const double &val) {
+IVector operator/(const IVector &ivec, const float &val) {
 	return {static_cast<int>(ivec.x/val), static_cast<int>(ivec.y/val)};
 }
 
@@ -165,7 +279,7 @@ void operator/=(IVector &ivec1, const IVector &ivec2) {
 }
 
 IVector::operator Vector() const {
-	return {static_cast<double>(x), static_cast<double>(y)};
+	return {static_cast<float>(x), static_cast<float>(y)};
 }
 
 IVector::operator SDL_Point() const {
@@ -194,11 +308,11 @@ Vector operator-(const Vector &vec1, const Vector &vec2) {
 	return {vec1.x - vec2.x, vec1.y - vec2.y};
 }
 
-Vector operator*(const Vector &vec, const double &val) {
+Vector operator*(const Vector &vec, const float &val) {
 	return {vec.x*val, vec.y*val};
 }
 
-Vector operator/(const Vector &vec, const double &val) {
+Vector operator/(const Vector &vec, const float &val) {
 	return {vec.x/val, vec.y/val};
 }
 
@@ -231,18 +345,18 @@ Vector::operator SDL_Point() const {
 }
 
 Vector::operator SDL_FPoint() const {
-	return {static_cast<float>(x), static_cast<float>(y)};
+	return {x, y};
 }
 
 const string Vector::to_str() const {
 	return "Vector(" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
-double Vector::magnitude_squared() const {
+float Vector::magnitude_squared() const {
 	return pow(x, 2) + pow(y, 2);
 }
 
-double Vector::magnitude() const {
+float Vector::magnitude() const {
 	return pow(magnitude_squared(), 0.5);
 }
 
@@ -255,38 +369,41 @@ void Vector::normalize_ip() {
 	y = y / magnitude();
 }
 
-Vector Vector::rotate_rad(const double &angle) const {
-	return {x*cos(angle) - y*sin(angle), x*sin(angle) + y*cos(angle)};
+Vector Vector::rotate_rad(const float &angle) const {
+	return {
+		static_cast<float>(x*cos(angle) - y*sin(angle)),
+		static_cast<float>(x*sin(angle) + y*cos(angle))
+	};
 }
 
-void Vector::rotate_rad_ip(const double &angle) {
-	double temp = x;
+void Vector::rotate_rad_ip(const float &angle) {
+	float temp = x;
 	x = x*cos(angle) - y*sin(angle);
 	y = temp*sin(angle) + y*cos(angle);
 }
 
-Vector Vector::rotate(const double &angle) const {
+Vector Vector::rotate(const float &angle) const {
 	return rotate_rad(radians(angle));
 }
 
-void Vector::rotate_ip(const double &angle) {
+void Vector::rotate_ip(const float &angle) {
 	rotate_rad_ip(radians(angle));
 }
 
-double Vector::distance_to_squared(const Vector &vec) const {
+float Vector::distance_to_squared(const Vector &vec) const {
 	return pow(vec.x - x, 2) + pow(vec.y - y, 2);
 }
 
-double Vector::distance_to(const Vector &vec) const {
+float Vector::distance_to(const Vector &vec) const {
 	return sqrt(distance_to_squared(vec));
 }
 
-double Vector::angle_rad() const {
-	double temp = atan2(y, x);
+float Vector::angle_rad() const {
+	float temp = atan2(y, x);
 	return (temp > 0) ? temp : 2*PI + temp;
 }
 
-double Vector::angle() const {
+float Vector::angle() const {
 	return degrees(angle_rad());
 }
 
@@ -328,7 +445,7 @@ void Vector::clamp_ip(const Rect &rect) {
 }
 
 void Vector::clamp_ip(const Circle &circle) {
-	double temp = this->distance_to(circle.center());
+	float temp = this->distance_to(circle.center());
 
 	if (temp > circle.radius()){
 		x = circle.x + (x - circle.x)*circle.r/temp;
@@ -336,7 +453,40 @@ void Vector::clamp_ip(const Circle &circle) {
 	}
 }
 
-Rect::Rect(int x, int y, int w, int h) {
+
+IRect::IRect(int x, int y, int w, int h) {
+	this->x = x;
+	this->y = y;
+	this->w = w;
+	this->h = h;
+}
+
+IRect::IRect(const IVector &pos, const IVector &size) {
+	x = pos.x;
+	y = pos.y;
+	w = size.x;
+	h = size.y;
+}
+
+std::ostream& operator<<(std::ostream &os, IRect const &IRect) {
+	std::cout << IRect.to_str();
+	return os;
+}
+
+IRect::operator Rect() const {
+	return {static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h)};
+}
+
+IRect::operator SDL_Rect() const {
+	return {x, y, w, h};
+}
+
+const string IRect::to_str() const {
+	return "Rect(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(w) + ", " + std::to_string(h) + ")";
+}
+
+
+Rect::Rect(float x, float y, float w, float h) {
 	this->x = x;
 	this->y = y;
 	this->w = w;
@@ -344,10 +494,10 @@ Rect::Rect(int x, int y, int w, int h) {
 }
 
 Rect::Rect(const Vector &pos, const Vector &size) {
-	x = static_cast<int>(pos.x);
-	y = static_cast<int>(pos.y);
-	w = static_cast<int>(size.x);
-	h = static_cast<int>(size.y);
+	x = pos.x;
+	y = pos.y;
+	w = size.x;
+	h = size.y;
 }
 
 std::ostream& operator<<(std::ostream &os, Rect const &rect) {
@@ -355,7 +505,7 @@ std::ostream& operator<<(std::ostream &os, Rect const &rect) {
 	return os;
 }
 
-Rect::operator SDL_Rect() const {
+Rect::operator SDL_FRect() const {
 	return {x, y, w, h};
 }
 
@@ -364,7 +514,7 @@ const string Rect::to_str() const {
 }
 
 Vector Rect::size() const {
-	return {static_cast<double>(w), static_cast<double>(h)};
+	return {w, h};
 }
 
 void Rect::size(const Vector &vec) {
@@ -377,16 +527,16 @@ void Rect::scale(const Vector &vec) {
 	h *= vec.y;
 }
 
-void Rect::scale(const double val) {
+void Rect::scale(const float val) {
 	w *= val;
 	h *= val;
 }
 
-double Rect::half_width() const {
+float Rect::half_width() const {
 	return w / 2;
 }
 
-double Rect::half_height() const {
+float Rect::half_height() const {
 	return h / 2;
 }
 
@@ -394,51 +544,51 @@ Vector Rect::half_size() const {
 	return {half_width(), half_width()};
 }
 
-double Rect::top() const {
+float Rect::top() const {
 	return y;
 }
 
-void Rect::top(const double &val) {
+void Rect::top(const float &val) {
 	y = val;
 }
 
-double Rect::bottom() const {
+float Rect::bottom() const {
 	return y + h;
 }
 
-void Rect::bottom(const double &val) {
+void Rect::bottom(const float &val) {
 	y = val - h;
 }
 
-double Rect::left() const {
+float Rect::left() const {
 	return x;
 }
 
-void Rect::left(const double &val) {
+void Rect::left(const float &val) {
 	x = val;
 }
 
-double Rect::right() const {
+float Rect::right() const {
 	return x + w;
 }
 
-void Rect::right(const double &val) {
+void Rect::right(const float &val) {
 	x = val - w;
 }
 
-double Rect::centerx() const {
+float Rect::centerx() const {
 	return x + half_width();
 }
 
-void Rect::centerx(const double &val) {
+void Rect::centerx(const float &val) {
 	x = val - half_width();
 }
 
-double Rect::centery() const {
+float Rect::centery() const {
 	return y + half_height();
 }
 
-void Rect::centery(const double &val) {
+void Rect::centery(const float &val) {
 	y = val - half_height();
 }
 
@@ -524,22 +674,28 @@ void Rect::midright(const Vector &vec) {
 }
 
 bool Rect::collide_point(const Vector &vec) const {
-	if (((left() <= vec.x) && (vec.x <= right())) && ((top() <= vec.y) && (vec.y <= bottom()))) return true;
+	if (((left() <= vec.x) && (vec.x <= right())) && ((top() <= vec.y) && (vec.y <= bottom())))
+		return true;
 	return false;
 }
 
 bool Rect::collide_rect(const Rect &rect) const {
-	if ((left() < rect.x + rect.w) && (right() > rect.x) && (top() < rect.y + rect.h) && (bottom() > rect.y)) return true;
+	if ((left() < rect.x + rect.w) && (right() > rect.x) && (top() < rect.y + rect.h) && (bottom() > rect.y))
+		return true;
 	return false;
 }
 
 Rect Rect::clamp(const Rect &rect) const {
 	// Clamps the rect within the rect passed
 	Rect new_rect = {x, y, w, h};
-	if (left() < rect.x) new_rect.left(rect.x);
-	else if (right() > (rect.x + rect.w)) new_rect.right(rect.x + rect.w);
-	if (top() < rect.y) new_rect.top(rect.y);
-	else if (bottom() > (rect.y + rect.h)) new_rect.bottom(rect.y + rect.h);
+	if (left() < rect.x)
+		new_rect.left(rect.x);
+	else if (right() > (rect.x + rect.w))
+		new_rect.right(rect.x + rect.w);
+	if (top() < rect.y)
+		new_rect.top(rect.y);
+	else if (bottom() > (rect.y + rect.h))
+		new_rect.bottom(rect.y + rect.h);
 	return new_rect;
 }
 
@@ -567,7 +723,7 @@ bool Rect::clamp_ip(const Rect &rect) {
 }
 
 Rect Rect::move(const Vector &vec) const {
-	return {static_cast<int>(x + vec.x), static_cast<int>(y + vec.y), w, h};
+	return {x + vec.x, y + vec.y, w, h};
 }
 
 void Rect::move_ip(const Vector &vec) {
@@ -576,15 +732,15 @@ void Rect::move_ip(const Vector &vec) {
 }
 
 
-Circle::Circle(int x, int y, int r) {
+Circle::Circle(float x, float y, float r) {
 	this->x = x;
 	this->y = y;
 	this->r = r;
 }
 
-Circle::Circle(const Vector &vec, const int radius) {
-	x = static_cast<int>(vec.x);
-	y = static_cast<int>(vec.y);
+Circle::Circle(const Vector &vec, const float radius) {
+	x = vec.x;
+	y = vec.y;
 	r = radius;
 }
 
@@ -597,16 +753,16 @@ const string Circle::to_str() const {
 	return "Circle(" + std::to_string(x) + ", " + std::to_string(y) + std::to_string(r) + ")";
 }
 
-double Circle::radius() const {
+float Circle::radius() const {
 	return r;
 }
 
-void Circle::radius(const double radius) {
+void Circle::radius(const float radius) {
 	r = radius;
 }
 
 Vector Circle::center() const {
-	return {static_cast<double>(x), static_cast<double>(y)};
+	return {x, y};
 }
 
 void Circle::center(const Vector &vec) {
@@ -651,7 +807,7 @@ bool Circle::clamp_ip(const Circle &circle) {
 }
 
 Circle Circle::move(const Vector &vec) const {
-	return {static_cast<int>(x + vec.x), static_cast<int>(y + vec.y), r};
+	return {x + vec.x, y + vec.y, r};
 }
 
 void Circle::move_ip(const Vector &vec) {
@@ -936,111 +1092,111 @@ void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colou
 	draw_line_raw(v1, v2);
 }
 
-// void Renderer::draw_rect_raw(const Rect &rect, int width) {
-// 	if (width == 0) {
-// 		SDL_Rect r = rect;
-// 		SDL_RenderRect(renderer.get(), &r);
-// 	} else if (width == 1) {
-// 		SDL_Rect r = rect;
-// 		SDL_RenderDrawRect(renderer.get(), &r);
-// 	} else {
-// 		SDL_Rect r1 = {rect.x - width, rect.y - width, rect.w + 2*width, width};
-// 		SDL_Rect r2 = {rect.x - width, rect.y + rect.h, rect.w + 2*width, width};
-// 		SDL_Rect r3 = {rect.x - width, rect.y, width, rect.h};
-// 		SDL_Rect r4 = {rect.x + rect.w, rect.y, width, rect.h};
-// 		SDL_RenderFillRect(renderer.get(), &r1);
-// 		SDL_RenderFillRect(renderer.get(), &r2);
-// 		SDL_RenderFillRect(renderer.get(), &r3);
-// 		SDL_RenderFillRect(renderer.get(), &r4);
-// 	}
-// }
+void Renderer::draw_rect_raw(const Rect &rect, float width) {
+	if (width == 0) {
+		SDL_FRect r = rect;
+		SDL_RenderFillRect(renderer.get(), &r);
+	} else if (width == 1) {
+		SDL_FRect r = rect;
+		SDL_RenderRect(renderer.get(), &r);
+	} else {
+		SDL_FRect r1 = {rect.x - width, rect.y - width, rect.w + 2*width, width};
+		SDL_FRect r2 = {rect.x - width, rect.y + rect.h, rect.w + 2*width, width};
+		SDL_FRect r3 = {rect.x - width, rect.y, width, rect.h};
+		SDL_FRect r4 = {rect.x + rect.w, rect.y, width, rect.h};
+		SDL_RenderFillRect(renderer.get(), &r1);
+		SDL_RenderFillRect(renderer.get(), &r2);
+		SDL_RenderFillRect(renderer.get(), &r3);
+		SDL_RenderFillRect(renderer.get(), &r4);
+	}
+}
 
-// void Renderer::draw_rect(const Rect &rect, const Colour &colour, int width) {
-// 	set_colour(colour);
-// 	draw_rect_raw(rect, width);
-// }
+void Renderer::draw_rect(const Rect &rect, const Colour &colour, float width) {
+	set_colour(colour);
+	draw_rect_raw(rect, width);
+}
 
-// void Renderer::draw_circle(const Circle &circle, const Colour &colour, const bool filled) {
-// 	set_colour(colour);
+void Renderer::draw_circle(const Circle &circle, const Colour &colour, const bool filled) {
+	if (filled) {
+		constexpr int tris = 225; // Amount of triangles
+		float mirror = 2.0f * static_cast<float>(PI); // 2*PI
+		SDL_Vertex vertices[tris];
 
-// 	if (filled) {
-// 		constexpr int tris = 225; // Amount of triangles
-// 		float mirror = 2.0f * static_cast<float>(PI); // 2*PI
-// 		SDL_Vertex vertices[tris];
+		for (int i = 0; i < tris; i += 3) {
+			// The upper bound of the triangle
+			vertices[i].position = circle.center(); // 0, 3, 6, 9
+			vertices[i].color = (FColour)colour;
 
-// 		for (int i = 0; i < tris; i += 3) {
-// 			// The upper bound of the triangle
-// 			vertices[i].position = circle.center(); // 0, 3, 6, 9
-// 			vertices[i].color = colour;
+			// Subtract 3 from tris so we don't operate on a triangle that is out of bounds
 
-// 			// Subtract 3 from tris so we don't operate on a triangle that is out of bounds
+			// The lower right bound of the triangle
+			vertices[i + 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 1, 4, 7, 10
+			vertices[i + 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
+			vertices[i + 1].color = (FColour)colour;
 
-// 			// The lower right bound of the triangle
-// 			vertices[i + 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 1, 4, 7, 10
-// 			vertices[i + 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
-// 			vertices[i + 1].color = colour;
+			// The lower left bound of the triangle
+			if (i > 0) {
+				vertices[i - 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 2, 5, 8, 11
+				vertices[i - 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
+				vertices[i - 1].color = (FColour)colour;
+			}
+		}
 
-// 			// The lower left bound of the triangle
-// 			if (i > 0) {
-// 				vertices[i - 1].position.x = circle.x + (cos(i * mirror / (tris - 3)) * circle.r); // 2, 5, 8, 11
-// 				vertices[i - 1].position.y = circle.y + (sin(i * mirror / (tris - 3)) * circle.r);
-// 				vertices[i - 1].color = colour;
-// 			}
-// 		}
+		SDL_RenderGeometry(renderer.get(), NULL, vertices, tris - 3, NULL, tris - 3);
 
-// 		SDL_RenderGeometry(renderer.get(), NULL, vertices, tris - 3, NULL, tris - 3);
+	} else {
+		int x = circle.r, y = 0;
 
-// 	} else {
-// 		int x = circle.r, y = 0;
+		set_colour(colour);
 
-// 		// Printing the initial point on the axes
-// 		// after translation
-// 		SDL_RenderDrawPoint(renderer.get(), x + circle.x, circle.y);
+		// Printing the initial point on the axes
+		// after translation
+		SDL_RenderPoint(renderer.get(), x + circle.x, circle.y);
 
-// 		// When radius is zero only a single
-// 		// point will be printed
-// 		if (circle.r > 0) {
-// 			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, circle.y);
-// 			SDL_RenderDrawPoint(renderer.get(), circle.x, -x + circle.y);
-// 			SDL_RenderDrawPoint(renderer.get(), circle.x, x + circle.y);
-// 		}
+		// When radius is zero only a single
+		// point will be printed
+		if (circle.r > 0) {
+			SDL_RenderPoint(renderer.get(), -x + circle.x, circle.y);
+			SDL_RenderPoint(renderer.get(), circle.x, -x + circle.y);
+			SDL_RenderPoint(renderer.get(), circle.x, x + circle.y);
+		}
 
-// 		// Initialising the value of P
-// 		int P = 1 - circle.r;
-// 		while (x > y) {
-// 			y++;
+		// Initialising the value of P
+		int P = 1 - circle.r;
+		while (x > y) {
+			y++;
 
-// 			// Mid-point is inside or on the perimeter
-// 			if (P <= 0)
-// 				P = P + 2*y + 1;
-// 			// Mid-point is outside the perimeter
-// 			else {
-// 				x--;
-// 				P = P + 2*y - 2*x + 1;
-// 			}
+			// Mid-point is inside or on the perimeter
+			if (P <= 0)
+				P = P + 2*y + 1;
+			// Mid-point is outside the perimeter
+			else {
+				x--;
+				P = P + 2*y - 2*x + 1;
+			}
 
-// 			// All the perimeter points have already been printed
-// 			if (x < y)
-// 				break;
+			// All the perimeter points have already been printed
+			if (x < y)
+				break;
 
-// 			// Printing the generated point and its reflection
-// 			// in the other octants after translation
-// 			SDL_RenderDrawPoint(renderer.get(), x + circle.x, y + circle.y);
-// 			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, y + circle.y);
-// 			SDL_RenderDrawPoint(renderer.get(), x + circle.x, -y + circle.y);
-// 			SDL_RenderDrawPoint(renderer.get(), -x + circle.x, -y + circle.y);
+			// Printing the generated point and its reflection
+			// in the other octants after translation
+			SDL_RenderPoint(renderer.get(), x + circle.x, y + circle.y);
+			SDL_RenderPoint(renderer.get(), -x + circle.x, y + circle.y);
+			SDL_RenderPoint(renderer.get(), x + circle.x, -y + circle.y);
+			SDL_RenderPoint(renderer.get(), -x + circle.x, -y + circle.y);
 
-// 			// If the generated point is on the line x = y then
-// 			// the perimeter points have already been printed
-// 			if (x != y) {
-// 				SDL_RenderDrawPoint(renderer.get(), y + circle.x, x + circle.y);
-// 				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, x + circle.y);
-// 				SDL_RenderDrawPoint(renderer.get(), y + circle.x, -x + circle.y);
-// 				SDL_RenderDrawPoint(renderer.get(), -y + circle.x, -x + circle.y);
-// 			}
-// 		}
-// 	}
-// }
+			// If the generated point is on the line x = y then
+			// the perimeter points have already been printed
+			if (x != y) {
+				SDL_RenderPoint(renderer.get(), y + circle.x, x + circle.y);
+				SDL_RenderPoint(renderer.get(), -y + circle.x, x + circle.y);
+				SDL_RenderPoint(renderer.get(), y + circle.x, -x + circle.y);
+				SDL_RenderPoint(renderer.get(), -y + circle.x, -x + circle.y);
+			}
+		}
+	}
+}
 
 void Renderer::draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled) {
 	int n = vertices.size();
@@ -1049,7 +1205,7 @@ void Renderer::draw_polygon(const std::vector<Vector> vertices, const Colour col
 		std::vector<SDL_Vertex> verts(n);
 		for (int i=0; i < n; i++) {
 			verts[i].position = vertices[i];
-			verts[i].color = colour;
+			verts[i].color = (FColour)colour;
 		}
 
 		std::vector<int> indices((n-2)*3);
@@ -1067,7 +1223,7 @@ void Renderer::draw_polygon(const std::vector<Vector> vertices, const Colour col
 
 		int j = n - 1;
 		for (int i=0; i < n; i++) {
-			SDL_RenderDrawLine(renderer.get(), vertices[j].x, vertices[j].y, vertices[i].x, vertices[i].y);
+			SDL_RenderLine(renderer.get(), vertices[j].x, vertices[j].y, vertices[i].x, vertices[i].y);
 			j = i;
 		}
 	}
@@ -1306,14 +1462,14 @@ void Surface::blit(Surface &dst_surface, const IVector &ivec) {
 	SDL_BlitSurface(surface.get(), &src_rect, dst_surface.surface.get(), &dst_rect);
 }
 
-void Surface::blit(Surface &dst_surface, const Rect &dst_rect) {
+void Surface::blit(Surface &dst_surface, const IRect &dst_rect) {
 	SDL_Rect src_rect = {0, 0, surface.get()->w, surface.get()->h};
 	SDL_Rect _dst_rect = dst_rect;
 
 	SDL_BlitSurface(surface.get(), &src_rect, dst_surface.surface.get(), &_dst_rect);
 }
 
-void Surface::blit(Surface &dst_surface, const Rect &dst_rect, const Rect &src_rect) {
+void Surface::blit(Surface &dst_surface, const IRect &dst_rect, const IRect &src_rect) {
 	SDL_Rect _src_rect = src_rect;
 	SDL_Rect _dst_rect = dst_rect;
 
@@ -1394,7 +1550,7 @@ Texture::Texture(Renderer &renderer, const IVector &size, const Uint32 format, c
 	}
 }
 
-Rect Texture::get_rect() {
+IRect Texture::get_rect() {
 	return {0, 0, w, h};
 }
 
@@ -1409,7 +1565,7 @@ void Texture::set_blend_mode(SDL_BlendMode blend_mode) {
 }
 
 void Texture::render(const Vector &vec) {
-	render({vec, get_rect().size()});
+	render({vec, static_cast<Rect>(get_rect()).size()});
 }
 
 void Texture::render(const Rect &dst_rect) {
@@ -1417,47 +1573,18 @@ void Texture::render(const Rect &dst_rect) {
 }
 
 void Texture::render(const Rect &dst_rect, const Rect &src_rect) {
-	const SDL_Rect r1 = src_rect;
-	const SDL_Rect r2 = dst_rect;
+	const SDL_FRect r1 = src_rect;
+	const SDL_FRect r2 = dst_rect;
 	SDL_RenderTexture(tex_renderer -> renderer.get(), texture.get(), &r1, &r2);
 }
 
-void Texture::render_rot(const Rect &dst_rect, const double angle, const Vector &center, const SDL_FlipMode flip) {
+void Texture::render_rot(const Rect &dst_rect, const float angle, const Vector &center, const SDL_FlipMode flip) {
 	render_rot(dst_rect, get_rect(), angle, center, flip);
 }
 
-void Texture::render_rot(const Rect &dst_rect, const Rect &src_rect, const double angle, const Vector &center, const SDL_FlipMode flip) {
-	const SDL_Rect r1 = {src_rect.x, src_rect.y, src_rect.w, src_rect.h};
-	const SDL_Rect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
-	const SDL_Point p = {(int)center.x, (int)center.y};
+void Texture::render_rot(const Rect &dst_rect, const Rect &src_rect, const float angle, const Vector &center, const SDL_FlipMode flip) {
+	const SDL_FRect r1 = {src_rect.x, src_rect.y, src_rect.w, src_rect.h};
+	const SDL_FRect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
+	const SDL_FPoint p = {center.x, center.y};
 	SDL_RenderTextureRotated(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
 }
-
-/*
-States::States(vector<State> &states) {
-	for (State &state: states) {
-		this->states[state.name] = state;
-	}
-}
-
-bool States::is_active(string state) {
-	return states[state].active;
-}
-
-void States::activate(string state) {
-	states[state].active = true;
-}
-
-void States::inactivate(string state) {
-	states[state].active = false;
-}
-
-string States::get_top_state() {
-	string state;
-	int p = -1;
-	for (auto &[key, value]: states) {
-		if (value.priority > p) state = key; 
-	}
-	return state;
-}
-*/

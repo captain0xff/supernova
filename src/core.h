@@ -16,6 +16,8 @@ using string = std::string;
 
 
 // Forward Declarations
+struct Colour;
+struct FColour;
 struct Vector;
 struct Rect;
 struct Circle;
@@ -75,21 +77,50 @@ struct Colour {
 	Uint8 r, g, b;
 	Uint8 a = 255;
 
+	friend std::ostream& operator<<(std::ostream &os, const Colour &colour);
+	friend Colour operator/(const Colour &colour, const float val);
+	friend Colour operator*(const Colour &colour, const float &val);
+	friend void operator*=(Colour &colour1, const Colour &colour2);
+	friend void operator/=(Colour &colour, const float val);
+
+	explicit operator FColour() const;
 	operator SDL_Color() const;
 
+	const string to_str() const;
+
 	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1
-	Colour modulate(const double mod_r=1, const double mod_g=1, const double mod_b=1, const double mod_a=1) const;
+	Colour modulate(const float mod_r=1, const float mod_g=1, const float mod_b=1, const float mod_a=1) const;
+};
+
+
+struct FColour {
+	float r, g, b;
+	float a = 1.0f;
+
+	friend std::ostream& operator<<(std::ostream &os, const Colour &fcolour);
+	friend FColour operator*(const FColour &fcolour, const float val);
+	friend FColour operator/(const FColour &fcolour, const float val);
+	friend void operator*=(FColour &fcolour, const float val);
+	friend void operator/=(FColour &fcolour, const float val);
+
+	explicit operator Colour() const;
+	operator SDL_FColor() const;
+
+	const string to_str() const;
+
+	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1
+	FColour modulate(const float mod_r=1, const float mod_g=1, const float mod_b=1, const float mod_a=1) const;
 };
 
 
 struct IVector {
 	int x, y;
 
-	friend std::ostream& operator<<(std::ostream &os, IVector const &ivector);
+	friend std::ostream& operator<<(std::ostream &os, const IVector &ivector);
 	friend IVector operator+(const IVector &ivec1, const IVector &ivec2);
 	friend IVector operator-(const IVector &ivec1, const IVector &ivec2);
-	friend IVector operator*(const IVector &ivec, const double &val);
-	friend IVector operator/(const IVector &ivec, const double &val);
+	friend IVector operator*(const IVector &ivec, const float &val);
+	friend IVector operator/(const IVector &ivec, const float &val);
 	friend void operator+=(IVector &ivec1, const IVector &ivec2);
 	friend void operator-=(IVector &ivec1, const IVector &ivec2);
 	friend void operator*=(IVector &ivec1, const IVector &ivec2);
@@ -104,13 +135,13 @@ struct IVector {
 
 
 struct Vector {
-	double x, y;
+	float x, y;
 
-	friend std::ostream& operator<<(std::ostream &os, Vector const &vector);
+	friend std::ostream& operator<<(std::ostream &os, const Vector &vector);
 	friend Vector operator+(const Vector &vec1, const Vector &vec2);
 	friend Vector operator-(const Vector &vec1, const Vector &vec2);
-	friend Vector operator*(const Vector &vec, const double &val);
-	friend Vector operator/(const Vector &vec, const double &val);
+	friend Vector operator*(const Vector &vec, const float &val);
+	friend Vector operator/(const Vector &vec, const float &val);
 	friend void operator+=(Vector &vec1, const Vector &vec2);
 	friend void operator-=(Vector &vec1, const Vector &vec2);
 	friend void operator*=(Vector &vec1, const Vector &vec2);
@@ -122,19 +153,19 @@ struct Vector {
 	
 	const string to_str() const;
 
-	double magnitude_squared() const;
-	double magnitude() const;
+	float magnitude_squared() const;
+	float magnitude() const;
 
 	Vector normalize() const;
 	void normalize_ip();
-	Vector rotate_rad(const double &angle) const;
-	void rotate_rad_ip(const double &angle);
-	Vector rotate(const double &angle) const; // In degrees
-	void rotate_ip(const double &angle); // In degrees
-	double distance_to_squared(const Vector &vec) const;
-	double distance_to(const Vector &vec) const;
-	double angle_rad() const;
-	double angle() const; // In degrees
+	Vector rotate_rad(const float &angle) const;
+	void rotate_rad_ip(const float &angle);
+	Vector rotate(const float &angle) const; // In degrees
+	void rotate_ip(const float &angle); // In degrees
+	float distance_to_squared(const Vector &vec) const;
+	float distance_to(const Vector &vec) const;
+	float angle_rad() const;
+	float angle() const; // In degrees
 	Vector clamp(const Rect &rect) const;
 	Vector clamp(const Circle &circle) const;
 	void clamp_ip(const Rect &rect);
@@ -142,16 +173,32 @@ struct Vector {
 };
 
 
-struct Rect {
+struct IRect {
 	int x, y, w, h;
 
+	IRect() {};
+	IRect(int x, int y, int w, int h);
+	IRect(const IVector &pos, const IVector &size);
+
+	friend std::ostream& operator<<(std::ostream &os, const Rect &rect);
+
+	operator Rect() const;
+	operator SDL_Rect() const;
+
+	const string to_str() const;
+};
+
+
+struct Rect {
+	float x, y, w, h;
+
 	Rect() {};
-	Rect(int x, int y, int w, int h);
+	Rect(float x, float y, float w, float h);
 	Rect(const Vector &pos, const Vector &size);
 
-	friend std::ostream& operator<<(std::ostream &os, Rect const &rect);
+	friend std::ostream& operator<<(std::ostream &os, const Rect &rect);
 
-	operator SDL_Rect() const;
+	operator SDL_FRect() const;
 
 	const string to_str() const;
 
@@ -159,23 +206,23 @@ struct Rect {
 	void size(const Vector &vec);
 	void scale(const Vector &vec);
 	// Scales the height and width by the given factor
-	void scale(const double val);
-	double half_width() const;
-	double half_height() const;
+	void scale(const float val);
+	float half_width() const;
+	float half_height() const;
 	Vector half_size() const;
 
-	double top() const;
-	void top(const double &val);
-	double bottom() const;
-	void bottom(const double &val);
-	double left() const;
-	void left(const double &val);
-	double right() const;
-	void right(const double &val);
-	double centerx() const;
-	void centerx(const double &val);
-	double centery() const;
-	void centery(const double &val);
+	float top() const;
+	void top(const float &val);
+	float bottom() const;
+	void bottom(const float &val);
+	float left() const;
+	void left(const float &val);
+	float right() const;
+	void right(const float &val);
+	float centerx() const;
+	void centerx(const float &val);
+	float centery() const;
+	void centery(const float &val);
 	Vector topleft() const;
 	void topleft(const Vector &vec);
 	Vector topright() const;
@@ -207,18 +254,18 @@ struct Rect {
 
 
 struct Circle {
-	int x, y, r;
+	float x, y, r;
 
 	Circle() {};
-	Circle(int x, int y, int r);
-	Circle(const Vector &vec, const int radius);
+	Circle(float x, float y, float r);
+	Circle(const Vector &vec, const float radius);
 
 	friend std::ostream& operator<<(std::ostream &os, const Circle &circle);
 
 	const string to_str() const;
 
-	double radius() const;
-	void radius(const double radius);
+	float radius() const;
+	void radius(const float radius);
 	Vector center() const;
 	void center(const Vector &vec);
 
@@ -253,7 +300,7 @@ struct Finger {
 	Vector pos;
 	Vector dpos;
 	bool pressed;
-	double pressure;
+	float pressure;
 };
 
 typedef std::unordered_map<SDL_FingerID, Finger> Fingers;
@@ -370,8 +417,8 @@ class Renderer {
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line_raw(const Vector &v1, const Vector &v2);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
-		void draw_rect_raw(const Rect &rect, const int width=0);
-		void draw_rect(const Rect &rect, const Colour &colour, const int width=0);
+		void draw_rect_raw(const Rect &rect, const float width=0);
+		void draw_rect(const Rect &rect, const Colour &colour, const float width=0);
 		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);
 		void draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled=true);
 		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices);
@@ -390,9 +437,9 @@ class Mouse {
 		Vector pos = {0, 0};
 		std::unordered_map<int, MouseButton> buttons;
 		// The amount scrolled vertically, positive away from the user and negative towards the user
-		double vert_wheel = 0;
+		float vert_wheel = 0;
 		// The amount scrolled horizontally, positive to the right and negative to the left
-		double horz_wheel = 0;
+		float horz_wheel = 0;
 
 		Mouse(const int needed_buttons = 0);
 
@@ -428,8 +475,8 @@ class Surface {
 		void set_colour_key(const Uint32 key, const bool enable=true);
 		// Blits the surface on another surface
 		void blit(Surface &dst_surface, const IVector &ivec);
-		void blit(Surface &dst_surface, const Rect &dst_rect);
-		void blit(Surface &dst_surface, const Rect &dst_rect, const Rect &src_rect);
+		void blit(Surface &dst_surface, const IRect &dst_rect);
+		void blit(Surface &dst_surface, const IRect &dst_rect, const IRect &src_rect);
 #ifdef IMAGE_ENABLED
 		// This function saves the surface as png
 		void save(const string &file);
@@ -456,36 +503,15 @@ class Texture {
 		Texture(Renderer &renderer, Surface surface);
 		Texture(Renderer &renderer, const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
 
-		Rect get_rect();
+		IRect get_rect();
 
 		void set_colour_mod(const Colour &colour);
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void render(const Vector &vec);
 		void render(const Rect &dst_rect);
 		void render(const Rect &dst_rect, const Rect &src_rect);
-		void render_rot(const Rect &dst_rect, const double angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
-		void render_rot(const Rect &dst_rect, const Rect &src_rect, const double angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
+		void render_rot(const Rect &dst_rect, const float angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
+		void render_rot(const Rect &dst_rect, const Rect &src_rect, const float angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
 };
-
-/*
-class States {
-	public:
-		struct State {
-			string name;
-			int priority; // Must be a positive integer
-			bool active = false;
-			bool quick_change = true;
-		};
-
-		unordered_map<string, State> states;
-
-		States(vector<State> &states);
-
-		bool is_active(string state);
-		void activate(string state);
-		void inactivate(string state);
-		string get_top_state();
-};
-*/
 
 #endif /* SUPERNOVA_CORE_H */
