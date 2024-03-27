@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(supernova)
+project(supernova3)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
