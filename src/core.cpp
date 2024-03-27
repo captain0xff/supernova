@@ -919,7 +919,7 @@ double Timer::time_left() {
 
 
 IO::IO(const string &file, const string access_mode) {
-	io = SDL_RWFromFile(file.c_str(), access_mode.c_str());
+	io = SDL_IOFromFile(file.c_str(), access_mode.c_str());
 
 	if (io == NULL)
 		SDL_LogError(0, "Failed to load file! (%s): %s", file.c_str(), SDL_GetError());
@@ -933,8 +933,8 @@ IO::~IO() {
 
 Sint64 IO::get_file_size() {
 	const Sint64 file_pos = tell();
-	const Sint64 file_size = seek(0, SDL_RW_SEEK_END);
-	seek(file_pos, SDL_RW_SEEK_SET);
+	const Sint64 file_size = seek(0, SDL_IO_SEEK_END);
+	seek(file_pos, SDL_IO_SEEK_SET);
 
 	return file_size;
 }
@@ -943,7 +943,7 @@ int IO::read(void *ptr, const int max) {
 	// The parameter takes the maximum number of bytes to read
 	// Returns the number of objects read or -1 on error
 	if (IS_LOADED)
-		return SDL_RWread(io, ptr, max);
+		return SDL_ReadIO(io, ptr, max);
 	SDL_LogWarn(0, "%s", "Failed to read: file not loaded successfully!");
 	return -1;
 }
@@ -978,7 +978,7 @@ void IO::write(const void *ptr, const size_t num) {
 	// Returns the numer of objects written
 	if (!IS_LOADED)
 		SDL_LogWarn(0, "%s", "Failed to write: file not loaded successfully!");
-	else if (SDL_RWwrite(io, ptr, num) < num)
+	else if (SDL_WriteIO(io, ptr, num) < num)
 		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
 }
 
@@ -988,21 +988,21 @@ void IO::write(const string &data) {
 
 Sint64 IO::tell() {
 	if (IS_LOADED)
-		return SDL_RWtell(io);
+		return SDL_TellIO(io);
 	SDL_LogWarn(0, "%s", "Failed to tell: file not loaded successfully!");
 	return -1;
 }
 
 Sint64 IO::seek(Sint64 offset, int whence) {
 	if (IS_LOADED)
-		return SDL_RWseek(io, offset, whence);
+		return SDL_SeekIO(io, offset, whence);
 	SDL_LogWarn(0, "%s", "Failed to seek: file not loaded successfully!");
 	return -1;
 }
 
 void IO::close() {
 	if (io != nullptr) {
-		SDL_RWclose(io);
+		SDL_CloseIO(io);
 		io = nullptr;
 		IS_LOADED = false;
 	}
@@ -1032,7 +1032,7 @@ void Window::destroy(SDL_Window *window) {
 
 
 Renderer::Renderer(Window &window, const SDL_RendererFlags flags, const string &driver):
-	renderer(managed_ptr<SDL_Renderer>(SDL_CreateRenderer(window.window.get(), driver.c_str(), flags),destroy)) {
+		renderer(managed_ptr<SDL_Renderer>((driver == "")? SDL_CreateRenderer(window.window.get(), NULL, flags) : SDL_CreateRenderer(window.window.get(), driver.c_str(), flags),destroy)) {
 	if (renderer.get() == NULL)
 		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
 	else
@@ -1423,26 +1423,51 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 
 
 Surface::Surface(const IVector &size, const Uint32 format):
-	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, format), SDL_DestroySurface)) {
-	if (surface.get() == NULL)
+	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, (SDL_PixelFormatEnum)format), SDL_DestroySurface)) {
+	if (surface.get() == nullptr)
 		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
 	else {
 		id = SURF_ID;
 		SDL_Log("Surface created successfully![%i]", id);
 		SURF_ID++;
+
+		w = size.x;
+		h = size.y;
 	}
 }
 
-Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_DestroySurface)) {}
+Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_DestroySurface)) {
+	if (surface.get() == nullptr) {
+		SDL_LogError(0, "Invalid surface");
+	} else {
+		w = surface.get()->w;
+		h = surface.get()->h;	
+	}
+}
+
+Surface::Surface(Surface &&_surface): surface(std::move(_surface.surface)) {
+	if (surface.get() == nullptr) {
+		SDL_LogError(0, "Failed to move surface: Invalid surface");
+	} else {
+		id = _surface.id;
+		_surface.id = -1;
+
+		w = _surface.w;
+		h = _surface.h;
+	}
+}
 
 #ifdef IMAGE_ENABLED
 Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
-	if (surface.get() == NULL)
+	if (surface.get() == nullptr)
 		SDL_LogError(0, "Failed to load surface: %s", SDL_GetError());
 	else {
 		id = SURF_ID;
 		SDL_Log("Surface loaded successfully![%i]", id);
 		SURF_ID++;
+
+		w = surface.get()->w;
+		h = surface.get()->h;
 	}
 }
 #endif /* IMAGE_ENABLED */
@@ -1498,12 +1523,12 @@ Texture::Texture(Renderer &renderer, SDL_Texture *_texture):
 }
 
 Texture::Texture(Texture &&_texture): texture(std::move(_texture.texture)) {
-    tex_renderer = _texture.tex_renderer;
-    _texture.tex_renderer = nullptr;
-    id = _texture.id;
-    _texture.id = -1;
-    w = _texture.w;
-    h = _texture.h;
+	tex_renderer = _texture.tex_renderer;
+	_texture.tex_renderer = nullptr;
+	id = _texture.id;
+	_texture.id = -1;
+	w = _texture.w;
+	h = _texture.h;
 }
 
 #ifdef IMAGE_ENABLED
@@ -1522,7 +1547,7 @@ Texture::Texture(Renderer &renderer, const string &file):
 }
 #endif /* IMAGE_ENABLED */
 
-Texture::Texture(Renderer &renderer, Surface surface):
+Texture::Texture(Renderer &renderer, const Surface &surface):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
@@ -1587,4 +1612,58 @@ void Texture::render_rot(const Rect &dst_rect, const Rect &src_rect, const float
 	const SDL_FRect r2 = {dst_rect.x, dst_rect.y, dst_rect.w, dst_rect.h};
 	const SDL_FPoint p = {center.x, center.y};
 	SDL_RenderTextureRotated(tex_renderer -> renderer.get(), texture.get(), &r1, &r2, angle, &p, flip);
+}
+
+
+std::vector<SDL_CameraDeviceID> Camera::get_available_devices() {
+	int count;
+	SDL_CameraDeviceID *dvcs = SDL_GetCameraDevices(&count);
+	if (!dvcs) {
+		SDL_LogError(0, "Failed to get camera devices: %s", SDL_GetError());
+	}
+	std::vector<SDL_CameraDeviceID> devices(dvcs, dvcs + count);
+
+	return devices;
+}
+
+SDL_CameraDeviceID Camera::select_device(const int id) {
+	SDL_CameraDeviceID devid = get_available_devices().at(id);
+	if (!devid)
+		SDL_LogError(0, "No cameras available.");
+
+	return devid;
+}
+
+Camera::Camera(const int id): camera(SDL_OpenCameraDevice(select_device(id), NULL), SDL_CloseCamera) {
+	permission_state = get_permission_state();
+}
+
+int Camera::get_permission_state() {
+	permission_state = SDL_GetCameraPermissionState(camera.get());
+	return permission_state;
+}
+
+bool Camera::is_new_frame_available() {
+	// This function must be called before acquire_frame()
+	// Otherwise acquire_frame() will keep returning the old surface
+	// Also returns false if camera permission hasn't been granted or
+	// if a new frame isn't available
+	if (permission_state > 0) {
+		surface = SDL_AcquireCameraFrame(camera.get(), &time_stamp);
+		return !(surface == nullptr);
+	} else {
+		return false;
+	}
+}
+
+Surface& Camera::acquire_frame() {
+	frame = std::make_unique<Surface>(surface);
+	return *frame.get();
+}
+
+void Camera::release_frame() {
+	if (permission_state > 0) {
+		(void)frame.release();
+		SDL_ReleaseCameraFrame(camera.get(), surface);
+	}
 }

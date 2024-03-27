@@ -31,6 +31,7 @@ class Surface;
 class Texture;
 class Mouse;
 class Events;
+class Camera;
 
 
 
@@ -311,7 +312,7 @@ extern Fingers FINGERS;
 // Classes
 class Engine {
 	public:
-		Engine(const unsigned int sdl_init_flags=62001, const int img_init_flags=2, const int mix_init_flags=24);
+		Engine(const unsigned int sdl_init_flags=127537, const int img_init_flags=2, const int mix_init_flags=24);
 		~Engine();
 };
 
@@ -359,7 +360,7 @@ class IO {
 		bool IS_LOADED = false;
 
 	public:
-		SDL_RWops *io;
+		SDL_IOStream *io;
 
 		IO(const string &file, const string access_mode="r");
 		~IO();
@@ -380,7 +381,7 @@ class IO {
 		void write(const string &data);
 		Sint64 tell();
 		// The parameter whence can be any of RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
-		Sint64 seek(Sint64 offset, int whence=SDL_RW_SEEK_CUR);
+		Sint64 seek(Sint64 offset, int whence=SDL_IO_SEEK_CUR);
 		void close();
 };
 
@@ -402,7 +403,7 @@ class Renderer {
 	public:
 		managed_ptr<SDL_Renderer> renderer;
 
-		Renderer(Window &window, const SDL_RendererFlags flags=(SDL_RendererFlags)0, const string &driver=NULL);
+		Renderer(Window &window, const SDL_RendererFlags flags=(SDL_RendererFlags)0, const string &driver="");
 
 		void static destroy(SDL_Renderer *renderer);
 		void set_colour(const Colour &colour);
@@ -464,9 +465,11 @@ class Surface {
 	public:
 		int id;
 		managed_ptr<SDL_Surface> surface;
+		int w, h;
 
 		Surface(const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA8888);
 		Surface(SDL_Surface *_surface);
+		Surface(Surface &&_surface);
 #ifdef IMAGE_ENABLED
 		Surface(const string &file);
 #endif /* IMAGE_ENABLED */
@@ -500,7 +503,7 @@ class Texture {
 #ifdef IMAGE_ENABLED
 		Texture(Renderer &renderer, const string &file);
 #endif /* IMAGE_ENABLED */
-		Texture(Renderer &renderer, Surface surface);
+		Texture(Renderer &renderer, const Surface &surface);
 		Texture(Renderer &renderer, const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
 
 		IRect get_rect();
@@ -512,6 +515,34 @@ class Texture {
 		void render(const Rect &dst_rect, const Rect &src_rect);
 		void render_rot(const Rect &dst_rect, const float angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
 		void render_rot(const Rect &dst_rect, const Rect &src_rect, const float angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
+};
+
+
+class Camera {
+	private:
+		// [-1/0/1] -> rejected/pending/approved
+		int permission_state;
+		SDL_Surface *surface;
+		std::unique_ptr<Surface> frame;
+
+	public:
+		managed_ptr<SDL_Camera> camera;
+		uint64_t time_stamp = 0;
+
+		Camera(const int id=0);
+
+		static std::vector<SDL_CameraDeviceID> get_available_devices();
+		// Throws an error if the ID is greater than the number of available devices
+		static SDL_CameraDeviceID select_device(const int id=0);
+
+		int get_permission_state();
+		// This function must be called before acquire_frame()
+		// Otherwise acquire_frame() will keep returning the old surface
+		// Also returns false if camera permission hasn't been granted
+		// if a new frame isn't available
+		bool is_new_frame_available();
+		Surface& acquire_frame();
+		void release_frame();
 };
 
 #endif /* SUPERNOVA_CORE_H */
