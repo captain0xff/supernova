@@ -5,6 +5,7 @@
 * Upgrade the satellite libs.
 * Change the SDL int types to C fixed width ints.
 * Try to reduce dependency on SDL of the headers so that we don't even need to link to it.
+* After SDL3 is released rename supernova3 to supernova and the sdl2 branch to supernova2.
 
 ## Already done
 * Renamed functions and variables.
