@@ -16,7 +16,7 @@
 #include <SDL3/SDL_ttf.h>
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-#include <SDL3/SDL_net.h>
+#include <SDL3_net/SDL_net.h>
 #endif /* NET_ENABLED */
 
 
@@ -1480,6 +1480,10 @@ void Surface::set_colour_key(const Uint32 key, const bool enable) {
 	SDL_SetSurfaceColorKey(surface.get(), enable, key);
 }
 
+void Surface::flip(const SDL_FlipMode flip_mode) {
+	SDL_FlipSurface(surface.get(), flip_mode);
+}
+
 void Surface::blit(Surface &dst_surface, const IVector &ivec) {
 	SDL_Rect src_rect = {0, 0, surface.get()->w, surface.get()->h};
 	SDL_Rect dst_rect = {ivec.x, ivec.y, dst_surface.surface.get()->w, dst_surface.surface.get()->h};
@@ -1579,6 +1583,10 @@ IRect Texture::get_rect() {
 	return {0, 0, w, h};
 }
 
+SDL_PropertiesID Texture::get_properties() {
+	return SDL_GetTextureProperties(texture.get());
+}
+
 void Texture::set_colour_mod(const Colour &colour) {
 	SDL_SetTextureColorMod(texture.get(), colour.r, colour.g, colour.b);
 	if (colour.a != 255)
@@ -1650,7 +1658,7 @@ bool Camera::is_new_frame_available() {
 	// if a new frame isn't available
 	if (permission_state > 0) {
 		surface = SDL_AcquireCameraFrame(camera.get(), &time_stamp);
-		return !(surface == nullptr);
+		return (surface != nullptr);
 	} else {
 		return false;
 	}
@@ -1663,7 +1671,7 @@ Surface& Camera::acquire_frame() {
 
 void Camera::release_frame() {
 	if (permission_state > 0) {
-		(void)frame.release();
+		frame.release();
 		SDL_ReleaseCameraFrame(camera.get(), surface);
 	}
 }

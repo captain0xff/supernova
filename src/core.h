@@ -476,7 +476,7 @@ class Surface {
 
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_colour_key(const Uint32 key, const bool enable=true);
-		// Blits the surface on another surface
+		void flip(const SDL_FlipMode flip_mode);
 		void blit(Surface &dst_surface, const IVector &ivec);
 		void blit(Surface &dst_surface, const IRect &dst_rect);
 		void blit(Surface &dst_surface, const IRect &dst_rect, const IRect &src_rect);
@@ -507,6 +507,7 @@ class Texture {
 		Texture(Renderer &renderer, const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
 
 		IRect get_rect();
+		SDL_PropertiesID get_properties();
 
 		void set_colour_mod(const Colour &colour);
 		void set_blend_mode(const SDL_BlendMode blend_mode);
