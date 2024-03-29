@@ -6,7 +6,7 @@
 #endif /* NET_ENABLED */
 
 
-#include <SDL2/SDL_net.h>
+#include <SDL3_net/SDL_net.h>
 
 #include "core.h"
 
@@ -16,111 +16,62 @@ using namespace std;
 
 
 // Forward Declarations
-class Packet;
-class UDPSocket;
-class TCPSocket;
-class NetUtils;
+class Address;
+class StreamServer;
+class StreamSocket;
 
 
 
 // Classes
-class Packet {
+class StreamServer {
 	private:
-		string _serialized_data;
-		string _val;
-		int maxlen;
-		IPaddress destination;
-		// Determines if the packet is used for receiving data
-		// or sending.
-		bool for_sending;
-		
-		string get_next_val();
-		// Every time this function is called the data becomes empty
-		char* get_data();
-		void set_data(char *val);
+		SDLNet_StreamSocket *client = nullptr;
 
 	public:
-		char DELIMITER = '|';
+		managed_ptr<SDLNet_Server> server;
 
-		managed_ptr<UDPpacket> packet;
-		vector<string> data;
+		StreamServer(const uint16_t port);
 
-		Packet(const int maxlen);
-		Packet(const int maxlen, IPaddress &destination);
-
-		void clear_data();
-		// This function shouldn't be called explicitly by the user.
-		void ready();
-		// This function shouldn't be called explicitly by the user.
-		void set();
-		// void destroy();
-
-		friend Packet& operator<<(Packet &packet, const string val);
-		friend Packet& operator<<(Packet &packet, const char *val);
-		friend Packet& operator<<(Packet &packet, const int val);
-		friend Packet& operator<<(Packet &packet, const double val);
-		friend Packet& operator<<(Packet &packet, const Uint8 val);
-		friend Packet& operator<<(Packet &packet, const Colour &colour);
-		friend Packet& operator<<(Packet &packet, const Vector &vec);
-		friend Packet& operator<<(Packet &packet, const Rect &rect);
-
-		friend Packet& operator>>(Packet &packet, string &val);
-		friend Packet& operator>>(Packet &packet, char *val);
-		friend Packet& operator>>(Packet &packet, int &val);
-		friend Packet& operator>>(Packet &packet, double &val);
-		friend Packet& operator>>(Packet &packet, Uint8 &val);
-		friend Packet& operator>>(Packet &packet, Colour &colour);
-		friend Packet& operator>>(Packet &packet, Vector &vec);
-		friend Packet& operator>>(Packet &packet, Rect &rect);
+		// This function must be called before calling accept_client
+		bool is_new_connection_available();
+		// This function should only be called if is_new_connection_available()
+		// returns true
+		StreamSocket accept_client();
 };
 
 
-class UDPSocket {
-	public:
-		UDPsocket socket;
-
-		UDPSocket(const int port);
-		~UDPSocket();
-
-		// Returns true if the packet is sent successfully
-		bool send(Packet &packet, const int chanel=-1);
-		// Returns true when a packet is coming
-		bool recv(Packet &packet);
-		void bind(const IPaddress &ip, const int channel=-1);
-		void unbind(const int channel);
-		// void destroy();
-};
-
-
-class TCPSocket {
+class StreamSocket {
 	private:
-		int _val;
-		IPaddress *ip;
+		// [-1/0/1] -> failed/pending/successful
+		int connection_status = 0;
+		int address_status = 0;
+
+		void create_socket();
 
 	public:
-		TCPsocket socket;
+		uint16_t port;
+		string host;
+		managed_ptr<SDLNet_StreamSocket> socket;
+		SDLNet_Address *address;
 
-		TCPSocket();
-		TCPSocket(IPaddress &ip);
-		~TCPSocket();
+		StreamSocket();
+		StreamSocket(SDLNet_StreamSocket *_socket);
+		StreamSocket(const uint16_t _port, const string &_host="127.0.0.1");
 
-		// Returns true if connection is accepted successfully
-		bool accept(TCPSocket &sock);
-		// Returns address of the machine connected to the socket
-		IPaddress* get_peer_address();
-		void send(const void *buffer, int size);
-		void send(string &data);
-		// Returns number of bytes received
-		int recv(void *buffer, const int size);
-		// void destroy();
+		StreamSocket& operator=(StreamSocket&& stream_socket);
+
+		// [-1/0/1] -> failed/pending/resolved
+		int get_address_status();
+		// [-1/0/1] -> failed/pending/successful
+		int get_connection_status();
+		// Returns the number of bytes left to send or -1 on error
+		int get_pending_writes();
+
+		// Returns the number of bytes read or -1 on error
+		int read(void *buffer, const int size);
+		int write(const void *buffer, const int size);
 };
 
-
-class NetUtils {
-	public:
-		void static resolve_host(IPaddress &IP, const int port, const string host="0.0.0.0");
-		string static get_formatted_ipv4_host(const Uint32 host);
-};
 
 
 #endif /* SUPERNOVA_NETWORKING_H */
