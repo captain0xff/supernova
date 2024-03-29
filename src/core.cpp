@@ -835,7 +835,7 @@ Engine::Engine(const unsigned int sdl_init_flags, const int img_init_flags, cons
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
 	if (SDLNet_Init() < 0)
-		SDL_LogError(0, "Failed to initialize SDL_net: %s", SDLNet_GetError());
+		SDL_LogError(0, "Failed to initialize SDL_net: %s", SDL_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
 	SDL_Log("Engine started!");
@@ -845,14 +845,14 @@ Engine::~Engine() {
 #ifdef IMAGE_ENABLED
 	IMG_Quit();
 #endif /* IMAGE_ENABLED */
+#ifdef MIX_ENABLED
+	Mix_Quit();
+#endif /* MIX_ENABLED */
 #ifdef TTF_ENABLED
 	TTF_Quit();
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
 	SDLNet_Quit();
-#endif /* TTF_ENABLED */
-#ifdef NET_ENABLED
-	Mix_Quit();
 #endif /* NET_ENABLED */
 	SDL_Quit();
 	SDL_Log("Engine stopped!");
