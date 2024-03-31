@@ -18,7 +18,9 @@ using string = std::string;
 // Forward Declarations
 struct Colour;
 struct FColour;
+struct IVector;
 struct Vector;
+struct IRect;
 struct Rect;
 struct Circle;
 struct EventKey;
