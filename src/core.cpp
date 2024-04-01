@@ -750,7 +750,7 @@ std::ostream& operator<<(std::ostream &os, const Circle &circle) {
 }
 
 const string Circle::to_str() const {
-	return "Circle(" + std::to_string(x) + ", " + std::to_string(y) + std::to_string(r) + ")";
+	return "Circle(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(r) + ")";
 }
 
 float Circle::radius() const {
