@@ -116,19 +116,19 @@ std::ostream& operator<<(std::ostream &os, Colour const &colour) {
 
 Colour operator*(const Colour &colour, const float val) {
 	return {
-		static_cast<Uint8>(colour.r*val),
-		static_cast<Uint8>(colour.g*val),
-		static_cast<Uint8>(colour.b*val),
-		static_cast<Uint8>(colour.a*val)
+		static_cast<uint8_t>(colour.r*val),
+		static_cast<uint8_t>(colour.g*val),
+		static_cast<uint8_t>(colour.b*val),
+		static_cast<uint8_t>(colour.a*val)
 	};
 }
 
 Colour operator/(const Colour &colour, const float val) {
 	return {
-		static_cast<Uint8>(colour.r/val),
-		static_cast<Uint8>(colour.g/val),
-		static_cast<Uint8>(colour.b/val),
-		static_cast<Uint8>(colour.a/val)
+		static_cast<uint8_t>(colour.r/val),
+		static_cast<uint8_t>(colour.g/val),
+		static_cast<uint8_t>(colour.b/val),
+		static_cast<uint8_t>(colour.a/val)
 	};
 }
 
@@ -165,10 +165,10 @@ const string Colour::to_str() const {
 
 Colour Colour::modulate(const float mod_r, const float mod_g, const float mod_b, const float mod_a) const {
 	return {
-		static_cast<Uint8>(r*mod_r),
-		static_cast<Uint8>(g*mod_g),
-		static_cast<Uint8>(b*mod_b),
-		static_cast<Uint8>(a*mod_a)
+		static_cast<uint8_t>(r*mod_r),
+		static_cast<uint8_t>(g*mod_g),
+		static_cast<uint8_t>(b*mod_b),
+		static_cast<uint8_t>(a*mod_a)
 	};
 }
 
@@ -212,10 +212,10 @@ void operator/=(FColour &fcolour, const float val) {
 
 FColour::operator Colour() const{
 	return {
-		static_cast<Uint8>(r*255),
-		static_cast<Uint8>(g*255),
-		static_cast<Uint8>(b*255),
-		static_cast<Uint8>(a*255)
+		static_cast<uint8_t>(r*255),
+		static_cast<uint8_t>(g*255),
+		static_cast<uint8_t>(b*255),
+		static_cast<uint8_t>(a*255)
 	};
 }
 
@@ -867,7 +867,7 @@ double Clock::tick(double target_fps) {
 		delay = target_ft - raw_time;
 
 		if (delay > 0)
-			SDL_Delay((Uint32)delay);
+			SDL_Delay((uint32_t)delay);
 	}
 
 	current_time = SDL_GetTicks();
@@ -1009,7 +1009,7 @@ void IO::close() {
 }
 
 
-Window::Window(const string &title, const IVector &size, const Uint32 flags):
+Window::Window(const string &title, const IVector &size, const uint32_t flags):
 	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), size.x,size.y, flags), destroy)) {
 	if (window.get() == NULL)
 		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
@@ -1285,7 +1285,7 @@ Mouse::Mouse(const int needed_buttons) {
 	int button;
 	for (int i = 0; i < 5; i++) {
 		if ((button = pow(2, i)) & needed_buttons) {
-			buttons[button] = {static_cast<Uint8>(i + 1)};
+			buttons[button] = {static_cast<uint8_t>(i + 1)};
 		}
 	}
 }
@@ -1422,7 +1422,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 }
 
 
-Surface::Surface(const IVector &size, const Uint32 format):
+Surface::Surface(const IVector &size, const uint32_t format):
 	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, (SDL_PixelFormatEnum)format), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
 		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
@@ -1476,7 +1476,7 @@ void Surface::set_blend_mode(const SDL_BlendMode blend_mode) {
 	SDL_SetSurfaceBlendMode(surface.get(), blend_mode);
 }
 
-void Surface::set_colour_key(const Uint32 key, const bool enable) {
+void Surface::set_colour_key(const uint32_t key, const bool enable) {
 	SDL_SetSurfaceColorKey(surface.get(), enable, key);
 }
 
@@ -1565,7 +1565,7 @@ Texture::Texture(Renderer &renderer, const Surface &surface):
 	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
 
-Texture::Texture(Renderer &renderer, const IVector &size, const Uint32 format, const int access):
+Texture::Texture(Renderer &renderer, const IVector &size, const uint32_t format, const int access):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTexture(renderer.renderer.get(), format, access, size.x, size.y), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	w = size.x;

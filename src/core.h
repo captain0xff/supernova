@@ -77,8 +77,8 @@ void show_toast(const string message, const bool duration=0, const int gravity=0
 
 // Structs
 struct Colour {
-	Uint8 r, g, b;
-	Uint8 a = 255;
+	uint8_t r, g, b;
+	uint8_t a = 255;
 
 	friend std::ostream& operator<<(std::ostream &os, const Colour &colour);
 	friend Colour operator/(const Colour &colour, const float val);
@@ -293,7 +293,7 @@ extern EventKeys EVENT_KEYS;
 
 
 struct MouseButton {
-	Uint8 id;
+	uint8_t id;
 	bool pressed = false, released = false, down = false;
 };
 
@@ -321,15 +321,15 @@ class Engine {
 
 class Clock {
 	private:
-		Uint64 current_time, last_tick = 0;
-		Uint64 timeit_tick = 0;
-		Sint64 target_ft, delay;
+		uint64_t current_time, last_tick = 0;
+		uint64_t timeit_tick = 0;
+		int64_t target_ft, delay;
 
 	public:
 		// time: Time used in the previous tick in ms
 		// raw_time: Actual time used in the previous tick in ms
 		// fps: The average framerate of the last 10 ticks
-		Uint64 raw_time = 0, frame_time = 0;
+		uint64_t raw_time = 0, frame_time = 0;
 		
 		// The parameter target_fps should be 0 for unclamped fps
 		double tick(double target_fps=0);
@@ -392,7 +392,7 @@ class Window {
 	public:
 		managed_ptr<SDL_Window> window;
 
-		Window(const string &title, const IVector &size, const Uint32 flags=0);
+		Window(const string &title, const IVector &size, const uint32_t flags=0);
 
 		void static destroy(SDL_Window *window);
 		void wrap_mouse(const Vector &wrap_pos);
@@ -469,7 +469,7 @@ class Surface {
 		managed_ptr<SDL_Surface> surface;
 		int w, h;
 
-		Surface(const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA8888);
+		Surface(const IVector &size, const uint32_t format=SDL_PIXELFORMAT_RGBA8888);
 		Surface(SDL_Surface *_surface);
 		Surface(Surface &&_surface);
 #ifdef IMAGE_ENABLED
@@ -477,7 +477,7 @@ class Surface {
 #endif /* IMAGE_ENABLED */
 
 		void set_blend_mode(const SDL_BlendMode blend_mode);
-		void set_colour_key(const Uint32 key, const bool enable=true);
+		void set_colour_key(const uint32_t key, const bool enable=true);
 		void flip(const SDL_FlipMode flip_mode);
 		void blit(Surface &dst_surface, const IVector &ivec);
 		void blit(Surface &dst_surface, const IRect &dst_rect);
@@ -506,7 +506,7 @@ class Texture {
 		Texture(Renderer &renderer, const string &file);
 #endif /* IMAGE_ENABLED */
 		Texture(Renderer &renderer, const Surface &surface);
-		Texture(Renderer &renderer, const IVector &size, const Uint32 format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
+		Texture(Renderer &renderer, const IVector &size, const uint32_t format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
 
 		IRect get_rect();
 		SDL_PropertiesID get_properties();
