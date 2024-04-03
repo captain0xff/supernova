@@ -1,9 +1,6 @@
 #include "mixer.h"
 
 
-using namespace std;
-
-
 
 // Globals
 int MUSIC_ID = 0;
@@ -13,7 +10,7 @@ int SOUND_ID = 0;
 
 // Classes
 void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int chunksize) {
-	if (Mix_OpenAudio(frequency, format, channels, chunksize) < 0) {
+	if (Mix_OpenAudio(0, NULL) < 0) {
 		SDL_LogError(0, "Failed to open audio device: %s", Mix_GetError());
 	}
 }
@@ -39,7 +36,7 @@ void Music::play(int loop) {
 
 float Music::volume() {
 	// Returns the current volume
-	return Mix_VolumeMusic(-1)/MIX_MAX_VOLUME;
+	return static_cast<float>(Mix_VolumeMusic(-1))/MIX_MAX_VOLUME;
 }
 
 void Music::volume(float volume) {
@@ -94,7 +91,7 @@ void Sound::play(int loop, int channel) {
 
 float Sound::volume() {
 	// Returns the current volume
-	return Mix_Volume(channel, -1)/MIX_MAX_VOLUME;
+	return static_cast<float>(Mix_Volume(channel, -1))/MIX_MAX_VOLUME;
 }
 
 void Sound::volume(float volume) {

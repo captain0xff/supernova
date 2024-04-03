@@ -1,9 +1,6 @@
 #include "font.h"
 
 
-using namespace std;
-
-
 
 // Globals
 int FONT_ID = 0;
@@ -163,7 +160,7 @@ FontAtlas Font::create_atlas(
 ) {
 	int dst = 0;
 	int w, h;
-	unordered_map<char, Rect> data;
+	std::unordered_map<char, IRect> data;
 
 	for (const char ch: chars) {
 		char chr[] = {ch, '\0'};
@@ -172,7 +169,7 @@ FontAtlas Font::create_atlas(
 		dst += w;
 	}
 
-	Surface surf(dst, h);
+	Surface surf(IVector{dst, h});
 
 	for (const char ch: chars) {
 		Surface glyph = create_glyph(ch, colour, quality, bg_colour);
@@ -196,10 +193,10 @@ void FontAtlas::set_colour(const Colour colour) {
 
 void FontAtlas::draw_text(const string &text, const IVector &pos, const double scale) {
 	int cx = pos.x;
-	Rect *r;
+	IRect *r;
 	for (auto &ch: text) {
 		r = &data[ch];
-		texture.render({cx, pos.y, static_cast<int>(r->w*scale), static_cast<int>(r->h*scale)}, *r);
+		texture.render(IRect{cx, pos.y, static_cast<int>(r->w*scale), static_cast<int>(r->h*scale)}, *r);
 		cx += r->w*scale;
 	}
 }
@@ -215,13 +212,13 @@ void FontAtlas::draw_text_with_kerning(const string &text, const IVector &pos, c
 	int cx = pos.x;
 	int kerning = 0;
 	char prev_ch = 0;
-	Rect *r;
+	IRect *r;
 	for (auto &ch: text) {
 		r = &data[ch];
 		if (prev_ch != 0)
 			kerning = font->get_glyph_kerning(prev_ch, ch);
 		texture.render(
-			{
+			IRect{
 				static_cast<int>(cx + kerning*scale),
 				pos.y,
 				static_cast<int>(r->w*scale),

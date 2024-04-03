@@ -5,10 +5,10 @@ project(supernova3)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # The satellite libs are not built by default as they are not ready yet
-option(ENABLE_IMAGE "Enables SDL_image support." OFF)
-option(ENABLE_MIXER "Enables SDL_mixer support." OFF)
-option(ENABLE_TTF "Enables SDL_ttf support." OFF)
-option(ENABLE_NET "Enables SDL_net support." OFF)
+option(ENABLE_IMAGE "Enables SDL_image support." ON)
+option(ENABLE_MIXER "Enables SDL_mixer support." ON)
+option(ENABLE_TTF "Enables SDL_ttf support." ON)
+option(ENABLE_NET "Enables SDL_net support." ON)
 
 if (NOT ANDROID)
 	set(CMAKE_INSTALL_PREFIX $ENV{PREFIX})

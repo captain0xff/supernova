@@ -11,9 +11,6 @@
 #include "core.h"
 
 
-using namespace std;
-
-
 
 // Forward Declarations
 class Address;

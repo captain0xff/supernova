@@ -3,9 +3,6 @@
 #include "networking.h"
 
 
-using namespace std;
-
-
 
 // Classes
 Address::Address(): address(nullptr) {}
@@ -183,23 +180,23 @@ Packet& operator<<(Packet &packet, const char *val) {
 }
 
 Packet& operator<<(Packet &packet, const bool val) {
-	return packet << to_string(val);
+	return packet << std::to_string(val);
 }
 
 Packet& operator<<(Packet &packet, const int val) {
-	return packet << to_string(val);
+	return packet << std::to_string(val);
 }
 
 Packet& operator<<(Packet &packet, const float val) {
-	return packet << to_string(val);
+	return packet << std::to_string(val);
 }
 
 Packet& operator<<(Packet &packet, const double val) {
-	return packet << to_string(val);
+	return packet << std::to_string(val);
 }
 
 Packet& operator<<(Packet &packet, const uint8_t val) {
-	return packet << to_string(val);
+	return packet << std::to_string(val);
 }
 
 Packet& operator<<(Packet &packet, const Colour &colour) {

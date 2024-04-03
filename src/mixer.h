@@ -6,12 +6,9 @@
 #endif /* MIXER_ENABLED */
 
 
-#include <SDL2/SDL_mixer.h>
+#include <SDL3_mixer/SDL_mixer.h>
 
 #include "core.h"
-
-
-using namespace std;
 
 
 

@@ -7,13 +7,13 @@
 #include "constants.h"
 #include "core.h"
 #ifdef IMAGE_ENABLED
-#include <SDL3/SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 #endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
-#include <SDL3/SDL_mixer.h>
+#include <SDL3_mixer/SDL_mixer.h>
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
-#include <SDL3/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
 #include <SDL3_net/SDL_net.h>

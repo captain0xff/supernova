@@ -6,13 +6,10 @@
 #endif /* TTF_ENABLED */
 
 
-#include <SDL2/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "core.h"
 #include "enums.h"
-
-
-using namespace std;
 
 
 
@@ -68,7 +65,7 @@ class FontAtlas{
 	public:
 		Font *font;
 		Texture texture;
-		unordered_map<char, Rect> data;
+		std::unordered_map<char, IRect> data;
 
 		FontAtlas(Font *font, Texture &&_texture);
 
