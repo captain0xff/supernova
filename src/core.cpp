@@ -1092,6 +1092,24 @@ void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colou
 	draw_line_raw(v1, v2);
 }
 
+void Renderer::draw_line(const Vector &v1, const Vector &v2, const Colour &colour, const float width) {
+	float slope = atan2(v1.x - v2.x, v2.y - v1.y);
+	float x = (width/2)*cos(slope);
+	float y = (width/2)*sin(slope);
+
+	constexpr Vector tex_coord = {0, 0}; // The coords are not used
+
+	SDL_Vertex vertices[4] = {
+		{{v1.x + x, v1.y + y}, (FColour)colour, tex_coord},
+		{{v1.x - x, v1.y - y}, (FColour)colour, tex_coord},
+		{{v2.x - x, v2.y - y}, (FColour)colour, tex_coord},
+		{{v2.x + x, v2.y + y}, (FColour)colour, tex_coord},
+	};
+	int indices[6] = {0, 1, 2, 0, 2, 3};
+
+	SDL_RenderGeometry(renderer.get(), NULL, vertices, 4, indices, 6);
+}
+
 void Renderer::draw_rect_raw(const Rect &rect, float width) {
 	if (width == 0) {
 		SDL_FRect r = rect;

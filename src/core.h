@@ -420,6 +420,7 @@ class Renderer {
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line_raw(const Vector &v1, const Vector &v2);
 		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
+		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour, const float width);
 		void draw_rect_raw(const Rect &rect, const float width=0);
 		void draw_rect(const Rect &rect, const Colour &colour, const float width=0);
 		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);

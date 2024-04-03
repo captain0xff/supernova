@@ -1,246 +1,76 @@
-#include <optional>
-#include <variant>
+#define IMAGE_ENABLED
 
 #include <SDL3/SDL_main.h>
 
 #include "../src/core.h"
 #include "../src/constants.h"
 #include "../src/networking.h"
+#include "../src/graphics.h"
+#include "../src/logging.h"
+#include "../src/mixer.h"
+#include "../src/font.h"
 
 
 using namespace std;
 
 
 
-class Server {
-private:
-	enum States {
-		NONE = 0,
-		STARTED = 2,
-		CONNECTED = 4,
-		DONE = 8,
-		CLEANED = 16
-	};
-
-	bool connected = false, done = false, cleaned = true;
-	StreamServer server;
-	StreamSocket client;
-	vector<char> buffer;
-	int size;
-
-	void check_for_connection();
-	void recv();
-	void clean();
-
-public:
-	string msg;
-
-	Server(const uint16_t port);
-
-	bool run();
-};
-
-Server::Server(const uint16_t port): server(port), buffer(1024) {}
-
-bool Server::run() {
-	if (!done and cleaned) {
-		if (connected)
-			recv();
-		else
-			check_for_connection();
-	}
-
-	if (!cleaned)
-		clean();
-
-	return done;
-}
-
-void Server::check_for_connection() {
-	if (server.is_new_connection_available()) {
-		client = server.accept_client();
-		connected = true;
-	}
-}
-
-void Server::recv() {
-	size = client.read(buffer.data(), buffer.size());
-	if (size > 0) {
-		if (string(buffer.data()) != "quit") {
-			msg = buffer.data();
-			if (client.write(buffer.data(), buffer.size()) < 0) {
-				SDL_Log("Error: Failed to write!");
-				cleaned = false;
-			}
-		} else {
-			cleaned = false;
-		}
-	} else if (size < 0) {
-		SDL_Log("Error: Failed to read!");
-		cleaned = false;
-	}
-}
-
-void Server::clean() {
-	if (client.get_pending_writes() == 0) {
-		cleaned = true;
-		done = true;
-	}
-}
-
-
-class Client {
-private:
-	enum States {
-		NONE = 0,
-		STARTED = 2,
-		CONNECTED = 4,
-		DONE = 8,
-		CLEANED = 16
-	};
-
-	bool started = false, connected = false, done = false, cleaned = true;
-	StreamSocket socket;
-	int size;
-
-	void check_address_status();
-	void check_connection_status();
-	void send();
-	void clean();
-
-public:
-	string msg;
-
-	Client(const uint16_t port, const string &host="127.0.0.1");
-
-	bool run();
-};
-
-Client::Client(const uint16_t port, const string &host): socket(port, host) {}
-
-bool Client::run() {
-	if (!started)
-		check_address_status();
-
-	if (!done and started and cleaned) {
-		if (connected)
-			send();
-		else
-			check_connection_status();
-	}
-
-	if (!cleaned)
-		clean();
-
-	return done;
-}
-
-void Client::check_address_status() {
-	switch (socket.get_address_status()) {
-		case -1:
-			SDL_Log("Error: Failed to resolve server address!");
-			done = true;
-			break;
-		case 1:
-			started = true;
-			break;
-	}
-}
-
-void Client::check_connection_status() {
-	switch(socket.get_connection_status()) {
-		case -1:
-			SDL_Log("Error: Failed to connect with server!");
-			done = true;
-			break;
-		case 1:
-			connected = true;
-			break;
-	}
-}
-
-void Client::send() {
-	if (msg != "") {
-		if (socket.write(msg.c_str(), msg.size() + 1) < 0) {
-			SDL_Log("Error: Failed to write!");
-			cleaned = false;
-		}
-	}
-	if (msg == "quit") {
-		cleaned = false;
-	}
-}
-
-void Client::clean() {
-	if (socket.get_pending_writes() == 0) {
-		cleaned = true;
-		done = true;
-	}
-}
-
 int main(int argc, char *argv[]) {
-
-	bool is_client;
-	if (argc < 2) {
-		SDL_Log("Wrong usage!");
-		SDL_Log("Usage: main.exe <--server/--client>");
-		return 0;
-	} else {
-		string arg(argv[1]);
-		if (arg == "--server")
-			is_client = false;
-		else if (arg == "--client")
-			is_client = true;
-		else {
-			SDL_Log("Wrong args!");
-			SDL_Log("Usage: main.exe <--server/--client>");
-			return 0;
-		}
-	}
 
 	Engine engine;
 
-	Window window("", {800, 600});
+	Window window("Graphics Demo", {800, 600});
 	Renderer renderer(window);
 
 	Clock clock;
 	Events events;
 
-	bool rng = true;
+	Texture tex(renderer, "../SDL_Logo.png");
+	Rect tex_rect = tex.get_rect();
+	tex_rect.center({400, 350});
+
+	Font font("../font.ttf", 40);
+
+	string text = "SDL with C++ is cool!";
+	Texture text_tex = font.create_text(renderer, text, ORANGE);
+	Rect text_rect = text_tex.get_rect();
+	text_rect.center({400, 500});
+
+	FontAtlas font_atlas = font.create_atlas(renderer, GREEN);
+
+	bool running = true;
 	double dt;
 
-	optional<variant<Server, Client>> socket;
-	if (is_client) {
-		socket.emplace(in_place_type<Client>, 3000);
-	} else {
-		socket.emplace(in_place_type<Server>, 3000);
-	}
+	EVENT_KEYS["UP"] = {SDLK_w, SDLK_UP};
+	EVENT_KEYS["QUIT"] = {SDLK_ESCAPE};
 
-	bool pressed_enter = false;
-
-	EVENT_KEYS["ENTER"] = {SDLK_RETURN};
-
-	while (rng) {
+	while (running) {
 		dt = clock.tick(60);
 
-		rng = events.process_events(&EVENT_KEYS);
+		running = events.process_events(&EVENT_KEYS);
 
-		pressed_enter = EVENT_KEYS["ENTER"].pressed;
-
-		visit([&](auto& socket) {
-			rng &= !socket.run();
-			if (is_client) {
-				if (pressed_enter)
-					socket.msg = "cool";
-				else
-					socket.msg = "";
-			} else if (socket.msg != "") {
-				SDL_Log("msg: %s", socket.msg.c_str());
-				socket.msg = "";
-			}
-		}, socket.value());
+		if (EVENT_KEYS["UP"].pressed)
+			SDL_Log("Pressed UP");
+		if (EVENT_KEYS["UP"].down)
+			SDL_Log("Held UP");
+		if (EVENT_KEYS["UP"].released)
+			SDL_Log(" Released UP");
+		if (EVENT_KEYS["QUIT"].pressed)
+			running = false;
 
 		renderer.clear(WHITE);
+		renderer.draw_rect({100, 100, 100, 100}, RED);
+		renderer.draw_rect({250, 100, 100, 100}, YELLOW, 1);
+		renderer.draw_rect({400, 100, 100, 100}, BLUE, 10);
+		renderer.draw_line({550, 100}, {650, 200}, GREEN);
+		renderer.draw_line({700, 100}, {800, 200}, GRAY, 4);
+		renderer.draw_circle({700, 150, 50}, PURPLE, false);
+		renderer.draw_circle({650, 350, 50}, {255, 100, 30});
+		renderer.draw_polygon({{50, 300}, {150, 250}, {250, 350}, {150, 390}}, {10, 230, 50, 100});
+		renderer.draw_polygon({{50, 450}, {150, 450}, {250, 500}, {150, 550}, {50, 500}}, {200, 30, 45}, false);
+		tex.render(tex_rect);
+		text_tex.render(text_rect);
+		font_atlas.draw_text("FPS: " + to_string(int(clock.get_fps())), {1, 1}, {100, 250, 30});
 		renderer.present();
 	}
 
