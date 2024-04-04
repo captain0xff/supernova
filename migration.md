@@ -5,7 +5,7 @@
 * Upgrade the satellite libs (SDL3_net done).
 * Try to reduce dependency on SDL of the headers so that we don't even need to link to it.
 * After SDL3 is released rename supernova3 to supernova and the sdl2 branch to supernova2.
-* Fix mixer to open the currect device.
+* Wrap SDL_OpenAudioDevice as a constructor of the mixer class.
 * Add AnimatedSprite::render_rot
 
 ## Already done

@@ -8,11 +8,15 @@ int SOUND_ID = 0;
 
 
 
+
 // Classes
-void Mixer::open_audio_device(int frequency, Uint16 format, int channels, int chunksize) {
-	if (Mix_OpenAudio(0, NULL) < 0) {
+Mixer::Mixer() {
+	if (Mix_OpenAudio(0, NULL) < 0)
 		SDL_LogError(0, "Failed to open audio device: %s", Mix_GetError());
-	}
+}
+
+Mixer::~Mixer() {
+	Mix_CloseAudio();
 }
 
 void Mixer::allocate_channels(int channels) {

@@ -19,58 +19,53 @@ int main(int argc, char *argv[]) {
 
 	Engine engine;
 
-	Window window("Graphics Demo", {800, 600});
+	Window window("test", {800, 600});
 	Renderer renderer(window);
 
 	Clock clock;
 	Events events;
 
-	Texture tex(renderer, "../SDL_Logo.png");
-	Rect tex_rect = tex.get_rect();
-	tex_rect.center({400, 350});
-
-	Font font("../font.ttf", 40);
-
-	string text = "SDL with C++ is cool!";
-	Texture text_tex = font.create_text(renderer, text, ORANGE);
-	Rect text_rect = text_tex.get_rect();
-	text_rect.center({400, 500});
-
-	FontAtlas font_atlas = font.create_atlas(renderer, GREEN);
-
 	bool running = true;
-	double dt;
+	double dt, volume;
 
-	EVENT_KEYS["UP"] = {SDLK_w, SDLK_UP};
-	EVENT_KEYS["QUIT"] = {SDLK_ESCAPE};
+	Mouse mouse(LEFT);
+
+	Mixer mixer;
+	Mixer::allocate_channels(1);
+
+	Sound sound("../sound.wav");
+	sound.play(-1); // Loops the sound infinite times
+	volume = sound.volume();
+
+	Rect volume_bar_bg{0, 0, 400, 75};
+	volume_bar_bg.center({400, 300});
+
+	float volume_bar_fg_length = 380;
+	Rect volume_bar_fg{0, 0, volume_bar_fg_length, 55};
+	volume_bar_fg.center(volume_bar_bg.center());
 
 	while (running) {
 		dt = clock.tick(60);
 
-		running = events.process_events(&EVENT_KEYS);
+		running = events.process_events(&EVENT_KEYS, &mouse);
 
-		if (EVENT_KEYS["UP"].pressed)
-			SDL_Log("Pressed UP");
-		if (EVENT_KEYS["UP"].down)
-			SDL_Log("Held UP");
-		if (EVENT_KEYS["UP"].released)
-			SDL_Log(" Released UP");
-		if (EVENT_KEYS["QUIT"].pressed)
-			running = false;
+		if (mouse.buttons[LEFT].pressed)
+			sound.toggle();
 
-		renderer.clear(WHITE);
-		renderer.draw_rect({100, 100, 100, 100}, RED);
-		renderer.draw_rect({250, 100, 100, 100}, YELLOW, 1);
-		renderer.draw_rect({400, 100, 100, 100}, BLUE, 10);
-		renderer.draw_line({550, 100}, {650, 200}, GREEN);
-		renderer.draw_line({700, 100}, {800, 200}, GRAY, 4);
-		renderer.draw_circle({700, 150, 50}, PURPLE, false);
-		renderer.draw_circle({650, 350, 50}, {255, 100, 30});
-		renderer.draw_polygon({{50, 300}, {150, 250}, {250, 350}, {150, 390}}, {10, 230, 50, 100});
-		renderer.draw_polygon({{50, 450}, {150, 450}, {250, 500}, {150, 550}, {50, 500}}, {200, 30, 45}, false);
-		tex.render(tex_rect);
-		text_tex.render(text_rect);
-		font_atlas.draw_text("FPS: " + to_string(int(clock.get_fps())), {1, 1}, {100, 250, 30});
+		if (mouse.vert_wheel != 0) {
+			volume += mouse.vert_wheel*0.01;
+			if (volume > 1)
+				volume = 1;
+			else if (volume < 0)
+				volume = 0;
+			sound.volume(volume);
+		}
+
+		volume_bar_fg.w = volume_bar_fg_length*volume;
+
+		renderer.clear({255, 0, 0});
+		renderer.draw_rect(volume_bar_bg, {125, 125, 125});
+		renderer.draw_rect(volume_bar_fg, {100, 130, 230});
 		renderer.present();
 	}
 

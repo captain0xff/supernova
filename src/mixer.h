@@ -22,7 +22,9 @@ class Sound;
 // Classes
 class Mixer {
 	public:
-		void static open_audio_device(int frequency=MIX_DEFAULT_FREQUENCY, Uint16 format=MIX_DEFAULT_FORMAT, int channels=2, int chunksize=2048);
+		Mixer();
+		~Mixer();
+
 		void static allocate_channels(int channels);
 };
 
