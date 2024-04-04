@@ -46,7 +46,8 @@ double degrees(const double angle);
 
 // Generates a random integer b/w 0 to end (0 included and end excluded).
 int randint(const int end);
-// Generates a random integer b/w start to end (start included and end excluded).
+// Generates a random integer b/w start to end
+// (start included and end excluded).
 int randint(const int start, const int end);
 
 
