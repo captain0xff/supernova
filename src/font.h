@@ -35,9 +35,9 @@ class Font {
 		// GPOS kerning is not supported
 		int kerning();
 		void kerning(bool allowed);
-		int get_glyph_kerning(const Uint32 prev_ch, const Uint32 ch);
+		int get_glyph_kerning(const uint32_t prev_ch, const uint32_t ch);
 		Surface create_glyph(
-			const Uint32 ch,
+			const uint32_t ch,
 			const Colour colour,
 			const int quality=0,
 			const Colour &bg_colour={0, 0, 0, 0}
@@ -48,7 +48,7 @@ class Font {
 			const Colour &colour,
 			const FONTQUALITY quality=FQ::SOLID,
 			const bool wrap_text=true,
-			const Uint32 wrap_length=0,
+			const uint32_t wrap_length=0,
 			const Colour &bg_colour={0, 0, 0, 0}
 		);
 		FontAtlas create_atlas(

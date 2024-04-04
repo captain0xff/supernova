@@ -39,13 +39,13 @@ void Font::kerning(bool allowed) {
 	TTF_SetFontKerning(font.get(), allowed);
 }
 
-int Font::get_glyph_kerning(const Uint32 prev_ch, const Uint32 ch) {
+int Font::get_glyph_kerning(const uint32_t prev_ch, const uint32_t ch) {
 	// GPOS kerning is not supported
 	return TTF_GetFontKerningSizeGlyphs32(font.get(), prev_ch, ch);
 }
 
 Surface Font::create_glyph(
-	const Uint32 ch,
+	const uint32_t ch,
 	const Colour colour,
 	const int quality,
 	const Colour &bg_colour
@@ -76,7 +76,7 @@ Texture Font::create_text(
 	const Colour &colour,
 	const FONTQUALITY quality,
 	const bool wrap_text,
-	const Uint32 wrap_length,
+	const uint32_t wrap_length,
 	const Colour &bg_colour
 ) {
 	SDL_Surface *text_surf;
