@@ -56,7 +56,9 @@ class Font {
 			const Colour &colour={255, 255, 255, 255},
 			const FONTQUALITY quality=FQ::SOLID,
 			const Colour &bg_colour={0, 0, 0, 0},
-			const string chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.:,;'\"(!?)+-*/= "
+			const string chars="abcdefghijklmnopqrstuvwxyz\
+								ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+								1234567890.:,;'\"(!?)+-*/= "
 		);
 };
 
@@ -70,12 +72,30 @@ class FontAtlas{
 		FontAtlas(Font *font, Texture &&_texture);
 
 		void set_colour(const Colour colour);
-		void draw_text(const string &text, const IVector &pos, const double scale=1);
-		void draw_text(const string &text, const IVector &pos, const Colour &colour, const double scale=1);
+		void draw_text(
+			const string &text,
+			const IVector &pos,
+			const double scale=1
+		);
+		void draw_text(
+			const string &text,
+			const IVector &pos,
+			const Colour &colour,
+			const double scale=1
+		);
 		// These functions will only work if the font has kerning tables
 		// GPOS kerning is not supported
-		void draw_text_with_kerning(const string &text, const IVector &pos, const double scale=1);
-		void draw_text_with_kerning(const string &text, const IVector &pos, const Colour &colour, const double scale=1);
+		void draw_text_with_kerning(
+			const string &text,
+			const IVector &pos,
+			const double scale=1
+		);
+		void draw_text_with_kerning(
+			const string &text,
+			const IVector &pos,
+			const Colour &colour,
+			const double scale=1
+		);
 };
 
 #endif /* SUPERNOVA_FONT_H */

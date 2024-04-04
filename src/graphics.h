@@ -17,11 +17,19 @@ class SpriteSheet {
 		IRect src_rect;
 		Texture texture;
 
-		SpriteSheet(Renderer &renderer, const string &file, const int &column, const int &row);
+		SpriteSheet(
+			Renderer &renderer,
+			const string &file,
+			const int &column,
+			const int &row
+		);
 
 		void set_src_rect(const IRect &src_rect);
-		void draw_sprite(const Rect &dst_rect, const int &column, const int &row);
-		// void destroy();
+		void draw_sprite(
+			const Rect &dst_rect,
+			const int &column,
+			const int &row
+		);
 };
 
 
@@ -36,7 +44,12 @@ class AnimatedSprite: public SpriteSheet {
 		// Returns true when the animation has just completed looping once
 		bool update(double dt);
 		void render(const Rect &dst_rect);
-		// void render_rot(const Rect &dst_rect, const double &angle=0, const Vector &center={0, 0}, const SDL_FlipMode &flip=SDL_FLIP_NONE);
+		void render_rot(
+			const Rect &dst_rect,
+			const double &angle=0,
+			const Vector &center={0, 0},
+			const SDL_FlipMode &flip=SDL_FLIP_NONE
+		);
 };
 
 #endif /* SUPERNOVA_GRAPHICS_H */

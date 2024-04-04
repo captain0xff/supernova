@@ -13,6 +13,8 @@ All contributions are welcome but please keep these things in mind before contri
 * There should one line gap between these.
 * `Using namespace` statements should come next separated by a gap of two lines from the includes.
 * Below this the main code should be there after a gap of 3 lines.
+* Maximum line length should be 79.
+* Wrap only the words after the limit in a comment if there is no punctuations.
 * For documentation use comments like this:-
 	```
 	/**

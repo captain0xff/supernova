@@ -2,7 +2,7 @@
 ## TODO
 * Expose new SDL3 functionality (Properties of Renderer and Texture).
 * Take another shot at making a better event system.
-* Upgrade the satellite libs (SDL3_net done).
+* Upgrade the satellite libs (done for now).
 * Try to reduce dependency on SDL of the headers so that we don't even need to link to it.
 * After SDL3 is released rename supernova3 to supernova and the sdl2 branch to supernova2.
 * Wrap SDL_OpenAudioDevice as a constructor of the mixer class.

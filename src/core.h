@@ -70,7 +70,13 @@ void* get_jni_env();
 bool get_permission(const string permission);
 
 // Set offsetx and offsety only when gravity is non-zero
-void show_toast(const string message, const bool duration=0, const int gravity=0, const int offsetx=0, const int offsety=0);
+void show_toast(
+	const string message,
+	const bool duration=0,
+	const int gravity=0,
+	const int offsetx=0,
+	const int offsety=0
+);
 #endif /* __ANDROID__ */
 
 
@@ -92,7 +98,12 @@ struct Colour {
 	const string to_str() const;
 
 	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1
-	Colour modulate(const float mod_r=1, const float mod_g=1, const float mod_b=1, const float mod_a=1) const;
+	Colour modulate(
+		const float mod_r=1,
+		const float mod_g=1,
+		const float mod_b=1,
+		const float mod_a=1
+	) const;
 };
 
 
@@ -112,7 +123,12 @@ struct FColour {
 	const string to_str() const;
 
 	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1
-	FColour modulate(const float mod_r=1, const float mod_g=1, const float mod_b=1, const float mod_a=1) const;
+	FColour modulate(
+		const float mod_r=1,
+		const float mod_g=1,
+		const float mod_b=1,
+		const float mod_a=1
+	) const;
 };
 
 
@@ -314,7 +330,11 @@ extern Fingers FINGERS;
 // Classes
 class Engine {
 	public:
-		Engine(const unsigned int sdl_init_flags=127537, const int img_init_flags=2, const int mix_init_flags=24);
+		Engine(
+			const unsigned int sdl_init_flags=127537,
+			const int img_init_flags=2,
+			const int mix_init_flags=24
+		);
 		~Engine();
 };
 
@@ -347,7 +367,8 @@ class Timer {
 		// Time should be in seconds
 		Timer(double time);
 
-		// Returns true once after the set time is over and gets reset if the _reset parameter is true
+		// Returns true once after the set time is over and gets reset if the
+		// _reset parameter is true
 		bool update(double dt, bool _reset=true);
 		// Sets the counter to 0
 		void reset();
@@ -382,7 +403,8 @@ class IO {
 		void write(const void *ptr, const size_t num);
 		void write(const string &data);
 		Sint64 tell();
-		// The parameter whence can be any of RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
+		// The parameter whence can be any of
+		// RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
 		Sint64 seek(Sint64 offset, int whence=SDL_IO_SEEK_CUR);
 		void close();
 };
@@ -392,11 +414,16 @@ class Window {
 	public:
 		managed_ptr<SDL_Window> window;
 
-		Window(const string &title, const IVector &size, const uint32_t flags=0);
+		Window(
+			const string &title,
+			const IVector &size,
+			const uint32_t flags=0
+		);
 
 		void static destroy(SDL_Window *window);
 		void wrap_mouse(const Vector &wrap_pos);
-		// This function should be only used if the renderer is created with an SDL_RENDERER_SOFTWARE flag
+		// This function should be only used if the renderer is created with an
+		// SDL_RENDERER_SOFTWARE flag
 		Surface get_window_surface();
 };
 
@@ -405,7 +432,11 @@ class Renderer {
 	public:
 		managed_ptr<SDL_Renderer> renderer;
 
-		Renderer(Window &window, const SDL_RendererFlags flags=(SDL_RendererFlags)0, const string &driver="");
+		Renderer(
+			Window &window,
+			const SDL_RendererFlags flags=(SDL_RendererFlags)0,
+			const string &driver=""
+		);
 
 		void static destroy(SDL_Renderer *renderer);
 		void set_colour(const Colour &colour);
@@ -414,25 +445,71 @@ class Renderer {
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
-		void set_logical_presentation(const IVector &size, const SDL_RendererLogicalPresentation mode=SDL_LOGICAL_PRESENTATION_DISABLED, const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST);
+		void set_logical_presentation(
+			const IVector &size,
+			const SDL_RendererLogicalPresentation
+					mode=SDL_LOGICAL_PRESENTATION_DISABLED,
+			const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST
+		);
 		IVector get_output_size();
 		void draw_point_raw(const Vector &point_pos);
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line_raw(const Vector &v1, const Vector &v2);
-		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
-		void draw_line(const Vector &v1, const Vector &v2, const Colour &colour, const float width);
+		void draw_line(
+			const Vector &v1,
+			const Vector &v2,
+			const Colour &colour
+		);
+		void draw_line(
+			const Vector &v1,
+			const Vector &v2,
+			const Colour &colour,
+			const float width
+		);
 		void draw_rect_raw(const Rect &rect, const float width=0);
-		void draw_rect(const Rect &rect, const Colour &colour, const float width=0);
-		void draw_circle(const Circle &circle, const Colour &colour, const bool filled=true);
-		void draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled=true);
-		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices);
-		void render_geometry_raw(const int num_vertices, const SDL_Vertex *vertices, const int num_indices, const int *indices, Texture &texture);
+		void draw_rect(const Rect &rect,
+			const Colour &colour,
+			const float width=0
+		);
+		void draw_circle(const Circle &circle,
+			const Colour &colour,
+			const bool filled=true
+		);
+		void draw_polygon(const std::vector<Vector> vertices,
+			const Colour colour,
+			const bool filled=true
+		);
+		void render_geometry_raw(const int num_vertices,
+			const SDL_Vertex *vertices,
+			const int num_indices,
+			const int *indices
+		);
+		void render_geometry_raw(const int num_vertices,
+			const SDL_Vertex *vertices,
+			const int num_indices,
+			const int *indices,
+			Texture &texture
+		);
 		void render_geometry(const std::vector<SDL_Vertex> &vertices);
-		void render_geometry(const std::vector<SDL_Vertex> &vertices, const std::vector<int> &indices);
-		void render_geometry(const std::vector<SDL_Vertex> &vertices, Texture &texture);
-		void render_geometry(const std::vector<SDL_Vertex> &vertices, const std::vector<int> &indices, Texture &texture);
-		void render_geometry_sorted(const std::vector<SDL_Vertex> &vertices);
-		void render_geometry_sorted(const std::vector<SDL_Vertex> &vertices, Texture &texture);
+		void render_geometry(const std::vector<SDL_Vertex> &vertices,
+			const std::vector<int> &indices
+		);
+		void render_geometry(
+			const std::vector<SDL_Vertex> &vertices,
+			Texture &texture
+		);
+		void render_geometry(
+			const std::vector<SDL_Vertex> &vertices,
+			const std::vector<int> &indices,
+			Texture &texture
+		);
+		void render_geometry_sorted(
+			const std::vector<SDL_Vertex> &vertices
+		);
+		void render_geometry_sorted(
+			const std::vector<SDL_Vertex> &vertices,
+			Texture &texture
+		);
 };
 
 
@@ -440,15 +517,18 @@ class Mouse {
 	public:
 		Vector pos = {0, 0};
 		std::unordered_map<int, MouseButton> buttons;
-		// The amount scrolled vertically, positive away from the user and negative towards the user
+		// The amount scrolled vertically, positive away from the user and
+		// negative towards the user
 		float vert_wheel = 0;
-		// The amount scrolled horizontally, positive to the right and negative to the left
+		// The amount scrolled horizontally, positive to the right and negative
+		// to the left
 		float horz_wheel = 0;
 
 		Mouse(const int needed_buttons = 0);
 
 		static void set_relative_mode(const bool val);
-		// The function calls window.wrap_mouse and updates the mouse position to wrap_pos
+		// The function calls window.wrap_mouse and updates the mouse position
+		// to wrap_pos
 		void wrap_in_window(Window &window, const Vector &wrap_pos);
 };
 
@@ -458,8 +538,14 @@ class Events {
 		SDL_Event event;
 		bool running = true;
 
-		// The function event handler should return true if the engine loop should not be run otherwise false
-		bool process_events(EventKeys *event_keys = nullptr, Mouse *mouse = nullptr, Fingers *fingers = nullptr, std::function<bool(SDL_Event&)> event_handler = nullptr);
+		// The function event handler should return true if the engine loop
+		// should not be run otherwise false
+		bool process_events(
+			EventKeys *event_keys = nullptr,
+			Mouse *mouse = nullptr,
+			Fingers *fingers = nullptr,
+			std::function<bool(SDL_Event&)> event_handler = nullptr
+		);
 };
 
 
@@ -470,7 +556,10 @@ class Surface {
 		managed_ptr<SDL_Surface> surface;
 		int w, h;
 
-		Surface(const IVector &size, const uint32_t format=SDL_PIXELFORMAT_RGBA8888);
+		Surface(
+			const IVector &size,
+			const uint32_t format=SDL_PIXELFORMAT_RGBA8888
+		);
 		Surface(SDL_Surface *_surface);
 		Surface(Surface &&_surface);
 #ifdef IMAGE_ENABLED
@@ -482,7 +571,11 @@ class Surface {
 		void flip(const SDL_FlipMode flip_mode);
 		void blit(Surface &dst_surface, const IVector &ivec);
 		void blit(Surface &dst_surface, const IRect &dst_rect);
-		void blit(Surface &dst_surface, const IRect &dst_rect, const IRect &src_rect);
+		void blit(
+			Surface &dst_surface,
+			const IRect &dst_rect,
+			const IRect &src_rect
+		);
 #ifdef IMAGE_ENABLED
 		// This function saves the surface as png
 		void save(const string &file);
@@ -507,7 +600,12 @@ class Texture {
 		Texture(Renderer &renderer, const string &file);
 #endif /* IMAGE_ENABLED */
 		Texture(Renderer &renderer, const Surface &surface);
-		Texture(Renderer &renderer, const IVector &size, const uint32_t format=SDL_PIXELFORMAT_RGBA32, const int access=SDL_TEXTUREACCESS_TARGET);
+		Texture(
+			Renderer &renderer,
+			const IVector &size,
+			const uint32_t format=SDL_PIXELFORMAT_RGBA32,
+			const int access=SDL_TEXTUREACCESS_TARGET
+		);
 
 		IRect get_rect();
 		SDL_PropertiesID get_properties();
@@ -517,8 +615,19 @@ class Texture {
 		void render(const Vector &vec);
 		void render(const Rect &dst_rect);
 		void render(const Rect &dst_rect, const Rect &src_rect);
-		void render_rot(const Rect &dst_rect, const float angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
-		void render_rot(const Rect &dst_rect, const Rect &src_rect, const float angle=0, const Vector &center={0, 0}, const SDL_FlipMode flip=SDL_FLIP_NONE);
+		void render_rot(
+			const Rect &dst_rect,
+			const float angle=0,
+			const Vector &center={0, 0},
+			const SDL_FlipMode flip=SDL_FLIP_NONE
+		);
+		void render_rot(
+			const Rect &dst_rect,
+			const Rect &src_rect,
+			const float angle=0,
+			const Vector &center={0, 0},
+			const SDL_FlipMode flip=SDL_FLIP_NONE
+		);
 };
 
 
@@ -536,7 +645,8 @@ class Camera {
 		Camera(const int id=0);
 
 		static std::vector<SDL_CameraDeviceID> get_available_devices();
-		// Throws an error if the ID is greater than the number of available devices
+		// Throws an error if the ID is greater than the number of available
+		// devices
 		static SDL_CameraDeviceID select_device(const int id=0);
 
 		int get_permission_state();
