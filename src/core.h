@@ -38,11 +38,16 @@ class Camera;
 
 
 // Helper functions
-double radians(const double angle); // Degree to radians
-double degrees(const double angle); // Radians to degrees
 
-int randint(const int end); // Generates a random integer b/w 0 to end (0 included and end excluded).
-int randint(const int start, const int end); // Generates a random integer b/w start to end (start included and end excluded).
+// Degree to radians
+double radians(const double angle);
+// Radians to degrees
+double degrees(const double angle);
+
+// Generates a random integer b/w 0 to end (0 included and end excluded).
+int randint(const int end);
+// Generates a random integer b/w start to end (start included and end excluded).
+int randint(const int start, const int end);
 
 
 
