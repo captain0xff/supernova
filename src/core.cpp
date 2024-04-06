@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <ctime>
 #include <iostream>
@@ -49,6 +50,11 @@ int randint(const int end) {
 int randint(const int start, const int end) {
 	// Generates a random integer b/w start to end (start included and end excluded).
 	return start + rand()%(end - start);
+}
+
+void image_function_not_implemented(const string &str) {
+	SDL_Log("Engine was not built with SDL_image support! %s not available.", str.c_str());
+	assert(0);
 }
 
 
@@ -827,7 +833,7 @@ Engine::Engine(const unsigned int sdl_init_flags, const int img_init_flags, cons
 #endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
 	if (Mix_Init(mix_init_flags) != mix_init_flags)
-		SDL_LogError(0, "Failed to initialize SDL_mixer: %s", IMG_GetError());
+		SDL_LogError(0, "Failed to initialize SDL_mixer: %s", Mix_GetError());
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
 	if (TTF_Init() < 0)
@@ -1476,7 +1482,8 @@ Surface::Surface(Surface &&_surface): surface(std::move(_surface.surface)) {
 }
 
 #ifdef IMAGE_ENABLED
-Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
+Surface::Surface(const string &file):
+	surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
 		SDL_LogError(0, "Failed to load surface: %s", SDL_GetError());
 	else {
@@ -1487,6 +1494,11 @@ Surface::Surface(const string &file): surface(managed_ptr<SDL_Surface>(IMG_Load(
 		w = surface.get()->w;
 		h = surface.get()->h;
 	}
+}
+#else
+Surface::Surface([[maybe_unused]] const string &file):
+	surface(managed_ptr<SDL_Surface>(nullptr, SDL_DestroySurface)) {
+	image_function_not_implemented("Surface::Surface(const string &file)");
 }
 #endif /* IMAGE_ENABLED */
 
@@ -1534,6 +1546,19 @@ void Surface::save(const string &file, const int quality) {
 	// quality should be between 0 to 100
 	IMG_SaveJPG(surface.get(), file.c_str(), quality);
 }
+#else
+void Surface::save([[maybe_unused]] const string &file) {
+	image_function_not_implemented("Surface::save(const string &file)");
+}
+
+void Surface::save(
+	[[maybe_unused]] const string &file,
+	[[maybe_unused]] const int quality
+) {
+	image_function_not_implemented(
+		"Surface::save(const string &file, const int quality)"
+	);
+}
 #endif /* IMAGE_ENABLED */
 
 
@@ -1566,6 +1591,15 @@ Texture::Texture(Renderer &renderer, const string &file):
 	}
 
 	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
+}
+#else
+Texture::Texture(
+	[[maybe_unused]] Renderer &renderer,
+	[[maybe_unused]] const string &file
+): texture(managed_ptr<SDL_Texture>(nullptr, SDL_DestroyTexture)) {
+	image_function_not_implemented(
+		"Texture::Texture(Renderer &renderer, const string &file)"
+	);
 }
 #endif /* IMAGE_ENABLED */
 

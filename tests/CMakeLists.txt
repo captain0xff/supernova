@@ -5,7 +5,7 @@ project(test)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Debug)
 
-add_compile_definitions(IMAGE_ENABLED)
+# add_compile_definitions(IMAGE_ENABLED)
 add_compile_definitions(MIXER_ENABLED)
 add_compile_definitions(TTF_ENABLED)
 add_compile_definitions(NET_ENABLED)
@@ -20,3 +20,5 @@ set(SRC_PATH ../src)
 file(GLOB SOURCES ${SRC_PATH}/*.cpp)
 
 add_executable(main main.cpp ${SOURCES})
+
+target_compile_options(main PUBLIC -Wall -Wextra -Wpedantic)

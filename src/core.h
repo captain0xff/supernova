@@ -568,9 +568,7 @@ class Surface {
 		);
 		Surface(SDL_Surface *_surface);
 		Surface(Surface &&_surface);
-#ifdef IMAGE_ENABLED
 		Surface(const string &file);
-#endif /* IMAGE_ENABLED */
 
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_colour_key(const uint32_t key, const bool enable=true);
@@ -582,13 +580,11 @@ class Surface {
 			const IRect &dst_rect,
 			const IRect &src_rect
 		);
-#ifdef IMAGE_ENABLED
 		// This function saves the surface as png
 		void save(const string &file);
 		// This function saves the surface as jpg
 		// quality should be between 0 to 100
 		void save(const string &file, const int quality);
-#endif /* IMAGE_ENABLED */
 };
 
 
@@ -602,9 +598,7 @@ class Texture {
 
 		Texture(Renderer &renderer, SDL_Texture *_texture);
 		Texture(Texture &&_texture);
-#ifdef IMAGE_ENABLED
 		Texture(Renderer &renderer, const string &file);
-#endif /* IMAGE_ENABLED */
 		Texture(Renderer &renderer, const Surface &surface);
 		Texture(
 			Renderer &renderer,
