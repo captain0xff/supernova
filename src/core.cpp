@@ -1031,6 +1031,10 @@ Surface Window::get_window_surface() {
 	return Surface(SDL_GetWindowSurface(window.get()));
 }
 
+void Window::gl_swap() {
+	SDL_GL_SwapWindow(window.get());
+}
+
 void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
 	SDL_Log("Window closed successfully!");
@@ -1056,6 +1060,10 @@ void Renderer::clear(const Colour &colour) {
 
 void Renderer::present() {
 	SDL_RenderPresent(renderer.get());
+}
+
+void Renderer::flush() {
+	SDL_FlushRenderer(renderer.get());
 }
 
 void Renderer::set_blend_mode(const SDL_BlendMode blendmode) {
@@ -1637,6 +1645,14 @@ IRect Texture::get_rect() {
 
 SDL_PropertiesID Texture::get_properties() {
 	return SDL_GetTextureProperties(texture.get());
+}
+
+int Texture::get_gl_texture_number() {
+	return SDL_GetNumberProperty(
+		get_properties(),
+		SDL_PROP_TEXTURE_OPENGL_TEXTURE_NUMBER,
+		0
+	);
 }
 
 void Texture::set_colour_mod(const Colour &colour) {

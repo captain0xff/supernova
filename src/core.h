@@ -431,6 +431,7 @@ class Window {
 		// This function should be only used if the renderer is created with an
 		// SDL_RENDERER_SOFTWARE flag
 		Surface get_window_surface();
+		void gl_swap();
 };
 
 
@@ -448,6 +449,7 @@ class Renderer {
 		void set_colour(const Colour &colour);
 		void clear(const Colour &colour);
 		void present();
+		void flush();
 		void set_blend_mode(const SDL_BlendMode blend_mode);
 		void set_target(); // Resets the render target to the window
 		void set_target(Texture &tex);
@@ -609,6 +611,7 @@ class Texture {
 
 		IRect get_rect();
 		SDL_PropertiesID get_properties();
+		int get_gl_texture_number();
 
 		void set_colour_mod(const Colour &colour);
 		void set_blend_mode(const SDL_BlendMode blend_mode);
