@@ -1095,6 +1095,10 @@ SDL_RendererInfo Renderer::get_info() {
 	return info;
 }
 
+string Renderer::get_driver_name() {
+	return string(get_info().name);
+}
+
 void Renderer::draw_point_raw(const Vector &point_pos) {
 	SDL_RenderPoint(renderer.get(), point_pos.x, point_pos.y);
 }
