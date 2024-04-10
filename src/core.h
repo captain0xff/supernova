@@ -460,6 +460,7 @@ class Renderer {
 			const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST
 		);
 		IVector get_output_size();
+		SDL_RendererInfo get_info();
 		void draw_point_raw(const Vector &point_pos);
 		void draw_point(const Vector &point_pos, const Colour &colour);
 		void draw_line_raw(const Vector &v1, const Vector &v2);

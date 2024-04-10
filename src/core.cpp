@@ -1088,6 +1088,13 @@ IVector Renderer::get_output_size() {
 	return {w, h};
 }
 
+SDL_RendererInfo Renderer::get_info() {
+	SDL_RendererInfo info;
+	SDL_GetRendererInfo(renderer.get(), &info);
+
+	return info;
+}
+
 void Renderer::draw_point_raw(const Vector &point_pos) {
 	SDL_RenderPoint(renderer.get(), point_pos.x, point_pos.y);
 }
