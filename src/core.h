@@ -568,7 +568,7 @@ class Surface {
 
 		Surface(
 			const IVector &size,
-			const uint32_t format=SDL_PIXELFORMAT_RGBA8888
+			const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA8888
 		);
 		Surface(SDL_Surface *_surface);
 		Surface(Surface &&_surface);
@@ -607,7 +607,7 @@ class Texture {
 		Texture(
 			Renderer &renderer,
 			const IVector &size,
-			const uint32_t format=SDL_PIXELFORMAT_RGBA32,
+			const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA32,
 			const int access=SDL_TEXTUREACCESS_TARGET
 		);
 

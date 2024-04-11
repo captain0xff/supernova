@@ -1465,8 +1465,8 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 }
 
 
-Surface::Surface(const IVector &size, const uint32_t format):
-	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, (SDL_PixelFormatEnum)format), SDL_DestroySurface)) {
+Surface::Surface(const IVector &size, const SDL_PixelFormatEnum format):
+	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, format), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
 		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
 	else {
@@ -1636,7 +1636,7 @@ Texture::Texture(Renderer &renderer, const Surface &surface):
 	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
 }
 
-Texture::Texture(Renderer &renderer, const IVector &size, const uint32_t format, const int access):
+Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormatEnum format, const int access):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTexture(renderer.renderer.get(), format, access, size.x, size.y), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	w = size.x;
