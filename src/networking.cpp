@@ -153,6 +153,10 @@ int StreamSocket::write(const void *buffer, const int size) {
 	return SDLNet_WriteToStreamSocket(socket.get(), buffer, size);
 }
 
+int StreamSocket::write(const string &msg) {
+	return write(msg.c_str(), msg.size());
+}
+
 void StreamSocket::create_socket() {
 	socket = managed_ptr<SDLNet_StreamSocket>(SDLNet_CreateClient(address.address, port), SDLNet_DestroyStreamSocket);
 }

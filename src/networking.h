@@ -101,6 +101,7 @@ class StreamSocket: public AddressHandler {
 		// Returns the number of bytes read or -1 on error
 		int read(void *buffer, const int size);
 		int write(const void *buffer, const int size);
+		int write(const string &msg);
 };
 
 
