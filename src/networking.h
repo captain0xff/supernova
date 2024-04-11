@@ -37,6 +37,7 @@ class Address {
 
 		// [-1/0/1] -> failed/pending/resolved
 		int get_status();
+		string get_string();
 		void unref();
 };
 

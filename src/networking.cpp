@@ -49,6 +49,10 @@ int Address::get_status() {
 	return status;
 }
 
+string Address::get_string() {
+	return string(SDLNet_GetAddressString(address));
+}
+
 void Address::unref() {
 	SDLNet_UnrefAddress(address);
 }
