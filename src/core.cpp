@@ -1041,7 +1041,7 @@ void Window::destroy(SDL_Window *window) {
 }
 
 
-Renderer::Renderer(Window &window, const SDL_RendererFlags flags, const string &driver):
+Renderer::Renderer(Window &window, const uint32_t flags, const string &driver):
 		renderer(managed_ptr<SDL_Renderer>((driver == "")? SDL_CreateRenderer(window.window.get(), NULL, flags) : SDL_CreateRenderer(window.window.get(), driver.c_str(), flags),destroy)) {
 	if (renderer.get() == NULL)
 		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());

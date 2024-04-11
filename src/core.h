@@ -441,7 +441,7 @@ class Renderer {
 
 		Renderer(
 			Window &window,
-			const SDL_RendererFlags flags=(SDL_RendererFlags)0,
+			const uint32_t flags=0,
 			const string &driver=""
 		);
 
