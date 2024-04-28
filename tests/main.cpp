@@ -7,38 +7,58 @@
 #include "../src/logging.h"
 #include "../src/mixer.h"
 #include "../src/font.h"
+#include "../src/print.h"
 
 
 using namespace std;
 
 
 
-int main(int argc, char *argv[]) {
-
+int main(int, char**) {
 	Engine engine;
 
-	Window window("Test", {800, 600});
-	Renderer renderer(window);
+	bool server_ready = false;
+
+	StreamServer server(3000);
+	StreamSocket *client = nullptr;
+	StreamSocket *server_sock = nullptr;
+
+	char sbuffer[64], cbuffer[64] = "Hello Boys";
 
 	Clock clock;
-	Events events;
 
-	bool rng = true;
+	while (1) {
+		clock.tick(30);
 
-	Texture texture(renderer, "../../res/banner.png");
-	Rect rect = texture.get_rect();
-	rect.scale(800/rect.w);
-	rect.center({400, 300});
+		if (server.update() == StreamServer::READY && !server_sock) {
+			if (!server_ready) {
+				client = new StreamSocket(3000, "127.0.0.1");
+				print("Created client!");
+			}
+			server_sock = server.accept_client();
+			if (server_sock)
+				print("Accepted client!");
+			server_ready = true;
+		}
 
-	while (rng) {
-		clock.tick(60);
+		if (server_sock != nullptr) {
+			int size = server_sock->read(sbuffer, 64);
+			if (size > 0)
+				print(sbuffer);
+			else if (size < 0) {
+				print("Failed to read!");
+				break;
+			}
+		}
 
-		rng = events.process_events();
-
-		renderer.clear(WHITE);
-		texture.render(rect);
-		renderer.present();
+		if (client && client->update() == StreamSocket::READY) {
+			if (client->write(cbuffer, 64) < 0)
+				break;
+		}
 	}
+
+	delete client;
 
 	return 0;
 }
+

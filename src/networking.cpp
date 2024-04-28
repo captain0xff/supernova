@@ -83,86 +83,132 @@ int AddressHandler::get_address_status() {
 }
 
 
-StreamServer::StreamServer(const uint16_t port):
-	server(managed_ptr<SDLNet_Server>(SDLNet_CreateServer(NULL, port), SDLNet_DestroyServer)) {
-	if (server == nullptr)
-		SDL_LogError(0, "Failed to create server: %s", SDL_GetError());
+StreamSocket::StreamSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
+	address = SDLNet_ResolveHostname(host.c_str());
+	state = RESOLVING_ADDRESS;
 }
 
-bool StreamServer::is_new_connection_available() {
-	if (client != nullptr)
-		SDLNet_DestroyStreamSocket(client);
-	SDLNet_AcceptClient(server.get(), &client);
-
-	return (client != nullptr);
+StreamSocket::StreamSocket(SDLNet_StreamSocket *_socket): port(0) {
+	socket = _socket;
+	state = READY;
 }
 
-StreamSocket StreamServer::accept_client() {
-	return StreamSocket(client);
-	client = nullptr;
-}
-
-
-StreamSocket::StreamSocket():
-	socket(managed_ptr<SDLNet_StreamSocket>(nullptr, SDLNet_DestroyStreamSocket)) {}
-
-StreamSocket::StreamSocket(SDLNet_StreamSocket *_socket):
-	socket(managed_ptr<SDLNet_StreamSocket>(_socket, SDLNet_DestroyStreamSocket)) {
-	if (socket == nullptr)
-		SDL_LogError(0, "Invalid stream-socket");
-	else {
-		address_status = 1;
-		connection_status = 1;
+StreamSocket::~StreamSocket() {
+	if (state != DESTROYED) {
+		SDLNet_WaitUntilStreamSocketDrained(socket, -1);
+		SDLNet_DestroyStreamSocket(socket);
+		state = DESTROYED;
 	}
 }
 
-StreamSocket::StreamSocket(const uint16_t _port, const string &_host):
-	AddressHandler(_port, _host),
-	socket(nullptr, SDLNet_DestroyStreamSocket) {}
+StreamSocket::State& StreamSocket::update() {
+	switch (state) {
+		case RESOLVING_ADDRESS:
+			switch (SDLNet_GetAddressStatus(address)) {
+				case -1:
+					SDL_LogError(0, "Failed to resolve server address!");
+					state = DEAD;
+					break;
+				case 1:
+					socket = SDLNet_CreateClient(address, port);
+					SDLNet_UnrefAddress(address);
+					state = CONNECTING;
+					break;
+			}
+			break;
+		case CONNECTING:
+			switch(SDLNet_GetConnectionStatus(socket)) {
+				case -1:
+					SDL_LogError(0, "Failed to connect with server!");
+					state = DEAD;
+					break;
+				case 1:
+					state = READY;
+					break;
+			}
+			break;
+		case DEAD:
+			if (SDLNet_GetStreamSocketPendingWrites(socket) <= 0) {
+				SDLNet_DestroyStreamSocket(socket);
+				state = DESTROYED;
+			}
+			break;
+		default:
+			break;
+	};
 
-StreamSocket& StreamSocket::operator=(StreamSocket&& stream_socket) {
-	if (this == &stream_socket)
-		return *this;
-
-	socket = std::move(stream_socket.socket);
-	address = stream_socket.address;
-	stream_socket.address.address = nullptr;
-	port = stream_socket.port;
-	host = stream_socket.host;
-	connection_status = stream_socket.connection_status;
-	address_status = stream_socket.address_status;
-
-	return *this;
-}
-
-int StreamSocket::get_connection_status() {
-	// [-1/0/1] -> failed/pending/successful
-	if ((address_status > 0) && (connection_status <= 0))
-		connection_status = SDLNet_GetConnectionStatus(socket.get());
-
-	return connection_status;
-}
-
-int StreamSocket::get_pending_writes() {
-	// Returns the number of bytes left to send or -1 on error
-	return SDLNet_GetStreamSocketPendingWrites(socket.get());
+	return state;
 }
 
 int StreamSocket::read(void *buffer, const int size) {
 	// Returns the number of bytes read and -1 on error
-	return SDLNet_ReadFromStreamSocket(socket.get(), buffer, size);
+	return SDLNet_ReadFromStreamSocket(socket, buffer, size);
 }
 
 int StreamSocket::write(const void *buffer, const int size) {
-	return SDLNet_WriteToStreamSocket(socket.get(), buffer, size);
+	return SDLNet_WriteToStreamSocket(socket, buffer, size);
 }
 
 int StreamSocket::write(const string &msg) {
 	return write(msg.c_str(), msg.size());
 }
 
-void StreamSocket::create_socket() {
-	socket = managed_ptr<SDLNet_StreamSocket>(SDLNet_CreateClient(address.address, port), SDLNet_DestroyStreamSocket);
+
+StreamServer::StreamServer(const uint16_t _port): port(_port) {
+	address = NULL;
+	state = CREATING_SERVER;
+}
+
+StreamServer::StreamServer(const uint16_t _port, const string &_host): port(_port), host(_host) {
+	address = SDLNet_ResolveHostname(host.c_str());
+	state = RESOLVING_ADDRESS;
+}
+
+StreamServer::~StreamServer() {
+	SDLNet_DestroyServer(server);
+}
+
+StreamServer::State& StreamServer::update() {
+	switch (state) {
+		case RESOLVING_ADDRESS:
+			switch (SDLNet_GetAddressStatus(address)) {
+				case -1:
+					SDL_LogError(0, "Failed to resolve server address!");
+					state = DEAD;
+					break;
+				case 1:
+					state = CREATING_SERVER;
+					break;
+			}
+			break;
+		case CREATING_SERVER:
+			if (address == NULL) {
+				server = SDLNet_CreateServer(NULL, port);
+			} else {
+				server = SDLNet_CreateServer(address, port);
+				SDLNet_UnrefAddress(address);
+			}
+			state = READY;
+			break;
+		default:
+			break;
+	};
+
+	return state;
+}
+
+StreamSocket* StreamServer::accept_client() {
+	// Returns nullptr if no new client is available
+	SDLNet_StreamSocket *client;
+
+	SDLNet_AcceptClient(server, &client);
+	if (client != NULL) {
+		auto res = clients.try_emplace(1, client);
+		if (res.second)
+			return &res.first->second;
+	}
+
+	return nullptr;
 }
 
 

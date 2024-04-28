@@ -14,8 +14,8 @@
 
 // Forward Declarations
 class Address;
-class StreamServer;
 class StreamSocket;
+class StreamServer;
 class Packet;
 class DatagramSocket;
 
@@ -61,48 +61,70 @@ class AddressHandler {
 };
 
 
-class StreamServer {
-	private:
-		SDLNet_StreamSocket *client = nullptr;
+class StreamSocket {
+public:
+	enum State {
+		RESOLVING_ADDRESS,
+		CONNECTING,
+		READY,
+		DEAD,
+		DESTROYED
+	};
 
-	public:
-		managed_ptr<SDLNet_Server> server;
+	const uint16_t port;
+	const string host;
 
-		StreamServer(const uint16_t port);
+	State state;
 
-		// This function must be called before calling accept_client
-		bool is_new_connection_available();
-		// This function should only be called if is_new_connection_available()
-		// returns true
-		StreamSocket accept_client();
+	SDLNet_Address *address;
+	SDLNet_StreamSocket *socket;
+
+	StreamSocket(const uint16_t _port, const string &_host);
+	StreamSocket(SDLNet_StreamSocket *_socket);
+	StreamSocket(const StreamSocket&) = delete;
+	~StreamSocket();
+
+	StreamSocket& operator=(StreamSocket&) = delete;
+
+	State& update();
+
+	// Returns the number of bytes read or -1 on error
+	int read(void *buffer, const int size);
+	int write(const void *buffer, const int size);
+	int write(const string &msg);
 };
 
 
-class StreamSocket: public AddressHandler {
-	private:
-		// [-1/0/1] -> failed/pending/successful
-		int connection_status = 0;
+class StreamServer {
+public:
+	enum State {
+		RESOLVING_ADDRESS,
+		CREATING_SERVER,
+		READY,
+		DEAD
+	};
 
-		void create_socket();
+	const uint16_t port;
+	const string host;
 
-	public:
-		managed_ptr<SDLNet_StreamSocket> socket;
+	State state;
+	int last_id = 0;
+	std::unordered_map<int, StreamSocket> clients;
 
-		StreamSocket();
-		StreamSocket(SDLNet_StreamSocket *_socket);
-		StreamSocket(const uint16_t _port, const string &_host="127.0.0.1");
+	SDLNet_Server *server;
+	SDLNet_Address *address;
 
-		StreamSocket& operator=(StreamSocket&& stream_socket);
+	StreamServer(const uint16_t _port);
+	StreamServer(const uint16_t _port, const string &_host);
+	StreamServer(const StreamServer&) = delete;
+	~StreamServer();
 
-		// [-1/0/1] -> failed/pending/successful
-		int get_connection_status();
-		// Returns the number of bytes left to send or -1 on error
-		int get_pending_writes();
+	StreamServer& operator=(const StreamServer&) = delete;
 
-		// Returns the number of bytes read or -1 on error
-		int read(void *buffer, const int size);
-		int write(const void *buffer, const int size);
-		int write(const string &msg);
+	State& update();
+
+	// Returns nullptr if no new client is available
+	StreamSocket* accept_client();
 };
 
 
