@@ -14,50 +14,54 @@ using namespace std;
 
 
 
-int main(int, char**) {
+int main(int argc, char *argv[]) {
 	Engine engine;
 
-	bool server_ready = false;
-
-	StreamServer server(3000);
-	StreamSocket *client = nullptr;
-	StreamSocket *server_sock = nullptr;
-
-	char sbuffer[64], cbuffer[64] = "Hello Boys";
+	Window window("Datagram Demo", {800, 600});
+	Renderer renderer(window);
 
 	Clock clock;
+	Events events;
 
-	while (1) {
-		clock.tick(30);
+	bool rng = true;
+	double dt;
 
-		if (server.update() == StreamServer::READY && !server_sock) {
-			if (!server_ready) {
-				client = new StreamSocket(3000, "127.0.0.1");
-				print("Created client!");
-			}
-			server_sock = server.accept_client();
-			if (server_sock)
-				print("Accepted client!");
+	DatagramSocket server(2000), client(0, "127.0.0.1");
+	Packet server_packet, client_packet;
+	Datagram dgram(2000, "127.0.0.1", client_packet);
+	Rect server_rect, client_rect;
+	server_rect = client_rect = {0, 0, 50, 50};
+	bool server_ready = false;
+	Vector pos;
+
+	Mouse mouse;
+
+	while (rng) {
+		dt = clock.tick(60);
+
+		rng = events.process_events(&EVENT_KEYS, &mouse);
+
+		client_rect.center(mouse.pos);
+		client_rect.clamp_ip({0, 0, 400, 600});
+
+		client_packet << client_rect.center();
+		if ((client.get_state() == DatagramSocket::READY) && (dgram.get_state() == Datagram::READY)) {
+			client.send(dgram);
+		}
+
+		if ((server.get_state() == DatagramSocket::READY) && (server.recv(server_packet))) {
 			server_ready = true;
+			server_packet >> pos;
+			server_rect.center({pos.x + 400, pos.y});
 		}
 
-		if (server_sock != nullptr) {
-			int size = server_sock->read(sbuffer, 64);
-			if (size > 0)
-				print(sbuffer);
-			else if (size < 0) {
-				print("Failed to read!");
-				break;
-			}
-		}
-
-		if (client && client->update() == StreamSocket::READY) {
-			if (client->write(cbuffer, 64) < 0)
-				break;
-		}
+		renderer.clear(WHITE);
+		renderer.draw_rect(client_rect, GREEN);
+		if (server_ready)
+			renderer.draw_rect(server_rect, YELLOW);
+		renderer.draw_line({400, 0}, {400, 600}, RED);
+		renderer.present();
 	}
-
-	delete client;
 
 	return 0;
 }

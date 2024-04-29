@@ -13,54 +13,15 @@
 
 
 // Forward Declarations
-class Address;
 class StreamSocket;
 class StreamServer;
 class Packet;
+class Datagram;
 class DatagramSocket;
 
 
 
 // Classes
-class Address {
-	public:
-		int status;
-		SDLNet_Address *address;
-
-		Address();
-		Address(SDLNet_Address *_address);
-		Address(const string &host);
-		Address(Address& _address);
-		~Address();
-
-		Address& operator=(Address& _address);
-
-		// [-1/0/1] -> failed/pending/resolved
-		int get_status();
-		string get_string();
-		void unref();
-};
-
-
-class AddressHandler {
-	protected:
-		int address_status = 0;
-
-		virtual void create_socket() {};
-
-	public:
-		uint16_t port;
-		string host;
-		Address address;
-
-		AddressHandler();
-		AddressHandler(const uint16_t _port, const string &_host="127.0.0.1");
-
-		// [-1/0/1] -> failed/pending/resolved
-		int get_address_status();
-};
-
-
 class StreamSocket {
 public:
 	enum State {
@@ -86,7 +47,7 @@ public:
 
 	StreamSocket& operator=(StreamSocket&) = delete;
 
-	State& update();
+	State& get_state();
 
 	// Returns the number of bytes read or -1 on error
 	int read(void *buffer, const int size);
@@ -121,7 +82,7 @@ public:
 
 	StreamServer& operator=(const StreamServer&) = delete;
 
-	State& update();
+	State& get_state();
 
 	// Returns nullptr if no new client is available
 	StreamSocket* accept_client();
@@ -172,22 +133,63 @@ class Packet {
 		void clear();
 };
 
-class DatagramSocket: public AddressHandler {
-	int res;
 
-	void create_socket();
+class Datagram {
+public:
+	enum State {
+		RESOLVING,
+		READY,
+		DEAD
+	};
 
-	public:
-		SDLNet_Datagram *datagram;
-		managed_ptr<SDLNet_DatagramSocket> socket;
+	const uint16_t port;
+	const string host;
+	Packet &packet;
 
-		DatagramSocket(const uint16_t _port);
-		DatagramSocket(const uint16_t _port, const string &_host);
-		~DatagramSocket();
+	State state;
 
-		void send(const uint16_t port, const Address &address, Packet &packet);
-		// Returns true when a packet is available
-		bool recv(Packet &packet);
+	SDLNet_Address *address;
+
+	Datagram(const uint16_t _port, const string _host, Packet &_packet);
+	Datagram(const Datagram&) = delete;
+	~Datagram();
+
+	Datagram& operator=(const Datagram&) = delete;
+
+	State& get_state();
+};
+
+
+class DatagramSocket {
+public:
+	enum State {
+		RESOLVING_ADDRESS,
+		CREATING_SOCKET,
+		READY,
+		DEAD
+	};
+
+	const uint16_t port;
+	const string host;
+
+	State state;
+
+	SDLNet_Address *address;
+	SDLNet_DatagramSocket *socket;
+	SDLNet_Datagram *datagram = nullptr;
+
+	DatagramSocket(const uint16_t _port);
+	DatagramSocket(const uint16_t _port, const string &_host);
+	DatagramSocket(const DatagramSocket&) = delete;
+	~DatagramSocket();
+
+	DatagramSocket& operator=(const DatagramSocket&) = delete;
+
+	State& get_state();
+
+	void send(Datagram &_datagram);
+	// Returns true when a packet is available
+	bool recv(Packet &packet);
 };
 
 #endif /* SUPERNOVA_NETWORKING_H */

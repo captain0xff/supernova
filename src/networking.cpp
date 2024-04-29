@@ -5,84 +5,6 @@
 
 
 // Classes
-Address::Address(): address(nullptr) {}
-
-Address::Address(SDLNet_Address *_address) {
-	if (_address != nullptr) {
-		address = _address;
-		SDLNet_RefAddress(address);
-	}
-}
-
-Address::Address(Address& _address) {
-	address = _address.address;
-	SDLNet_RefAddress(address);
-}
-
-Address::Address(const string &host): address(SDLNet_ResolveHostname(host.c_str())) {
-	if (address == nullptr)
-		SDL_LogError(0, "Failed to resolve host: %s", SDL_GetError());
-}
-
-Address::~Address() {
-	if (address != nullptr) {
-		SDLNet_UnrefAddress(address);
-		address = nullptr;
-	}
-}
-
-Address& Address::operator=(Address& _address) {
-	if (&_address == this)
-		return *this;
-
-	address = _address.address;
-	SDLNet_RefAddress(address);
-
-	return *this;
-}
-
-int Address::get_status() {
-	if (status == 0) {
-		status = SDLNet_GetAddressStatus(address);
-	}
-
-	return status;
-}
-
-string Address::get_string() {
-	return string(SDLNet_GetAddressString(address));
-}
-
-void Address::unref() {
-	SDLNet_UnrefAddress(address);
-}
-
-
-AddressHandler::AddressHandler() {
-	port = -1;
-	host = "";
-};
-
-AddressHandler::AddressHandler(const uint16_t _port, const string &_host): address(_host) {
-	port = _port;
-	host = _host;
-};
-
-int AddressHandler::get_address_status() {
-	// [-1/0/1] -> failed/pending/resolved
-	if (address_status <= 0) {
-		address_status = address.get_status();
-
-		if (address_status > 0) {
-			create_socket();
-			address.unref();
-		}
-	}
-
-	return address_status;
-}
-
-
 StreamSocket::StreamSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
 	address = SDLNet_ResolveHostname(host.c_str());
 	state = RESOLVING_ADDRESS;
@@ -97,11 +19,13 @@ StreamSocket::~StreamSocket() {
 	if (state != DESTROYED) {
 		SDLNet_WaitUntilStreamSocketDrained(socket, -1);
 		SDLNet_DestroyStreamSocket(socket);
+		if (address != nullptr)
+			SDLNet_UnrefAddress(address); 
 		state = DESTROYED;
 	}
 }
 
-StreamSocket::State& StreamSocket::update() {
+StreamSocket::State& StreamSocket::get_state() {
 	switch (state) {
 		case RESOLVING_ADDRESS:
 			switch (SDLNet_GetAddressStatus(address)) {
@@ -112,6 +36,7 @@ StreamSocket::State& StreamSocket::update() {
 				case 1:
 					socket = SDLNet_CreateClient(address, port);
 					SDLNet_UnrefAddress(address);
+					address = nullptr;
 					state = CONNECTING;
 					break;
 			}
@@ -155,7 +80,7 @@ int StreamSocket::write(const string &msg) {
 
 
 StreamServer::StreamServer(const uint16_t _port): port(_port) {
-	address = NULL;
+	address = nullptr;
 	state = CREATING_SERVER;
 }
 
@@ -166,9 +91,11 @@ StreamServer::StreamServer(const uint16_t _port, const string &_host): port(_por
 
 StreamServer::~StreamServer() {
 	SDLNet_DestroyServer(server);
+	if (address != nullptr)
+		SDLNet_UnrefAddress(address); 
 }
 
-StreamServer::State& StreamServer::update() {
+StreamServer::State& StreamServer::get_state() {
 	switch (state) {
 		case RESOLVING_ADDRESS:
 			switch (SDLNet_GetAddressStatus(address)) {
@@ -182,11 +109,12 @@ StreamServer::State& StreamServer::update() {
 			}
 			break;
 		case CREATING_SERVER:
-			if (address == NULL) {
+			if (address == nullptr) {
 				server = SDLNet_CreateServer(NULL, port);
 			} else {
 				server = SDLNet_CreateServer(address, port);
 				SDLNet_UnrefAddress(address);
+				address = nullptr;
 			}
 			state = READY;
 			break;
@@ -349,25 +277,92 @@ void Packet::clear() {
 }
 
 
-DatagramSocket::DatagramSocket(const uint16_t _port):
-	socket(SDLNet_CreateDatagramSocket(NULL, _port), SDLNet_DestroyDatagramSocket) {}
+Datagram::Datagram(const uint16_t _port, const string _host, Packet &_packet):
+	port(_port), host(_host), packet(_packet) {
+	address = SDLNet_ResolveHostname(host.c_str());
+	state = RESOLVING;
+}
 
-DatagramSocket::DatagramSocket(const uint16_t _port, const string &_host):
-	AddressHandler(_port, _host), socket(nullptr, SDLNet_DestroyDatagramSocket) {}
+Datagram::~Datagram() {
+	SDLNet_UnrefAddress(address);
+}
+
+Datagram::State& Datagram::get_state() {
+	switch (state) {
+		case RESOLVING:
+			switch (SDLNet_GetAddressStatus(address)) {
+				case -1:
+					SDL_LogError(0, "Failed to resolve server address!");
+					state = DEAD;
+					break;
+				case 1:
+					state = READY;
+					break;
+			}
+		default:
+			break;
+	};
+
+	return state;
+}
+
+
+DatagramSocket::DatagramSocket(const uint16_t _port): port(_port) {
+	address = nullptr;
+	state = CREATING_SOCKET;
+}
+
+DatagramSocket::DatagramSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
+	address = SDLNet_ResolveHostname(host.c_str());
+	state = RESOLVING_ADDRESS;
+}
 
 DatagramSocket::~DatagramSocket() {
 	SDLNet_DestroyDatagram(datagram);
+	SDLNet_DestroyDatagramSocket(socket);
+	if (address != nullptr)
+		SDLNet_UnrefAddress(address); 
 }
 
-void DatagramSocket::send(const uint16_t port, const Address &address, Packet &packet) {
-	res = SDLNet_SendDatagram(
-		socket.get(),
-		address.address,
-		port,
-		packet.buffer.c_str(),
-		packet.buffer.size()
+DatagramSocket::State& DatagramSocket::get_state() {
+	switch (state) {
+		case RESOLVING_ADDRESS:
+			switch (SDLNet_GetAddressStatus(address)) {
+				case -1:
+					SDL_LogError(0, "Failed to resolve server address!");
+					state = DEAD;
+					break;
+				case 1:
+					state = CREATING_SOCKET;
+					break;
+			}
+			break;
+		case CREATING_SOCKET:
+			if (address == nullptr) {
+				socket = SDLNet_CreateDatagramSocket(NULL, port);
+			} else {
+				socket = SDLNet_CreateDatagramSocket(address, port);
+				SDLNet_UnrefAddress(address);
+				address = nullptr;
+			}
+			state = READY;
+			break;
+		default:
+			break;
+	};
+
+	return state;
+}
+
+void DatagramSocket::send(Datagram &_datagram) {
+	int res = SDLNet_SendDatagram(
+		socket,
+		_datagram.address,
+		_datagram.port,
+		_datagram.packet.buffer.c_str(),
+		_datagram.packet.buffer.size()
 	);
-	packet.clear();
+	_datagram.packet.clear();
 
 	if (res < 0)
 		SDL_LogError(0, "Failed to send packet: %s", SDL_GetError());
@@ -375,10 +370,9 @@ void DatagramSocket::send(const uint16_t port, const Address &address, Packet &p
 
 bool DatagramSocket::recv(Packet &packet) {
 	// Returns true when a packet is available
-	res = SDLNet_ReceiveDatagram(socket.get(), &datagram);
+	int res = SDLNet_ReceiveDatagram(socket, &datagram);
 
 	if (res == 0 && datagram != nullptr) {
-		packet.clear();
 		packet.buffer.assign(datagram->buf, datagram->buf + datagram->buflen);
 
 		return true;
@@ -387,8 +381,4 @@ bool DatagramSocket::recv(Packet &packet) {
 	}
 
 	return false;
-}
-
-void DatagramSocket::create_socket() {
-	socket = managed_ptr<SDLNet_DatagramSocket>(SDLNet_CreateDatagramSocket(address.address, port), SDLNet_DestroyDatagramSocket);
 }
