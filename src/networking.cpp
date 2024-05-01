@@ -307,10 +307,10 @@ Datagram::State& Datagram::get_state() {
 }
 
 
-DatagramSocket::DatagramSocket(const uint16_t _port): port(_port) {
-	address = nullptr;
-	state = CREATING_SOCKET;
-}
+// DatagramSocket::DatagramSocket(const uint16_t _port): port(_port) {
+// 	address = nullptr;
+// 	state = CREATING_SOCKET;
+// }
 
 DatagramSocket::DatagramSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
 	address = SDLNet_ResolveHostname(host.c_str());

@@ -178,8 +178,8 @@ public:
 	SDLNet_DatagramSocket *socket;
 	SDLNet_Datagram *datagram = nullptr;
 
-	DatagramSocket(const uint16_t _port);
-	DatagramSocket(const uint16_t _port, const string &_host);
+	// DatagramSocket(const uint16_t _port);
+	DatagramSocket(const uint16_t _port, const string &_host="0.0.0.0");
 	DatagramSocket(const DatagramSocket&) = delete;
 	~DatagramSocket();
 

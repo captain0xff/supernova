@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 	bool rng = true;
 	double dt;
 
-	DatagramSocket server(2000), client(0, "127.0.0.1");
+	DatagramSocket server(2000), client(0);
 	Packet server_packet, client_packet;
 	Datagram dgram(2000, "127.0.0.1", client_packet);
 	Rect server_rect, client_rect;
