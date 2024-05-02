@@ -30,21 +30,27 @@ StreamSocket::State& StreamSocket::get_state() {
 		case RESOLVING_ADDRESS:
 			switch (SDLNet_GetAddressStatus(address)) {
 				case -1:
-					SDL_LogError(0, "Failed to resolve server address!");
+					SDL_LogError(0, "Failed to resolve address: %s", SDL_GetError());
 					state = DEAD;
 					break;
 				case 1:
 					socket = SDLNet_CreateClient(address, port);
 					SDLNet_UnrefAddress(address);
 					address = nullptr;
-					state = CONNECTING;
+					if (socket == nullptr) {
+						SDL_LogError(0, "Failed to create stream socket: %s", SDL_GetError());
+						state = DEAD;
+					} else {
+						SDL_Log("Stream socket created successfully!");
+						state = CONNECTING;
+					}
 					break;
 			}
 			break;
 		case CONNECTING:
 			switch(SDLNet_GetConnectionStatus(socket)) {
 				case -1:
-					SDL_LogError(0, "Failed to connect with server!");
+					SDL_LogError(0, "Failed to connect with server: %s", SDL_GetError());
 					state = DEAD;
 					break;
 				case 1:
@@ -92,7 +98,7 @@ StreamServer::StreamServer(const uint16_t _port, const string &_host): port(_por
 StreamServer::~StreamServer() {
 	SDLNet_DestroyServer(server);
 	if (address != nullptr)
-		SDLNet_UnrefAddress(address); 
+		SDLNet_UnrefAddress(address);
 }
 
 StreamServer::State& StreamServer::get_state() {
@@ -100,7 +106,7 @@ StreamServer::State& StreamServer::get_state() {
 		case RESOLVING_ADDRESS:
 			switch (SDLNet_GetAddressStatus(address)) {
 				case -1:
-					SDL_LogError(0, "Failed to resolve server address!");
+					SDL_LogError(0, "Failed to resolve server address: %s", SDL_GetError());
 					state = DEAD;
 					break;
 				case 1:
@@ -116,7 +122,13 @@ StreamServer::State& StreamServer::get_state() {
 				SDLNet_UnrefAddress(address);
 				address = nullptr;
 			}
-			state = READY;
+			if (server == nullptr) {
+				SDL_LogError(0, "Failed to create stream server: %s", SDL_GetError());
+				state = DEAD;
+			} else {
+				SDL_Log("Stream server created successfully!");
+				state = READY;
+			}
 			break;
 		default:
 			break;
@@ -292,7 +304,7 @@ Datagram::State& Datagram::get_state() {
 		case RESOLVING:
 			switch (SDLNet_GetAddressStatus(address)) {
 				case -1:
-					SDL_LogError(0, "Failed to resolve server address!");
+					SDL_LogError(0, "Failed to resolve address: %s", SDL_GetError());
 					state = DEAD;
 					break;
 				case 1:
@@ -321,7 +333,7 @@ DatagramSocket::~DatagramSocket() {
 	SDLNet_DestroyDatagram(datagram);
 	SDLNet_DestroyDatagramSocket(socket);
 	if (address != nullptr)
-		SDLNet_UnrefAddress(address); 
+		SDLNet_UnrefAddress(address);
 }
 
 DatagramSocket::State& DatagramSocket::get_state() {
@@ -329,7 +341,7 @@ DatagramSocket::State& DatagramSocket::get_state() {
 		case RESOLVING_ADDRESS:
 			switch (SDLNet_GetAddressStatus(address)) {
 				case -1:
-					SDL_LogError(0, "Failed to resolve server address!");
+					SDL_LogError(0, "Failed to resolve address: %s", SDL_GetError());
 					state = DEAD;
 					break;
 				case 1:
@@ -345,7 +357,13 @@ DatagramSocket::State& DatagramSocket::get_state() {
 				SDLNet_UnrefAddress(address);
 				address = nullptr;
 			}
-			state = READY;
+			if (socket == nullptr) {
+				SDL_LogError(0, "Failed to create datagram socket: %s", SDL_GetError());
+				state = DEAD;
+			} else {
+				SDL_Log("Datagram socket created successfully!");
+				state = READY;
+			}
 			break;
 		default:
 			break;
