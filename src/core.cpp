@@ -865,6 +865,10 @@ Engine::~Engine() {
 }
 
 
+uint64_t Clock::get_ticks() {
+	return SDL_GetTicks();
+}
+
 double Clock::tick(double target_fps) {
 	// The parameter target_fps should be 0 for unclamped fps
 	if (target_fps) {
@@ -891,16 +895,17 @@ double Clock::get_fps() {
 }
 
 double Clock::timeit() {
+	// Returns the time between two of its successive calls in ms
 	current_time = SDL_GetPerformanceCounter();
-	double time_diff = (current_time - timeit_tick)/(double)SDL_GetPerformanceFrequency()*1000;
+	double time_diff = ((current_time - timeit_tick)/(double)SDL_GetPerformanceFrequency())*1000;
 	timeit_tick = current_time;
 	return time_diff;
 }
 
 
-Timer::Timer(double time) {
+Timer::Timer(double _time) {
 	// Time should be in seconds
-	this->time = time;
+	time = _time;
 }
 
 bool Timer::update(double dt, bool _reset) {

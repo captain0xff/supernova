@@ -352,15 +352,16 @@ class Clock {
 		int64_t target_ft, delay;
 
 	public:
-		// time: Time used in the previous tick in ms
+		// frame_time: Time used in the previous tick in ms
 		// raw_time: Actual time used in the previous tick in ms
-		// fps: The average framerate of the last 10 ticks
 		uint64_t raw_time = 0, frame_time = 0;
+
+		static uint64_t get_ticks();
 		
 		// The parameter target_fps should be 0 for unclamped fps
 		double tick(double target_fps=0);
 		double get_fps();
-		// Returns the time between two of its successive calls
+		// Returns the time between two of its successive calls in ms
 		double timeit();
 };
 
@@ -371,7 +372,7 @@ class Timer {
 
 		Timer() {};
 		// Time should be in seconds
-		Timer(double time);
+		Timer(double _time);
 
 		// Returns true once after the set time is over and gets reset if the
 		// _reset parameter is true
