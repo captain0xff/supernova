@@ -642,16 +642,22 @@ class Texture {
 
 class Camera {
 	private:
-		// [-1/0/1] -> rejected/pending/approved
-		int permission_state;
 		SDL_Surface *surface;
 		std::unique_ptr<Surface> frame;
 
 	public:
+		enum PERMISSION_STATE {
+			REJECTED,
+			PENDING,
+			APPROVED
+		};
+
 		uint64_t time_stamp = 0;
-		SDL_PixelFormatEnum format;
 		IVector size = {0, 0};
-		
+		SDL_PixelFormatEnum format;
+
+		PERMISSION_STATE permission_state;
+
 		managed_ptr<SDL_Camera> camera;
 
 		Camera(const int id=0);
@@ -661,7 +667,7 @@ class Camera {
 		// devices
 		static SDL_CameraDeviceID select_device(const int id=0);
 
-		int get_permission_state();
+		PERMISSION_STATE get_permission_state();
 		// This function must be called before acquire_frame()
 		// Otherwise acquire_frame() will keep returning the old surface
 		// Also returns false if camera permission hasn't been granted

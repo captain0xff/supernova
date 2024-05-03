@@ -1744,8 +1744,19 @@ Camera::Camera(const int id): camera(SDL_OpenCameraDevice(select_device(id), NUL
 	}
 }
 
-int Camera::get_permission_state() {
-	permission_state = SDL_GetCameraPermissionState(camera.get());
+Camera::PERMISSION_STATE Camera::get_permission_state() {
+	switch (SDL_GetCameraPermissionState(camera.get())) {
+		case -1:
+			permission_state = REJECTED;
+			break;
+		case 0:
+			permission_state = PENDING;
+			break;
+		case 1:
+			permission_state = APPROVED;
+			break;
+	}
+
 	return permission_state;
 }
 
@@ -1754,12 +1765,8 @@ bool Camera::is_new_frame_available() {
 	// Otherwise acquire_frame() will keep returning the old surface
 	// Also returns false if camera permission hasn't been granted or
 	// if a new frame isn't available
-	if (permission_state > 0) {
-		surface = SDL_AcquireCameraFrame(camera.get(), &time_stamp);
-		return (surface != nullptr);
-	} else {
-		return false;
-	}
+	surface = SDL_AcquireCameraFrame(camera.get(), &time_stamp);
+	return (surface != nullptr);
 }
 
 Surface& Camera::acquire_frame() {
@@ -1768,8 +1775,6 @@ Surface& Camera::acquire_frame() {
 }
 
 void Camera::release_frame() {
-	if (permission_state > 0) {
-		frame.release();
-		SDL_ReleaseCameraFrame(camera.get(), surface);
-	}
+	frame.release();
+	SDL_ReleaseCameraFrame(camera.get(), surface);
 }
