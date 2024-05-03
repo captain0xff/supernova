@@ -1488,18 +1488,6 @@ Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surfa
 	}
 }
 
-Surface::Surface(Surface &&_surface): surface(std::move(_surface.surface)) {
-	if (surface.get() == nullptr) {
-		SDL_LogError(0, "Failed to move surface: Invalid surface");
-	} else {
-		id = _surface.id;
-		_surface.id = -1;
-
-		w = _surface.w;
-		h = _surface.h;
-	}
-}
-
 #ifdef IMAGE_ENABLED
 Surface::Surface(const string &file):
 	surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
@@ -1676,6 +1664,23 @@ void Texture::set_blend_mode(SDL_BlendMode blend_mode) {
 	SDL_SetTextureBlendMode(texture.get(), blend_mode);
 }
 
+void Texture::update(const void *pixels, const int pitch) {
+	SDL_UpdateTexture(texture.get(), NULL, pixels, pitch);
+}
+
+void Texture::update(const void *pixels, const int pitch, const IRect &rect) {
+	const SDL_Rect r = rect;
+	SDL_UpdateTexture(texture.get(), &r, pixels, pitch);
+}
+
+void Texture::update(const Surface &surface) {
+	update(surface.surface->pixels, surface.surface->pitch);
+}
+
+void Texture::update(const Surface &surface, const IRect &rect) {
+	update(surface.surface->pixels, surface.surface->pitch, rect);
+}
+
 void Texture::render(const Vector &vec) {
 	render({vec, static_cast<Rect>(get_rect()).size()});
 }
@@ -1722,7 +1727,16 @@ SDL_CameraDeviceID Camera::select_device(const int id) {
 }
 
 Camera::Camera(const int id): camera(SDL_OpenCameraDevice(select_device(id), NULL), SDL_CloseCamera) {
-	permission_state = get_permission_state();
+	if (camera == nullptr) {
+		SDL_LogError(0, "Failed to open camera: %s", SDL_GetError());
+	} else {
+		SDL_CameraSpec spec;
+		SDL_GetCameraFormat(camera.get(), &spec);
+		size = {spec.width, spec.height};
+		format = spec.format;
+		permission_state = get_permission_state();
+		SDL_Log("Camera opened successfully!");
+	}
 }
 
 int Camera::get_permission_state() {

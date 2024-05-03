@@ -571,7 +571,6 @@ class Surface {
 			const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA8888
 		);
 		Surface(SDL_Surface *_surface);
-		Surface(Surface &&_surface);
 		Surface(const string &file);
 
 		void set_blend_mode(const SDL_BlendMode blend_mode);
@@ -617,6 +616,10 @@ class Texture {
 
 		void set_colour_mod(const Colour &colour);
 		void set_blend_mode(const SDL_BlendMode blend_mode);
+		void update(const void *pixels, const int pitch);
+		void update(const void *pixels, const int pitch, const IRect &rect);
+		void update(const Surface &surface);
+		void update(const Surface &surface, const IRect &rect);
 		void render(const Vector &vec);
 		void render(const Rect &dst_rect);
 		void render(const Rect &dst_rect, const Rect &src_rect);
@@ -644,8 +647,11 @@ class Camera {
 		std::unique_ptr<Surface> frame;
 
 	public:
-		managed_ptr<SDL_Camera> camera;
 		uint64_t time_stamp = 0;
+		SDL_PixelFormatEnum format;
+		IVector size = {0, 0};
+		
+		managed_ptr<SDL_Camera> camera;
 
 		Camera(const int id=0);
 
