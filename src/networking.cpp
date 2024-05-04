@@ -5,6 +5,24 @@
 
 
 // Classes
+string Netutils::get_address_string(SDLNet_Address *address) {
+	return string(SDLNet_GetAddressString(address));
+}
+
+std::vector<string> Netutils::get_local_addresses() {
+	int num;
+	SDLNet_Address **addresses = SDLNet_GetLocalAddresses(&num);
+
+	std::vector<string> address_strings;
+	for (int i = 0; i < num; i++) {
+		address_strings[i] = get_address_string(addresses[i]);
+	}
+	SDLNet_FreeLocalAddresses(addresses);
+
+	return address_strings;
+}
+
+
 StreamSocket::StreamSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
 	address = SDLNet_ResolveHostname(host.c_str());
 	state = RESOLVING_ADDRESS;
@@ -12,6 +30,8 @@ StreamSocket::StreamSocket(const uint16_t _port, const string &_host): port(_por
 
 StreamSocket::StreamSocket(SDLNet_StreamSocket *_socket): port(0) {
 	socket = _socket;
+	address = SDLNet_GetStreamSocketAddress(socket);
+
 	state = READY;
 }
 
@@ -81,7 +101,8 @@ int StreamSocket::write(const void *buffer, const int size) {
 }
 
 int StreamSocket::write(const string &msg) {
-	return write(msg.c_str(), msg.size());
+	// Sends a null-terminated string
+	return write(msg.c_str(), msg.size() + 1);
 }
 
 

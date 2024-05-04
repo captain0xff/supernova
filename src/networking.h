@@ -13,6 +13,7 @@
 
 
 // Forward Declarations
+class NetUtils;
 class StreamSocket;
 class StreamServer;
 class Packet;
@@ -22,6 +23,13 @@ class DatagramSocket;
 
 
 // Classes
+class Netutils {
+	public:
+		static string get_address_string(SDLNet_Address *address);
+		static std::vector<string> get_local_addresses();
+};
+
+
 class StreamSocket {
 public:
 	enum State {
@@ -52,6 +60,7 @@ public:
 	// Returns the number of bytes read or -1 on error
 	int read(void *buffer, const int size);
 	int write(const void *buffer, const int size);
+	// Sends a null-terminated string
 	int write(const string &msg);
 };
 
