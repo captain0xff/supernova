@@ -5,11 +5,11 @@
 
 
 // Classes
-string Netutils::get_address_string(SDLNet_Address *address) {
+string NetUtils::get_address_string(SDLNet_Address *address) {
 	return string(SDLNet_GetAddressString(address));
 }
 
-std::vector<string> Netutils::get_local_addresses() {
+std::vector<string> NetUtils::get_local_addresses() {
 	int num;
 	SDLNet_Address **addresses = SDLNet_GetLocalAddresses(&num);
 

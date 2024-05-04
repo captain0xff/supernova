@@ -23,7 +23,7 @@ class DatagramSocket;
 
 
 // Classes
-class Netutils {
+class NetUtils {
 	public:
 		static string get_address_string(SDLNet_Address *address);
 		static std::vector<string> get_local_addresses();
