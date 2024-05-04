@@ -13,7 +13,7 @@ std::vector<string> NetUtils::get_local_addresses() {
 	int num;
 	SDLNet_Address **addresses = SDLNet_GetLocalAddresses(&num);
 
-	std::vector<string> address_strings;
+	std::vector<string> address_strings(num);
 	for (int i = 0; i < num; i++) {
 		address_strings[i] = get_address_string(addresses[i]);
 	}

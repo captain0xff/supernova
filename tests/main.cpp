@@ -15,37 +15,12 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-	Engine engine;
+    Engine engine;
 
-	Window window("Camera Demo", {800, 600});
-	Renderer renderer(window);
+    for (string& str: NetUtils::get_local_addresses()) {
+        SDL_Log("ok");
+        SDL_Log("%s", str.c_str());
+    }
 
-	Clock clock;
-	Events events;
-
-	bool rng = true;
-	double dt;
-
-	Camera camera;
-
-	Texture tex(renderer, camera.size, camera.format, SDL_TEXTUREACCESS_STREAMING);
-
-	while (rng) {
-		dt = clock.tick(60);
-
-		rng = events.process_events(&EVENT_KEYS);
-
-		if ((camera.get_permission_state() == Camera::APPROVED)) {
-			if (camera.is_new_frame_available()) {
-				tex.update(camera.acquire_frame());
-				camera.release_frame();
-			}
-		}
-
-		renderer.clear(WHITE);
-		tex.render({0, 0, 800, 600});
-		renderer.present();
-	}
-
-	return 0;
+    return 0;
 }
