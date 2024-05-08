@@ -3,14 +3,18 @@ cmake_minimum_required(VERSION 3.10)
 project(supernova)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# The library needs atleast C++17 support
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-# The satellite libs are not built by default as they are not ready yet
 option(ENABLE_IMAGE "Enables SDL_image support." ON)
 option(ENABLE_MIXER "Enables SDL_mixer support." ON)
 option(ENABLE_TTF "Enables SDL_ttf support." ON)
 option(ENABLE_NET "Enables SDL_net support." ON)
 
-if (NOT ANDROID)
+if (NOT (ANDROID OR MSVC))
 	set(CMAKE_INSTALL_PREFIX $ENV{PREFIX})
 	include(GNUInstallDirs)
 endif()
@@ -28,12 +32,12 @@ set(SOURCES ${SRC_PATH}/core.cpp)
 
 set(LIBS SDL3::SDL3)
 
-if (NOT ANDROID)
+if (NOT (ANDROID OR MSVC))
 	find_package(SDL3 REQUIRED)
 endif()
 
 if (ENABLE_IMAGE)
-	if (NOT ANDROID)
+	if (NOT (ANDROID OR MSVC))
 		find_package(SDL3_image REQUIRED)
 	endif()
 	list(APPEND LIBS SDL3_image::SDL3_image)
@@ -43,7 +47,7 @@ if (ENABLE_IMAGE)
 endif()
 
 if (ENABLE_MIXER)
-	if (NOT ANDROID)
+	if (NOT (ANDROID OR MSVC))
 		find_package(SDL3_mixer REQUIRED)
 	endif()
 	list(APPEND LIBS SDL3_mixer::SDL3_mixer)
@@ -53,7 +57,7 @@ if (ENABLE_MIXER)
 endif()
 
 if (ENABLE_TTF)
-	if (NOT ANDROID)
+	if (NOT (ANDROID OR MSVC))
 		find_package(SDL3_ttf REQUIRED)
 	endif()
 	list(APPEND LIBS SDL3_ttf::SDL3_ttf)
@@ -63,7 +67,7 @@ if (ENABLE_TTF)
 endif()
 
 if (ENABLE_NET)
-	if (NOT ANDROID)
+	if (NOT (ANDROID OR MSVC))
 		find_package(SDL3_net REQUIRED)
 	endif()
 	list(APPEND LIBS SDL3_net::SDL3_net)
@@ -74,14 +78,16 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
 
-target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic)
+if (NOT MSVC)
+	target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic)	
+endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBS})
 
 # Setting which header files should be supplied with the library
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if (NOT ANDROID)
+if (NOT (ANDROID OR MSVC))
 	install(TARGETS ${PROJECT_NAME}
 			EXPORT "${PROJECT_NAME}-config"
 			RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"

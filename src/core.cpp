@@ -1373,7 +1373,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 	}
 
 	while (SDL_PollEvent(&event)) {
-		if (!(event_handler and event_handler(event))) {
+		if (!(event_handler && event_handler(event))) {
 			switch (event.type) {
 				case SDL_EVENT_QUIT:
 					running = false;
@@ -1382,7 +1382,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 					if (event_keys) {
 						if (!event.key.repeat) {
 							for (auto &[key, value]: *event_keys) {
-								if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+								if ((event.key.keysym.sym == value.primary) || (event.key.keysym.sym == value.secondary)) {
 									value.pressed = true;
 									value.down = true;
 								}
@@ -1394,7 +1394,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 					if (event_keys) {
 						if (!event.key.repeat) {
 							for (auto &[key, value]: *event_keys) {
-								if ((event.key.keysym.sym == value.primary) | (event.key.keysym.sym == value.secondary)) {
+								if ((event.key.keysym.sym == value.primary) || (event.key.keysym.sym == value.secondary)) {
 									value.released = true;
 									value.down = false;
 								}

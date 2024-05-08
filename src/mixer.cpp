@@ -71,7 +71,7 @@ void Music::toggle() {
 		Mix_ResumeMusic();
 	else
 		Mix_PauseMusic();
-	is_paused = not is_paused;
+	is_paused = !is_paused;
 }
 
 
@@ -126,5 +126,5 @@ void Sound::toggle() {
 		Mix_Resume(channel);
 	else
 		Mix_Pause(channel);
-	is_paused = not is_paused;
+	is_paused = !is_paused;
 }
