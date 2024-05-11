@@ -17,9 +17,33 @@ using namespace std;
 int main(int argc, char *argv[]) {
     Engine engine;
 
-    for (string& str: NetUtils::get_local_addresses()) {
-        SDL_Log("ok");
-        SDL_Log("%s", str.c_str());
+    Window window("Test", {800, 600});
+    Renderer renderer(window);
+
+    Clock clock;
+    Events events;
+
+    bool rng = true;
+    double dt;
+
+    auto handler = [](SDL_Event &event) {
+        switch (event.type) {
+            case SDL_EVENT_WINDOW_RESIZED:
+                SDL_Log("Works");
+                break;
+        };
+        return false;
+    };
+
+    Mouse mouse;
+
+    while (rng) {
+        dt = clock.tick(60);
+
+        rng = events.process_events({.event_handler = handler});
+
+        renderer.clear(WHITE);
+        renderer.present();
     }
 
     return 0;
