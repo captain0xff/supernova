@@ -23,11 +23,8 @@
 
 
 // Globals
-int SURF_ID = 0;
-int TEX_ID = 0;
-
-EventKeys EVENT_KEYS;
-Fingers FINGERS;
+static int SURF_ID = 0;
+static int TEX_ID = 0;
 
 
 

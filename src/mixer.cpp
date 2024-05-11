@@ -3,9 +3,8 @@
 
 
 // Globals
-int MUSIC_ID = 0;
-int SOUND_ID = 0;
-
+static int MUSIC_ID = 0;
+static int SOUND_ID = 0;
 
 
 

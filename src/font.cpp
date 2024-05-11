@@ -3,7 +3,7 @@
 
 
 // Globals
-int FONT_ID = 0;
+static int FONT_ID = 0;
 
 
 

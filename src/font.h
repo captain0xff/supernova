@@ -13,8 +13,12 @@
 
 
 
+// Forward Declarations
+class FontAtlas;
+
+
+
 // Classes
-extern int FONT_ID;
 class Font {
 	public:
 		int id;

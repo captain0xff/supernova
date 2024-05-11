@@ -299,7 +299,6 @@ struct EventKey {
 };
 
 typedef std::unordered_map<string, EventKey> EventKeys;
-extern EventKeys EVENT_KEYS;
 
 
 struct MouseButton {
@@ -317,7 +316,6 @@ struct Finger {
 };
 
 typedef std::unordered_map<SDL_FingerID, Finger> Fingers;
-extern Fingers FINGERS;
 
 
 
@@ -548,7 +546,6 @@ class Events {
 };
 
 
-extern int SURF_ID;
 class Surface {
 	public:
 		int id;
@@ -580,7 +577,6 @@ class Surface {
 };
 
 
-extern int TEX_ID;
 class Texture {
 	public:
 		int id;

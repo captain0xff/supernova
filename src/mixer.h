@@ -22,7 +22,6 @@ class Mixer {
 };
 
 
-extern int MUSIC_ID;
 class Music {
 	public:
 		int id;
@@ -44,7 +43,6 @@ class Music {
 };
 
 
-extern int SOUND_ID;
 class Sound {
 	public:
 		int id, channel;
