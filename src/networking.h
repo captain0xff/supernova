@@ -12,16 +12,6 @@
 
 
 
-// Forward Declarations
-class NetUtils;
-class StreamSocket;
-class StreamServer;
-class Packet;
-class Datagram;
-class DatagramSocket;
-
-
-
 // Classes
 class NetUtils {
 	public:

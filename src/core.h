@@ -16,24 +16,12 @@ using string = std::string;
 
 
 // Forward Declarations
-struct Colour;
 struct FColour;
-struct IVector;
 struct Vector;
-struct IRect;
 struct Rect;
 struct Circle;
-struct EventKey;
-struct MouseButton;
-struct Finger;
-class Clock;
-class Window;
-class Renderer;
 class Surface;
 class Texture;
-class Mouse;
-class Events;
-class Camera;
 
 
 

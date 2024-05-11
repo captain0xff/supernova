@@ -12,13 +12,6 @@
 
 
 
-// Forward Declarations
-class Mixer;
-class Music;
-class Sound;
-
-
-
 // Classes
 class Mixer {
 	public:

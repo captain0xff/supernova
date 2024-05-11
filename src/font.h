@@ -13,12 +13,6 @@
 
 
 
-// Forward Declarations
-class Font;
-class FontAtlas;
-
-
-
 // Classes
 extern int FONT_ID;
 class Font {
