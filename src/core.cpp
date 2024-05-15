@@ -1467,6 +1467,11 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 }
 
 
+bool Events::process_events(EventArgs event_args) {
+	return process_events(event_args.event_keys, event_args.mouse, event_args.fingers, event_args.event_handler);
+}
+
+
 Surface::Surface(const IVector &size, const SDL_PixelFormatEnum format):
 	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, format), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)

@@ -20,6 +20,7 @@ struct FColour;
 struct Vector;
 struct Rect;
 struct Circle;
+class Mouse;
 class Surface;
 class Texture;
 
@@ -318,6 +319,14 @@ struct Finger {
 typedef std::unordered_map<SDL_FingerID, Finger> Fingers;
 
 
+struct EventArgs {
+	EventKeys *event_keys = nullptr;
+	Mouse *mouse = nullptr;
+	Fingers *fingers = nullptr;
+	std::function<bool(SDL_Event&)> event_handler = nullptr;
+};
+
+
 
 // Classes
 class Engine {
@@ -543,6 +552,8 @@ class Events {
 			Fingers *fingers = nullptr,
 			std::function<bool(SDL_Event&)> event_handler = nullptr
 		);
+
+		bool process_events(EventArgs event_args);
 };
 
 

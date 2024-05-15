@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 project(supernova)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# The library needs atleast C++17 support
-set(CMAKE_CXX_STANDARD 17)
+# The library needs atleast C++20 support
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
