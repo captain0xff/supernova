@@ -2,6 +2,7 @@
 /tests/build/*
 .vscode
 .cache
+*.sublime-workspace
 
 # Ignore all files in test except CMakeLists.txt and main.cpp
 /tests/*

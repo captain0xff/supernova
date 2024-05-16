@@ -1,0 +1,33 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+		}
+	],
+	"build_systems": [
+		{
+			"name": "Build test",
+			"shell_cmd": "start cmd /c \"cd ${project_path}/tests/build & mingw32-make & (if not errorlevel 1 echo ------------------------------------------------------------------------------------------------------------- &\"./main.exe\") & pause\"",
+		},
+		{
+			"name": "Build",
+			"shell_cmd": "start cmd /c \"cd ${project_path}/build & mingw32-make & pause\"",
+		},
+		{
+			"name": "Build and install",
+			"shell_cmd": "start cmd /c \"cd ${project_path}/build & mingw32-make install & pause\"",
+		}
+	],
+	"debugger_configurations":
+	[
+		{
+			"type": "gdb",
+			"request": "launch",
+			"name": "Launch Program",
+			"target": "${project_path}/tests/build/main.exe",
+			"cwd": "${project_path}/tests/build",
+			"valuesFormatting": "parseText"
+		},
+	],
+}
