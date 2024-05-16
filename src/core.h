@@ -330,346 +330,346 @@ struct EventArgs {
 
 // Classes
 class Engine {
-	public:
-		Engine(
-			const unsigned int sdl_init_flags=127537,
-			const int img_init_flags=2,
-			const int mix_init_flags=24
-		);
-		~Engine();
+public:
+	Engine(
+		const unsigned int sdl_init_flags=127537,
+		const int img_init_flags=2,
+		const int mix_init_flags=24
+	);
+	~Engine();
 };
 
 
 class Clock {
-	private:
-		uint64_t current_time, last_tick = 0;
-		uint64_t timeit_tick = 0;
-		int64_t target_ft, delay;
+private:
+	uint64_t current_time, last_tick = 0;
+	uint64_t timeit_tick = 0;
+	int64_t target_ft, delay;
 
-	public:
-		// frame_time: Time used in the previous tick in ms
-		// raw_time: Actual time used in the previous tick in ms
-		uint64_t raw_time = 0, frame_time = 0;
+public:
+	// frame_time: Time used in the previous tick in ms
+	// raw_time: Actual time used in the previous tick in ms
+	uint64_t raw_time = 0, frame_time = 0;
 
-		static uint64_t get_ticks();
-		
-		// The parameter target_fps should be 0 for unclamped fps
-		double tick(double target_fps=0);
-		double get_fps();
-		// Returns the time between two of its successive calls in ms
-		double timeit();
+	static uint64_t get_ticks();
+	
+	// The parameter target_fps should be 0 for unclamped fps
+	double tick(double target_fps=0);
+	double get_fps();
+	// Returns the time between two of its successive calls in ms
+	double timeit();
 };
 
 
 class Timer {
-	public:
-		double time, counter = 0;
+public:
+	double time, counter = 0;
 
-		Timer() {};
-		// Time should be in seconds
-		Timer(double _time);
+	Timer() {};
+	// Time should be in seconds
+	Timer(double _time);
 
-		// Returns true once after the set time is over and gets reset if the
-		// _reset parameter is true
-		bool update(double dt, bool _reset=true);
-		// Sets the counter to 0
-		void reset();
+	// Returns true once after the set time is over and gets reset if the
+	// _reset parameter is true
+	bool update(double dt, bool _reset=true);
+	// Sets the counter to 0
+	void reset();
 
-		double time_left();
+	double time_left();
 };
 
 
 class IO {
-	private:
-		// Used to detect if the file exists and loaded properly
-		bool IS_LOADED = false;
+private:
+	// Used to detect if the file exists and loaded properly
+	bool IS_LOADED = false;
 
-	public:
-		SDL_IOStream *io;
+public:
+	SDL_IOStream *io;
 
-		IO(const string &file, const string access_mode="r");
-		~IO();
+	IO(const string &file, const string access_mode="r");
+	~IO();
 
-		Sint64 get_file_size();
-		// The size parameter takes the size of the object to read in bytes
-		// and the max parameter takes the maximum number of objects to read
-		// Returns the number of objects read or -1 on error
-		int read(void *ptr, const int max);
-		// Reads the whole file at once to a string
-		string read();
-		// Reads the next max number of chars from the file to a string
-		string read(const int max);
-		// The size parameter takes the size of the object to read in bytes
-		// and the num parameter takes the number of objects to write
-		// Returns the numer of objects written
-		void write(const void *ptr, const size_t num);
-		void write(const string &data);
-		Sint64 tell();
-		// The parameter whence can be any of
-		// RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
-		Sint64 seek(Sint64 offset, int whence=SDL_IO_SEEK_CUR);
-		void close();
+	Sint64 get_file_size();
+	// The size parameter takes the size of the object to read in bytes
+	// and the max parameter takes the maximum number of objects to read
+	// Returns the number of objects read or -1 on error
+	int read(void *ptr, const int max);
+	// Reads the whole file at once to a string
+	string read();
+	// Reads the next max number of chars from the file to a string
+	string read(const int max);
+	// The size parameter takes the size of the object to read in bytes
+	// and the num parameter takes the number of objects to write
+	// Returns the numer of objects written
+	void write(const void *ptr, const size_t num);
+	void write(const string &data);
+	Sint64 tell();
+	// The parameter whence can be any of
+	// RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
+	Sint64 seek(Sint64 offset, int whence=SDL_IO_SEEK_CUR);
+	void close();
 };
 
 
 class Window {
-	public:
-		managed_ptr<SDL_Window> window;
+public:
+	managed_ptr<SDL_Window> window;
 
-		Window(
-			const string &title,
-			const IVector &size,
-			const uint32_t flags=0
-		);
+	Window(
+		const string &title,
+		const IVector &size,
+		const uint32_t flags=0
+	);
 
-		void static destroy(SDL_Window *window);
-		void wrap_mouse(const Vector &wrap_pos);
-		// This function should be only used if the renderer is created with an
-		// SDL_RENDERER_SOFTWARE flag
-		Surface get_window_surface();
-		void gl_swap();
+	void static destroy(SDL_Window *window);
+	void wrap_mouse(const Vector &wrap_pos);
+	// This function should be only used if the renderer is created with an
+	// SDL_RENDERER_SOFTWARE flag
+	Surface get_window_surface();
+	void gl_swap();
 };
 
 
 class Renderer {
-	public:
-		managed_ptr<SDL_Renderer> renderer;
+public:
+	managed_ptr<SDL_Renderer> renderer;
 
-		Renderer(
-			Window &window,
-			const uint32_t flags=0,
-			const string &driver=""
-		);
+	Renderer(
+		Window &window,
+		const uint32_t flags=0,
+		const string &driver=""
+	);
 
-		void static destroy(SDL_Renderer *renderer);
-		void set_colour(const Colour &colour);
-		void clear(const Colour &colour);
-		void present();
-		void flush();
-		void set_blend_mode(const SDL_BlendMode blend_mode);
-		void set_target(); // Resets the render target to the window
-		void set_target(Texture &tex);
-		void set_logical_presentation(
-			const IVector &size,
-			const SDL_RendererLogicalPresentation
-					mode=SDL_LOGICAL_PRESENTATION_DISABLED,
-			const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST
-		);
-		IVector get_output_size();
-		SDL_RendererInfo get_info();
-		string get_driver_name();
-		void draw_point_raw(const Vector &point_pos);
-		void draw_point(const Vector &point_pos, const Colour &colour);
-		void draw_line_raw(const Vector &v1, const Vector &v2);
-		void draw_line(
-			const Vector &v1,
-			const Vector &v2,
-			const Colour &colour
-		);
-		void draw_line(
-			const Vector &v1,
-			const Vector &v2,
-			const Colour &colour,
-			const float width
-		);
-		void draw_rect_raw(const Rect &rect, const float width=0);
-		void draw_rect(const Rect &rect,
-			const Colour &colour,
-			const float width=0
-		);
-		void draw_circle(const Circle &circle,
-			const Colour &colour,
-			const bool filled=true
-		);
-		void draw_polygon(const std::vector<Vector> vertices,
-			const Colour colour,
-			const bool filled=true
-		);
-		void render_geometry_raw(const int num_vertices,
-			const SDL_Vertex *vertices,
-			const int num_indices,
-			const int *indices
-		);
-		void render_geometry_raw(const int num_vertices,
-			const SDL_Vertex *vertices,
-			const int num_indices,
-			const int *indices,
-			Texture &texture
-		);
-		void render_geometry(const std::vector<SDL_Vertex> &vertices);
-		void render_geometry(const std::vector<SDL_Vertex> &vertices,
-			const std::vector<int> &indices
-		);
-		void render_geometry(
-			const std::vector<SDL_Vertex> &vertices,
-			Texture &texture
-		);
-		void render_geometry(
-			const std::vector<SDL_Vertex> &vertices,
-			const std::vector<int> &indices,
-			Texture &texture
-		);
-		void render_geometry_sorted(
-			const std::vector<SDL_Vertex> &vertices
-		);
-		void render_geometry_sorted(
-			const std::vector<SDL_Vertex> &vertices,
-			Texture &texture
-		);
+	void static destroy(SDL_Renderer *renderer);
+	void set_colour(const Colour &colour);
+	void clear(const Colour &colour);
+	void present();
+	void flush();
+	void set_blend_mode(const SDL_BlendMode blend_mode);
+	void set_target(); // Resets the render target to the window
+	void set_target(Texture &tex);
+	void set_logical_presentation(
+		const IVector &size,
+		const SDL_RendererLogicalPresentation
+				mode=SDL_LOGICAL_PRESENTATION_DISABLED,
+		const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST
+	);
+	IVector get_output_size();
+	SDL_RendererInfo get_info();
+	string get_driver_name();
+	void draw_point_raw(const Vector &point_pos);
+	void draw_point(const Vector &point_pos, const Colour &colour);
+	void draw_line_raw(const Vector &v1, const Vector &v2);
+	void draw_line(
+		const Vector &v1,
+		const Vector &v2,
+		const Colour &colour
+	);
+	void draw_line(
+		const Vector &v1,
+		const Vector &v2,
+		const Colour &colour,
+		const float width
+	);
+	void draw_rect_raw(const Rect &rect, const float width=0);
+	void draw_rect(const Rect &rect,
+		const Colour &colour,
+		const float width=0
+	);
+	void draw_circle(const Circle &circle,
+		const Colour &colour,
+		const bool filled=true
+	);
+	void draw_polygon(const std::vector<Vector> vertices,
+		const Colour colour,
+		const bool filled=true
+	);
+	void render_geometry_raw(const int num_vertices,
+		const SDL_Vertex *vertices,
+		const int num_indices,
+		const int *indices
+	);
+	void render_geometry_raw(const int num_vertices,
+		const SDL_Vertex *vertices,
+		const int num_indices,
+		const int *indices,
+		Texture &texture
+	);
+	void render_geometry(const std::vector<SDL_Vertex> &vertices);
+	void render_geometry(const std::vector<SDL_Vertex> &vertices,
+		const std::vector<int> &indices
+	);
+	void render_geometry(
+		const std::vector<SDL_Vertex> &vertices,
+		Texture &texture
+	);
+	void render_geometry(
+		const std::vector<SDL_Vertex> &vertices,
+		const std::vector<int> &indices,
+		Texture &texture
+	);
+	void render_geometry_sorted(
+		const std::vector<SDL_Vertex> &vertices
+	);
+	void render_geometry_sorted(
+		const std::vector<SDL_Vertex> &vertices,
+		Texture &texture
+	);
 };
 
 
 class Mouse {
-	public:
-		Vector pos = {0, 0};
-		std::unordered_map<int, MouseButton> buttons;
-		// The amount scrolled vertically, positive away from the user and
-		// negative towards the user
-		float vert_wheel = 0;
-		// The amount scrolled horizontally, positive to the right and negative
-		// to the left
-		float horz_wheel = 0;
+public:
+	Vector pos = {0, 0};
+	std::unordered_map<int, MouseButton> buttons;
+	// The amount scrolled vertically, positive away from the user and
+	// negative towards the user
+	float vert_wheel = 0;
+	// The amount scrolled horizontally, positive to the right and negative
+	// to the left
+	float horz_wheel = 0;
 
-		Mouse(const int needed_buttons = 0);
+	Mouse(const int needed_buttons = 0);
 
-		static void set_relative_mode(const bool val);
-		// The function calls window.wrap_mouse and updates the mouse position
-		// to wrap_pos
-		void wrap_in_window(Window &window, const Vector &wrap_pos);
+	static void set_relative_mode(const bool val);
+	// The function calls window.wrap_mouse and updates the mouse position
+	// to wrap_pos
+	void wrap_in_window(Window &window, const Vector &wrap_pos);
 };
 
 
 class Events {
-	public:
-		SDL_Event event;
-		bool running = true;
+public:
+	SDL_Event event;
+	bool running = true;
 
-		// The function event handler should return true if the engine loop
-		// should not be run otherwise false
-		bool process_events(
-			EventKeys *event_keys = nullptr,
-			Mouse *mouse = nullptr,
-			Fingers *fingers = nullptr,
-			std::function<bool(SDL_Event&)> event_handler = nullptr
-		);
+	// The function event handler should return true if the engine loop
+	// should not be run otherwise false
+	bool process_events(
+		EventKeys *event_keys = nullptr,
+		Mouse *mouse = nullptr,
+		Fingers *fingers = nullptr,
+		std::function<bool(SDL_Event&)> event_handler = nullptr
+	);
 
-		bool process_events(EventArgs event_args);
+	bool process_events(EventArgs event_args);
 };
 
 
 class Surface {
-	public:
-		int id;
-		managed_ptr<SDL_Surface> surface;
-		int w, h;
+public:
+	int id;
+	managed_ptr<SDL_Surface> surface;
+	int w, h;
 
-		Surface(
-			const IVector &size,
-			const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA8888
-		);
-		Surface(SDL_Surface *_surface);
-		Surface(const string &file);
+	Surface(
+		const IVector &size,
+		const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA8888
+	);
+	Surface(SDL_Surface *_surface);
+	Surface(const string &file);
 
-		void set_blend_mode(const SDL_BlendMode blend_mode);
-		void set_colour_key(const uint32_t key, const bool enable=true);
-		void flip(const SDL_FlipMode flip_mode);
-		void blit(Surface &dst_surface, const IVector &ivec);
-		void blit(Surface &dst_surface, const IRect &dst_rect);
-		void blit(
-			Surface &dst_surface,
-			const IRect &dst_rect,
-			const IRect &src_rect
-		);
-		// This function saves the surface as png
-		void save(const string &file);
-		// This function saves the surface as jpg
-		// quality should be between 0 to 100
-		void save(const string &file, const int quality);
+	void set_blend_mode(const SDL_BlendMode blend_mode);
+	void set_colour_key(const uint32_t key, const bool enable=true);
+	void flip(const SDL_FlipMode flip_mode);
+	void blit(Surface &dst_surface, const IVector &ivec);
+	void blit(Surface &dst_surface, const IRect &dst_rect);
+	void blit(
+		Surface &dst_surface,
+		const IRect &dst_rect,
+		const IRect &src_rect
+	);
+	// This function saves the surface as png
+	void save(const string &file);
+	// This function saves the surface as jpg
+	// quality should be between 0 to 100
+	void save(const string &file, const int quality);
 };
 
 
 class Texture {
-	public:
-		int id;
-		managed_ptr<SDL_Texture> texture;
-		Renderer *tex_renderer;
-		int w, h;
+public:
+	int id;
+	managed_ptr<SDL_Texture> texture;
+	Renderer *tex_renderer;
+	int w, h;
 
-		Texture(Renderer &renderer, SDL_Texture *_texture);
-		Texture(Texture &&_texture);
-		Texture(Renderer &renderer, const string &file);
-		Texture(Renderer &renderer, const Surface &surface);
-		Texture(
-			Renderer &renderer,
-			const IVector &size,
-			const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA32,
-			const int access=SDL_TEXTUREACCESS_TARGET
-		);
+	Texture(Renderer &renderer, SDL_Texture *_texture);
+	Texture(Texture &&_texture);
+	Texture(Renderer &renderer, const string &file);
+	Texture(Renderer &renderer, const Surface &surface);
+	Texture(
+		Renderer &renderer,
+		const IVector &size,
+		const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA32,
+		const int access=SDL_TEXTUREACCESS_TARGET
+	);
 
-		IRect get_rect();
-		SDL_PropertiesID get_properties();
-		int get_gl_texture_number();
+	IRect get_rect();
+	SDL_PropertiesID get_properties();
+	int get_gl_texture_number();
 
-		void set_colour_mod(const Colour &colour);
-		void set_blend_mode(const SDL_BlendMode blend_mode);
-		void update(const void *pixels, const int pitch);
-		void update(const void *pixels, const int pitch, const IRect &rect);
-		void update(const Surface &surface);
-		void update(const Surface &surface, const IRect &rect);
-		void render(const Vector &vec);
-		void render(const Rect &dst_rect);
-		void render(const Rect &dst_rect, const Rect &src_rect);
-		void render_rot(
-			const Rect &dst_rect,
-			const float angle=0,
-			const Vector &center={0, 0},
-			const SDL_FlipMode flip=SDL_FLIP_NONE
-		);
-		void render_rot(
-			const Rect &dst_rect,
-			const Rect &src_rect,
-			const float angle=0,
-			const Vector &center={0, 0},
-			const SDL_FlipMode flip=SDL_FLIP_NONE
-		);
+	void set_colour_mod(const Colour &colour);
+	void set_blend_mode(const SDL_BlendMode blend_mode);
+	void update(const void *pixels, const int pitch);
+	void update(const void *pixels, const int pitch, const IRect &rect);
+	void update(const Surface &surface);
+	void update(const Surface &surface, const IRect &rect);
+	void render(const Vector &vec);
+	void render(const Rect &dst_rect);
+	void render(const Rect &dst_rect, const Rect &src_rect);
+	void render_rot(
+		const Rect &dst_rect,
+		const float angle=0,
+		const Vector &center={0, 0},
+		const SDL_FlipMode flip=SDL_FLIP_NONE
+	);
+	void render_rot(
+		const Rect &dst_rect,
+		const Rect &src_rect,
+		const float angle=0,
+		const Vector &center={0, 0},
+		const SDL_FlipMode flip=SDL_FLIP_NONE
+	);
 };
 
 
 class Camera {
-	private:
-		SDL_Surface *surface;
-		std::unique_ptr<Surface> frame;
+private:
+	SDL_Surface *surface;
+	std::unique_ptr<Surface> frame;
 
-	public:
-		enum PERMISSION_STATE {
-			REJECTED,
-			PENDING,
-			APPROVED
-		};
+public:
+	enum PERMISSION_STATE {
+		REJECTED,
+		PENDING,
+		APPROVED
+	};
 
-		uint64_t time_stamp = 0;
-		IVector size = {0, 0};
-		SDL_PixelFormatEnum format;
+	uint64_t time_stamp = 0;
+	IVector size = {0, 0};
+	SDL_PixelFormatEnum format;
 
-		PERMISSION_STATE permission_state;
+	PERMISSION_STATE permission_state;
 
-		managed_ptr<SDL_Camera> camera;
+	managed_ptr<SDL_Camera> camera;
 
-		Camera(const int id=0);
+	Camera(const int id=0);
 
-		static std::vector<SDL_CameraDeviceID> get_available_devices();
-		// Throws an error if the ID is greater than the number of available
-		// devices
-		static SDL_CameraDeviceID select_device(const int id=0);
+	static std::vector<SDL_CameraDeviceID> get_available_devices();
+	// Throws an error if the ID is greater than the number of available
+	// devices
+	static SDL_CameraDeviceID select_device(const int id=0);
 
-		PERMISSION_STATE get_permission_state();
-		// This function must be called before acquire_frame()
-		// Otherwise acquire_frame() will keep returning the old surface
-		// Also returns false if camera permission hasn't been granted
-		// if a new frame isn't available
-		bool is_new_frame_available();
-		Surface& acquire_frame();
-		void release_frame();
+	PERMISSION_STATE get_permission_state();
+	// This function must be called before acquire_frame()
+	// Otherwise acquire_frame() will keep returning the old surface
+	// Also returns false if camera permission hasn't been granted
+	// if a new frame isn't available
+	bool is_new_frame_available();
+	Surface& acquire_frame();
+	void release_frame();
 };
 
 #endif /* SUPERNOVA_CORE_H */

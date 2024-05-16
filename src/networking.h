@@ -14,9 +14,9 @@
 
 // Classes
 class NetUtils {
-	public:
-		static string get_address_string(SDLNet_Address *address);
-		static std::vector<string> get_local_addresses();
+public:
+	static string get_address_string(SDLNet_Address *address);
+	static std::vector<string> get_local_addresses();
 };
 
 
@@ -91,45 +91,45 @@ public:
 // Follows LIFO order for IO
 // Try to keep the packet size less than 512bytes
 class Packet {
-	private:
-		string get_last_element();
+private:
+	string get_last_element();
 
-	public:
-		char DELIMETER = '|'; // ASCII unit separater
+public:
+	char DELIMETER = '|'; // ASCII unit separater
 
-		string buffer;
+	string buffer;
 
-		friend Packet& operator<<(Packet &packet, const string &val);
-		friend Packet& operator<<(Packet &packet, const char *val);
-		friend Packet& operator<<(Packet &packet, const bool val);
-		friend Packet& operator<<(Packet &packet, const int val);
-		friend Packet& operator<<(Packet &packet, const float val);
-		friend Packet& operator<<(Packet &packet, const double val);
-		friend Packet& operator<<(Packet &packet, const uint8_t val);
-		friend Packet& operator<<(Packet &packet, const Colour &colour);
-		friend Packet& operator<<(Packet &packet, const FColour &fcolour);
-		friend Packet& operator<<(Packet &packet, const IVector &ivec);
-		friend Packet& operator<<(Packet &packet, const Vector &vec);
-		friend Packet& operator<<(Packet &packet, const IRect &irect);
-		friend Packet& operator<<(Packet &packet, const Rect &rect);
-		friend Packet& operator<<(Packet &packet, const Circle &circle);
+	friend Packet& operator<<(Packet &packet, const string &val);
+	friend Packet& operator<<(Packet &packet, const char *val);
+	friend Packet& operator<<(Packet &packet, const bool val);
+	friend Packet& operator<<(Packet &packet, const int val);
+	friend Packet& operator<<(Packet &packet, const float val);
+	friend Packet& operator<<(Packet &packet, const double val);
+	friend Packet& operator<<(Packet &packet, const uint8_t val);
+	friend Packet& operator<<(Packet &packet, const Colour &colour);
+	friend Packet& operator<<(Packet &packet, const FColour &fcolour);
+	friend Packet& operator<<(Packet &packet, const IVector &ivec);
+	friend Packet& operator<<(Packet &packet, const Vector &vec);
+	friend Packet& operator<<(Packet &packet, const IRect &irect);
+	friend Packet& operator<<(Packet &packet, const Rect &rect);
+	friend Packet& operator<<(Packet &packet, const Circle &circle);
 
-		friend Packet& operator>>(Packet &packet, string &val);
-		friend Packet& operator>>(Packet &packet, char *val);
-		friend Packet& operator>>(Packet &packet, bool &val);
-		friend Packet& operator>>(Packet &packet, int &val);
-		friend Packet& operator>>(Packet &packet, float &val);
-		friend Packet& operator>>(Packet &packet, double &val);
-		friend Packet& operator>>(Packet &packet, uint8_t &val);
-		friend Packet& operator>>(Packet &packet, Colour &colour);
-		friend Packet& operator>>(Packet &packet, FColour &fcolour);
-		friend Packet& operator>>(Packet &packet, IVector &ivec);
-		friend Packet& operator>>(Packet &packet, Vector &vec);
-		friend Packet& operator>>(Packet &packet, IRect &irect);
-		friend Packet& operator>>(Packet &packet, Rect &rect);
-		friend Packet& operator>>(Packet &packet, Circle &circle);
+	friend Packet& operator>>(Packet &packet, string &val);
+	friend Packet& operator>>(Packet &packet, char *val);
+	friend Packet& operator>>(Packet &packet, bool &val);
+	friend Packet& operator>>(Packet &packet, int &val);
+	friend Packet& operator>>(Packet &packet, float &val);
+	friend Packet& operator>>(Packet &packet, double &val);
+	friend Packet& operator>>(Packet &packet, uint8_t &val);
+	friend Packet& operator>>(Packet &packet, Colour &colour);
+	friend Packet& operator>>(Packet &packet, FColour &fcolour);
+	friend Packet& operator>>(Packet &packet, IVector &ivec);
+	friend Packet& operator>>(Packet &packet, Vector &vec);
+	friend Packet& operator>>(Packet &packet, IRect &irect);
+	friend Packet& operator>>(Packet &packet, Rect &rect);
+	friend Packet& operator>>(Packet &packet, Circle &circle);
 
-		void clear();
+	void clear();
 };
 
 
