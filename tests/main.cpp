@@ -2,6 +2,7 @@
 
 #include "../src/core.h"
 #include "../src/constants.h"
+#include "../src/enums.h"
 #include "../src/networking.h"
 #include "../src/graphics.h"
 #include "../src/logging.h"
@@ -15,10 +16,17 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-    Engine engine;
+    EngineArgs eargs;
+    eargs.sdl_init_flags |= SDL_INIT_CAMERA;
+    Engine engine(eargs);
+
+    // SDL_LogSetPriority(LC::INFO, SDL_LOG_PRIORITY_VERBOSE);
+    // print(SDL_LogGetPriority(LC::INFO));
 
     Window window("Test", {800, 600});
     Renderer renderer(window);
+
+    SDL_LogWarn(LC::WARN, "Good");
 
     Clock clock;
     Events events;

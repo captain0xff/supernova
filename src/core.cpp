@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdlib>
 
+#include "enums.h"
 #include "constants.h"
 #include "core.h"
 #ifdef IMAGE_ENABLED
@@ -50,7 +51,7 @@ int randint(const int start, const int end) {
 }
 
 void image_function_not_implemented(const string &str) {
-	SDL_Log("Engine was not built with SDL_image support! %s not available.", str.c_str());
+	SDL_LogInfo(LC::INFO, "Engine was not built with SDL_image support! %s not available.", str.c_str());
 	assert(0);
 }
 
@@ -70,7 +71,7 @@ void trigger_back_button() {
 void* get_activity() {
 	void *activity;
 	if ((activity = SDL_AndroidGetActivity()) == NULL) {
-		SDL_LogError(0, "Failed to get the android activity: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to get the android activity: %s", SDL_GetError());
 	}
 
 	return activity;
@@ -91,7 +92,7 @@ string get_internal_storage_path() {
 void* get_jni_env() {
 	void *jni;
 	if ((jni = SDL_AndroidGetJNIEnv()) == 0) {
-		SDL_LogError(0, "Failed to get JNIEnv: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to get JNIEnv: %s", SDL_GetError());
 	}
 
 	return jni;
@@ -819,29 +820,44 @@ void Circle::move_ip(const Vector &vec) {
 }
 
 
-
-// Classes
-Engine::Engine(const unsigned int sdl_init_flags, const int img_init_flags, const int mix_init_flags) {
-	if (SDL_Init(sdl_init_flags) < 0)
-		SDL_LogError(0, "Failed to initialize SDL: %s", SDL_GetError());
+EngineArgs::EngineArgs():
+	sdl_init_flags(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_AUDIO)
 #ifdef IMAGE_ENABLED
-	if (IMG_Init(img_init_flags) != img_init_flags)
-		SDL_LogError(0, "Failed to initialize SDL_image: %s", IMG_GetError());
+	, img_init_flags(IMG_INIT_PNG|IMG_INIT_JPG)
 #endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
-	if (Mix_Init(mix_init_flags) != mix_init_flags)
-		SDL_LogError(0, "Failed to initialize SDL_mixer: %s", Mix_GetError());
+	, mix_init_flags(MIX_INIT_MP3|MIX_INIT_OGG)
+#endif /* MIXER_ENABLED */
+	, enabled_log_categories(LC::VERBOSE) {
+	for (int i = SDL_LOG_CATEGORY_CUSTOM; i < enabled_log_categories + 1; i++) {
+		SDL_SetLogPriority(i, SDL_LOG_PRIORITY_VERBOSE);
+	}
+}
+
+
+
+// Classes
+Engine::Engine(const EngineArgs &args) {
+	if (SDL_Init(args.sdl_init_flags) < 0)
+		SDL_LogError(LC::ERROR, "Failed to initialize SDL: %s", SDL_GetError());
+#ifdef IMAGE_ENABLED
+	if (IMG_Init(args.img_init_flags) != args.img_init_flags)
+		SDL_LogError(LC::ERROR, "Failed to initialize SDL_image: %s", IMG_GetError());
+#endif /* IMAGE_ENABLED */
+#ifdef MIXER_ENABLED
+	if (Mix_Init(args.mix_init_flags) != args.mix_init_flags)
+		SDL_LogError(LC::ERROR, "Failed to initialize SDL_mixer: %s", Mix_GetError());
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
 	if (TTF_Init() < 0)
-		SDL_LogError(0, "Failed to initialize SDL_ttf: %s", TTF_GetError());
+		SDL_LogError(LC::ERROR, "Failed to initialize SDL_ttf: %s", TTF_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
 	if (SDLNet_Init() < 0)
-		SDL_LogError(0, "Failed to initialize SDL_net: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to initialize SDL_net: %s", SDL_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
-	SDL_Log("Engine started!");
+	SDL_LogInfo(LC::INFO, "Engine started!");
 }
 
 Engine::~Engine() {
@@ -858,7 +874,8 @@ Engine::~Engine() {
 	SDLNet_Quit();
 #endif /* NET_ENABLED */
 	SDL_Quit();
-	SDL_Log("Engine stopped!");
+	SDL_SetLogPriority(LC::INFO, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogInfo(LC::INFO, "Engine stopped!");
 }
 
 
@@ -930,7 +947,7 @@ IO::IO(const string &file, const string access_mode) {
 	io = SDL_IOFromFile(file.c_str(), access_mode.c_str());
 
 	if (io == NULL)
-		SDL_LogError(0, "Failed to load file! (%s): %s", file.c_str(), SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to load file! (%s): %s", file.c_str(), SDL_GetError());
 	else
 		IS_LOADED = true;
 }
@@ -952,7 +969,7 @@ int IO::read(void *ptr, const int max) {
 	// Returns the number of objects read or -1 on error
 	if (IS_LOADED)
 		return SDL_ReadIO(io, ptr, max);
-	SDL_LogWarn(0, "%s", "Failed to read: file not loaded successfully!");
+	SDL_LogWarn(LC::WARN, "%s", "Failed to read: file not loaded successfully!");
 	return -1;
 }
 
@@ -985,9 +1002,9 @@ void IO::write(const void *ptr, const size_t num) {
 	// The num parameter takes the number of objects to write
 	// Returns the numer of objects written
 	if (!IS_LOADED)
-		SDL_LogWarn(0, "%s", "Failed to write: file not loaded successfully!");
+		SDL_LogWarn(LC::WARN, "%s", "Failed to write: file not loaded successfully!");
 	else if (SDL_WriteIO(io, ptr, num) < num)
-		SDL_LogError(0, "Failed to write all the objects: %s", SDL_GetError());
+		SDL_LogError(LC::WARN, "Failed to write all the objects: %s", SDL_GetError());
 }
 
 void IO::write(const string &data) {
@@ -997,14 +1014,14 @@ void IO::write(const string &data) {
 Sint64 IO::tell() {
 	if (IS_LOADED)
 		return SDL_TellIO(io);
-	SDL_LogWarn(0, "%s", "Failed to tell: file not loaded successfully!");
+	SDL_LogWarn(LC::WARN, "%s", "Failed to tell: file not loaded successfully!");
 	return -1;
 }
 
 Sint64 IO::seek(Sint64 offset, int whence) {
 	if (IS_LOADED)
 		return SDL_SeekIO(io, offset, whence);
-	SDL_LogWarn(0, "%s", "Failed to seek: file not loaded successfully!");
+	SDL_LogWarn(LC::WARN, "%s", "Failed to seek: file not loaded successfully!");
 	return -1;
 }
 
@@ -1020,9 +1037,9 @@ void IO::close() {
 Window::Window(const string &title, const IVector &size, const uint32_t flags):
 	window(managed_ptr<SDL_Window>(SDL_CreateWindow(title.c_str(), size.x,size.y, flags), destroy)) {
 	if (window.get() == NULL)
-		SDL_LogError(0, "Failed to create window: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to create window: %s", SDL_GetError());
 	else
-		SDL_Log("Window created successfully!");
+		SDL_LogInfo(LC::INFO, "Window created successfully!");
 }
 
 void Window::wrap_mouse(const Vector &wrap_pos) {
@@ -1039,16 +1056,16 @@ void Window::gl_swap() {
 
 void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
-	SDL_Log("Window closed successfully!");
+	SDL_LogInfo(LC::INFO, "Window closed successfully!");
 }
 
 
-Renderer::Renderer(Window &window, const uint32_t flags, const string &driver):
-		renderer(managed_ptr<SDL_Renderer>((driver == "")? SDL_CreateRenderer(window.window.get(), NULL, flags) : SDL_CreateRenderer(window.window.get(), driver.c_str(), flags),destroy)) {
+Renderer::Renderer(Window &window, const string &driver):
+		renderer(managed_ptr<SDL_Renderer>((driver == "")? SDL_CreateRenderer(window.window.get(), NULL) : SDL_CreateRenderer(window.window.get(), driver.c_str()),destroy)) {
 	if (renderer.get() == NULL)
-		SDL_LogError(0, "Failed to create renderer: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to create renderer: %s", SDL_GetError());
 	else
-		SDL_Log("Renderer created successfully!");
+		SDL_LogInfo(LC::INFO, "Renderer created successfully!");
 }
 
 void Renderer::set_colour(const Colour &colour) {
@@ -1322,7 +1339,7 @@ void Renderer::render_geometry_sorted(const std::vector<SDL_Vertex> &vertices, T
 
 void Renderer::destroy(SDL_Renderer *renderer) {
 	SDL_DestroyRenderer(renderer);
-	SDL_Log("Renderer destroyed successfully!");
+	SDL_LogInfo(LC::INFO, "Renderer destroyed successfully!");
 }
 
 
@@ -1475,10 +1492,10 @@ bool Events::process_events(EventArgs event_args) {
 Surface::Surface(const IVector &size, const SDL_PixelFormatEnum format):
 	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, format), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
-		SDL_LogError(0, "Failed to create surface: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to create surface: %s", SDL_GetError());
 	else {
 		id = SURF_ID;
-		SDL_Log("Surface created successfully![%i]", id);
+		SDL_LogInfo(LC::INFO, "Surface created successfully![%i]", id);
 		SURF_ID++;
 
 		w = size.x;
@@ -1488,7 +1505,7 @@ Surface::Surface(const IVector &size, const SDL_PixelFormatEnum format):
 
 Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_DestroySurface)) {
 	if (surface.get() == nullptr) {
-		SDL_LogError(0, "Invalid surface");
+		SDL_LogError(LC::ERROR, "Invalid surface");
 	} else {
 		w = surface.get()->w;
 		h = surface.get()->h;	
@@ -1499,10 +1516,10 @@ Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surfa
 Surface::Surface(const string &file):
 	surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
-		SDL_LogError(0, "Failed to load surface: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to load surface: %s", SDL_GetError());
 	else {
 		id = SURF_ID;
-		SDL_Log("Surface loaded successfully![%i]", id);
+		SDL_LogInfo(LC::INFO, "Surface loaded successfully![%i]", id);
 		SURF_ID++;
 
 		w = surface.get()->w;
@@ -1597,10 +1614,10 @@ Texture::Texture(Renderer &renderer, const string &file):
 	texture(managed_ptr<SDL_Texture>(IMG_LoadTexture(renderer.renderer.get(), file.c_str()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to load texture! (%s): %s", file.c_str(), IMG_GetError());
+		SDL_LogError(LC::ERROR, "Failed to load texture! (%s): %s", file.c_str(), IMG_GetError());
 	else {
 		id = TEX_ID;
-		SDL_Log("Texture loaded successfully![%i] (%s)", id, file.c_str());
+		SDL_LogInfo(LC::INFO, "Texture loaded successfully![%i] (%s)", id, file.c_str());
 		TEX_ID++;
 	}
 
@@ -1621,10 +1638,10 @@ Texture::Texture(Renderer &renderer, const Surface &surface):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to create texture: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to create texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
-		SDL_Log("Texture created successfully![%i]", id);
+		SDL_LogInfo(LC::INFO, "Texture created successfully![%i]", id);
 		TEX_ID++;
 	}
 
@@ -1637,10 +1654,10 @@ Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormatE
 	w = size.x;
 	h = size.y;
 	if (texture.get() == nullptr)
-		SDL_LogError(0, "Failed to created texture: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to created texture: %s", SDL_GetError());
 	else {
 		id = TEX_ID;
-		SDL_Log("Texture created successfully![%i]", id);
+		SDL_LogInfo(LC::INFO, "Texture created successfully![%i]", id);
 		TEX_ID++;
 	}
 }
@@ -1718,7 +1735,7 @@ std::vector<SDL_CameraDeviceID> Camera::get_available_devices() {
 	int count;
 	SDL_CameraDeviceID *dvcs = SDL_GetCameraDevices(&count);
 	if (!dvcs) {
-		SDL_LogError(0, "Failed to get camera devices: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to get camera devices: %s", SDL_GetError());
 	}
 	std::vector<SDL_CameraDeviceID> devices(dvcs, dvcs + count);
 
@@ -1728,21 +1745,21 @@ std::vector<SDL_CameraDeviceID> Camera::get_available_devices() {
 SDL_CameraDeviceID Camera::select_device(const int id) {
 	SDL_CameraDeviceID devid = get_available_devices().at(id);
 	if (!devid)
-		SDL_LogError(0, "No cameras available.");
+		SDL_LogError(LC::ERROR, "No cameras available.");
 
 	return devid;
 }
 
 Camera::Camera(const int id): camera(SDL_OpenCameraDevice(select_device(id), NULL), SDL_CloseCamera) {
 	if (camera == nullptr) {
-		SDL_LogError(0, "Failed to open camera: %s", SDL_GetError());
+		SDL_LogError(LC::ERROR, "Failed to open camera: %s", SDL_GetError());
 	} else {
 		SDL_CameraSpec spec;
 		SDL_GetCameraFormat(camera.get(), &spec);
 		size = {spec.width, spec.height};
 		format = spec.format;
 		permission_state = get_permission_state();
-		SDL_Log("Camera opened successfully!");
+		SDL_LogInfo(LC::INFO, "Camera opened successfully!");
 	}
 }
 

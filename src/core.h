@@ -20,6 +20,7 @@ struct FColour;
 struct Vector;
 struct Rect;
 struct Circle;
+struct EngineArgs;
 class Mouse;
 class Surface;
 class Texture;
@@ -295,7 +296,7 @@ struct Circle {
 
 
 struct EventKey {
-	int primary, secondary = SDLK_UNKNOWN;
+	unsigned int primary, secondary = SDLK_UNKNOWN;
 	bool pressed = false, released = false, down = false;
 };
 
@@ -327,15 +328,21 @@ struct EventArgs {
 };
 
 
+struct EngineArgs {
+	unsigned int sdl_init_flags;
+	int img_init_flags;
+	int mix_init_flags;
+	int enabled_log_categories;
+
+	EngineArgs();
+};
+
+
 
 // Classes
 class Engine {
 public:
-	Engine(
-		const unsigned int sdl_init_flags=127537,
-		const int img_init_flags=2,
-		const int mix_init_flags=24
-	);
+	Engine(const EngineArgs &args={});
 	~Engine();
 };
 
@@ -437,7 +444,6 @@ public:
 
 	Renderer(
 		Window &window,
-		const uint32_t flags=0,
 		const string &driver=""
 	);
 

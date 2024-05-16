@@ -1,5 +1,7 @@
 #include "font.h"
 
+#include "enums.h"
+
 
 
 // Globals
@@ -11,10 +13,10 @@ static int FONT_ID = 0;
 Font::Font(const string &file, const int size):
 	font(managed_ptr<TTF_Font>(TTF_OpenFont(file.c_str(), size), TTF_CloseFont)) {
 	if (font.get() == nullptr)
-		SDL_LogError(0, "Failed to load font! (%s): %s", file.c_str(), TTF_GetError());
+		SDL_LogError(LC::ERROR, "Failed to load font! (%s): %s", file.c_str(), TTF_GetError());
 	else {
 		id = FONT_ID;
-		SDL_Log("Font loaded successfully![%i] (%s)", id, file.c_str());
+		SDL_LogInfo(LC::INFO, "Font loaded successfully![%i] (%s)", id, file.c_str());
 		FONT_ID++;
 	}
 

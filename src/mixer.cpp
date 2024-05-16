@@ -1,5 +1,7 @@
 #include "mixer.h"
 
+#include "enums.h"
+
 
 
 // Globals
@@ -11,7 +13,7 @@ static int SOUND_ID = 0;
 // Classes
 Mixer::Mixer() {
 	if (Mix_OpenAudio(0, NULL) < 0)
-		SDL_LogError(0, "Failed to open audio device: %s", Mix_GetError());
+		SDL_LogError(LC::ERROR, "Failed to open audio device: %s", Mix_GetError());
 }
 
 Mixer::~Mixer() {
@@ -25,10 +27,10 @@ void Mixer::allocate_channels(int channels) {
 
 Music::Music(const string &file): music(managed_ptr<Mix_Music>(Mix_LoadMUS(file.c_str()), Mix_FreeMusic)) {
 	if (music == NULL) {
-		SDL_LogError(0, "Failed to load music! (%s): %s", file.c_str(), Mix_GetError());
+		SDL_LogError(LC::ERROR, "Failed to load music! (%s): %s", file.c_str(), Mix_GetError());
 	} else {
 		id = MUSIC_ID;
-		SDL_Log("Music loaded successfully![%i] (%s)", id, file.c_str());
+		SDL_LogInfo(LC::INFO, "Music loaded successfully![%i] (%s)", id, file.c_str());
 		MUSIC_ID++;
 	}
 }
@@ -49,7 +51,7 @@ void Music::volume(float volume) {
 
 void Music::pause() {
 	if (is_paused) {
-		SDL_LogWarn(1, "Music is already paused!");
+		SDL_LogWarn(LC::WARN, "Music is already paused!");
 	} else {
 		Mix_PauseMusic();
 		is_paused = true;
@@ -61,7 +63,7 @@ void Music::resume() {
 		Mix_ResumeMusic();
 		is_paused = false;
 	} else {
-		SDL_LogWarn(1, "Music is not paused!");
+		SDL_LogWarn(LC::WARN, "Music is not paused!");
 	}
 }
 
@@ -76,10 +78,10 @@ void Music::toggle() {
 
 Sound::Sound(const string file): sound(managed_ptr<Mix_Chunk>(Mix_LoadWAV(file.c_str()), Mix_FreeChunk)) {
 	if (sound == NULL) {
-		SDL_LogError(0, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
+		SDL_LogError(LC::ERROR, "Failed to load sound! (%s): %s", file.c_str(), Mix_GetError());
 	} else {
 		id = SOUND_ID;
-		SDL_Log("Sound loaded successfully![%i] (%s)", id, file.c_str());
+		SDL_LogInfo(LC::INFO, "Sound loaded successfully![%i] (%s)", id, file.c_str());
 		SOUND_ID++;
 	}
 }
@@ -88,7 +90,7 @@ void Sound::play(int loop, int channel) {
 	// Pass -1 to the loop for looping infinitely
 	// The first free channel is choosed by default
 	if ((channel = Mix_PlayChannel(-1, sound.get(), loop)) < 0) {
-		SDL_LogError(0, "Failed to play sound![%i]: %s", id, Mix_GetError());
+		SDL_LogError(LC::ERROR, "Failed to play sound![%i]: %s", id, Mix_GetError());
 	}
 }
 
@@ -104,7 +106,7 @@ void Sound::volume(float volume) {
 
 void Sound::pause() {
 	if (is_paused) {
-		SDL_LogWarn(1, "Sound is already paused!");
+		SDL_LogWarn(LC::WARN, "Sound is already paused!");
 	} else {
 		Mix_Pause(channel);
 		is_paused = true;
@@ -116,7 +118,7 @@ void Sound::resume() {
 		Mix_Resume(channel);
 		is_paused = false;
 	} else {
-		SDL_LogWarn(1, "Sound is not paused!");
+		SDL_LogWarn(LC::WARN, "Sound is not paused!");
 	}
 }
 

@@ -48,22 +48,34 @@ void log_info(const LogArgs &log_args, Arg&& arg, Args&&... args) {
 
 template <typename Arg, typename... Args>
 void log_error(Arg&& arg, Args&&... args) {
-	SDL_LogError(0, "%s", log_to_string(arg, args...).c_str());
+	SDL_LogError(
+		SDL_LOG_CATEGORY_APPLICATION,
+		"%s",log_to_string(arg, args...).c_str()
+	);
 }
 
 template <typename Arg, typename... Args>
 void log_error(const LogArgs &log_args, Arg&& arg, Args&&... args) {
-	SDL_LogError(0, "%s", log_to_string(log_args, arg, args...).c_str());
+	SDL_LogError(
+		SDL_LOG_CATEGORY_APPLICATION,
+		"%s",log_to_string(log_args, arg, args...).c_str()
+	);
 }
 
 template <typename Arg, typename... Args>
 void log_warn(Arg&& arg, Args&&... args) {
-	SDL_LogWarn(0, "%s", log_to_string(arg, args...).c_str());
+	SDL_LogWarn(
+		SDL_LOG_CATEGORY_APPLICATION,
+		"%s",log_to_string(arg, args...).c_str()
+	);
 }
 
 template <typename Arg, typename... Args>
 void log_warn(const LogArgs &log_args, Arg&& arg, Args&&... args) {
-	SDL_LogWarn(0, "%s", log_to_string(log_args, arg, args...).c_str());
+	SDL_LogWarn(
+		SDL_LOG_CATEGORY_APPLICATION,
+		"%s",log_to_string(log_args, arg, args...).c_str()
+	);
 }
 
 #endif /* SUPERNOVA_LOGGING_H */
