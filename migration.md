@@ -3,7 +3,6 @@
 * Expose new SDL3 functionality (Properties of Renderer and Texture).
 * Take another shot at making a better event system.
 * Upgrade the satellite libs (done for now).
-* ~~Try to reduce dependency on SDL of the headers so that we don't even need to link to it.~~
 * Wrap SDL_OpenAudioDevice as a constructor of the mixer class.
 * Add AnimatedSprite::render_rot
 
