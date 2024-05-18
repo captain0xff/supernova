@@ -26,14 +26,10 @@ enum FONTQUALITY: int {
 
 
 // Log categories
-enum LOGCATEGORY {
-	CRITICAL = SDL_LOG_CATEGORY_CUSTOM,
-	ERROR,
-	WARN,
-	INFO,
-	DEBUG,
-	VERBOSE,
-	TOTAL_NUM
+enum LOGLEVEL {
+	ERROR = 1,
+	WARN = 2,
+	INFO = 4,
 };
 
 
@@ -41,6 +37,6 @@ enum LOGCATEGORY {
 // Typedefs
 typedef MOUSEBUTTON MB;
 typedef FONTQUALITY FQ;
-typedef LOGCATEGORY LC;
+typedef LOGLEVEL LC;
 
 #endif /* SUPERNOVA_ENUMS_H */

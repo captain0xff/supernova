@@ -33,7 +33,10 @@ set(HEADERS
 	${SRC_PATH}/print.h
 	${SRC_PATH}/logging.h
 )
-set(SOURCES ${SRC_PATH}/core.cpp)
+set(SOURCES
+	${SRC_PATH}/core.cpp
+	${SRC_PATH}/logging.cpp
+)
 
 set(LIBS SDL3::SDL3)
 
