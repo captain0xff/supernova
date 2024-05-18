@@ -59,7 +59,7 @@ void log_info(const LogArgs &log_args, Arg&& arg, Args&&... args) {
 template<typename ...A>
 void flog_info(std::format_string<A...> fmt, A&&...args){
 	if (get_log_state() & INFO)
-			SDL_Log("%s", format(fmt, args...).c_str());
+			SDL_Log("%s", format(fmt, std::forward<A>(args)...).c_str());
 }
 
 
@@ -83,7 +83,7 @@ void flog_error(std::format_string<A...> fmt, A&&...args){
 	if (get_log_state() & ERROR) {
 		SDL_LogError(
 			SDL_LOG_CATEGORY_APPLICATION, 
-			"%s", format(fmt, args...).c_str()
+			"%s", format(fmt, std::forward<A>(args)...).c_str()
 		);
 	}
 }
@@ -99,7 +99,7 @@ void log_warn(const LogArgs &log_args, Arg&& arg, Args&&... args) {
 	if (get_log_state() & WARN) {
 		SDL_LogWarn(
 			SDL_LOG_CATEGORY_APPLICATION,
-			"%s",log_to_string(log_args, arg, args...).c_str()
+			log_to_string(log_args, arg, args...).c_str()
 		);
 	}
 }
@@ -109,7 +109,7 @@ void flog_warn(std::format_string<A...> fmt, A&&...args){
 	if (get_log_state() & WARN) {
 		SDL_LogWarn(
 			SDL_LOG_CATEGORY_APPLICATION, 
-			"%s", format(fmt, args...).c_str()
+			format(fmt, std::forward<A>(args)...).c_str()
 		);
 	}
 }

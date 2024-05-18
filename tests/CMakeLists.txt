@@ -12,10 +12,9 @@ add_compile_definitions(TTF_ENABLED)
 add_compile_definitions(NET_ENABLED)
 
 if (WIN32)
-	link_libraries(mingw32 SDL3 SDL3_image SDL3_mixer SDL3_ttf SDL3_net)
-else ()
-	link_libraries(SDL3)
+	link_libraries(mingw32)
 endif()
+link_libraries(SDL3 SDL3_image SDL3_mixer SDL3_ttf SDL3_net)
 
 set(SRC_PATH ../src)
 file(GLOB SOURCES ${SRC_PATH}/*.cpp)

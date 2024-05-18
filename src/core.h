@@ -332,7 +332,6 @@ struct EngineArgs {
 	unsigned int sdl_init_flags;
 	int img_init_flags;
 	int mix_init_flags;
-	int enabled_log_categories;
 
 	EngineArgs();
 };

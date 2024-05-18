@@ -16,17 +16,11 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-    EngineArgs eargs;
-    eargs.sdl_init_flags |= SDL_INIT_CAMERA;
-    Engine engine(eargs);
+    Engine engine;
 
-    // SDL_LogSetPriority(LC::INFO, SDL_LOG_PRIORITY_VERBOSE);
-    // print(SDL_LogGetPriority(LC::INFO));
 
     Window window("Test", {800, 600});
-    Renderer renderer(window);
-
-    SDL_LogWarn(LC::WARN, "Good");
+    Renderer renderer(window, "open");
 
     Clock clock;
     Events events;
@@ -37,7 +31,7 @@ int main(int argc, char *argv[]) {
     auto handler = [](SDL_Event &event) {
         switch (event.type) {
             case SDL_EVENT_WINDOW_RESIZED:
-                SDL_Log("Works");
+                flog_info("Works");
                 break;
         };
         return false;
