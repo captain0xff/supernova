@@ -396,7 +396,7 @@ public:
 	IO(const string &file, const string access_mode="r");
 	~IO();
 
-	Sint64 get_file_size();
+	int64_t get_file_size();
 	// The size parameter takes the size of the object to read in bytes
 	// and the max parameter takes the maximum number of objects to read
 	// Returns the number of objects read or -1 on error
@@ -410,10 +410,10 @@ public:
 	// Returns the numer of objects written
 	void write(const void *ptr, const size_t num);
 	void write(const string &data);
-	Sint64 tell();
+	int64_t tell();
 	// The parameter whence can be any of
 	// RW_SEEK_SET, RW_SEEK_CUR or RW_SEEK_END
-	Sint64 seek(Sint64 offset, int whence=SDL_IO_SEEK_CUR);
+	int64_t seek(int64_t offset, SDL_IOWhence whence=SDL_IO_SEEK_CUR);
 	void close();
 };
 
@@ -461,7 +461,6 @@ public:
 		const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST
 	);
 	IVector get_output_size();
-	SDL_RendererInfo get_info();
 	string get_driver_name();
 	void draw_point_raw(const Vector &point_pos);
 	void draw_point(const Vector &point_pos, const Colour &colour);
@@ -611,6 +610,8 @@ public:
 		const int access=SDL_TEXTUREACCESS_TARGET
 	);
 
+	// Also updates the w and h member variables
+	IVector get_size();
 	IRect get_rect();
 	SDL_PropertiesID get_properties();
 	int get_gl_texture_number();

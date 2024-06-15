@@ -953,7 +953,7 @@ IO::~IO() {
 	close();
 }
 
-Sint64 IO::get_file_size() {
+int64_t IO::get_file_size() {
 	const Sint64 file_pos = tell();
 	const Sint64 file_size = seek(0, SDL_IO_SEEK_END);
 	seek(file_pos, SDL_IO_SEEK_SET);
@@ -1008,14 +1008,14 @@ void IO::write(const string &data) {
 	write(data.c_str(), data.length());
 }
 
-Sint64 IO::tell() {
+int64_t IO::tell() {
 	if (IS_LOADED)
 		return SDL_TellIO(io);
 	flog_warn("Failed to tell: file not loaded successfully!");
 	return -1;
 }
 
-Sint64 IO::seek(Sint64 offset, int whence) {
+int64_t IO::seek(int64_t offset, SDL_IOWhence whence) {
 	if (IS_LOADED)
 		return SDL_SeekIO(io, offset, whence);
 	flog_warn("Failed to seek: file not loaded successfully!");
@@ -1104,15 +1104,8 @@ IVector Renderer::get_output_size() {
 	return {w, h};
 }
 
-SDL_RendererInfo Renderer::get_info() {
-	SDL_RendererInfo info;
-	SDL_GetRendererInfo(renderer.get(), &info);
-
-	return info;
-}
-
 string Renderer::get_driver_name() {
-	return string(get_info().name);
+	return string(SDL_GetRendererName(renderer.get()));
 }
 
 void Renderer::draw_point_raw(const Vector &point_pos) {
@@ -1594,7 +1587,7 @@ Texture::Texture(Renderer &renderer, SDL_Texture *_texture):
 	texture(managed_ptr<SDL_Texture>(_texture, SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 
-	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
+	get_size();
 }
 
 Texture::Texture(Texture &&_texture): texture(std::move(_texture.texture)) {
@@ -1618,7 +1611,7 @@ Texture::Texture(Renderer &renderer, const string &file):
 		TEX_ID++;
 	}
 
-	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
+	get_size();
 }
 #else
 Texture::Texture(
@@ -1642,7 +1635,7 @@ Texture::Texture(Renderer &renderer, const Surface &surface):
 		TEX_ID++;
 	}
 
-	SDL_QueryTexture(texture.get(), NULL, NULL, &w, &h);
+	get_size();
 }
 
 Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormatEnum format, const int access):
@@ -1657,6 +1650,14 @@ Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormatE
 		flog_info("Texture created successfully![{}]", id);
 		TEX_ID++;
 	}
+}
+
+IVector Texture::get_size() {
+	// Also updates the w and h member variables
+	w = SDL_GetNumberProperty(get_properties(), SDL_PROP_TEXTURE_WIDTH_NUMBER, 0);
+	h = SDL_GetNumberProperty(get_properties(), SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
+
+	return {w, h};
 }
 
 IRect Texture::get_rect() {
