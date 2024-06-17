@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
 
     Window window("Test", {800, 600});
-    Renderer renderer(window, "open");
+    Renderer renderer(window, "opengl");
 
     Clock clock;
     Events events;
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     auto handler = [](SDL_Event &event) {
         switch (event.type) {
             case SDL_EVENT_WINDOW_RESIZED:
-                flog_info("Works");
+                log_info({}, "Works");
                 break;
         };
         return false;
@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
         dt = clock.tick(60);
 
         rng = events.process_events({.event_handler = handler});
+        log_error({.sep = ""}, "Works", 5);
 
         renderer.clear(WHITE);
         renderer.present();

@@ -47,7 +47,8 @@ std::string log_to_string(const LogArgs &log_args, Arg&& arg, Args&&... args) {
 
 template <typename Arg, typename... Args>
 void log_info(Arg&& arg, Args&&... args) {
-	log_info({}, arg, args...);
+	if (get_log_state() & INFO)
+		SDL_Log("%s", log_to_string({}, arg, args...).c_str());
 }
 
 template <typename Arg, typename... Args>
@@ -65,7 +66,12 @@ void flog_info(std::format_string<A...> fmt, A&&...args){
 
 template <typename Arg, typename... Args>
 void log_error(Arg&& arg, Args&&... args) {
-	log_error({}, arg, args...);
+	if (get_log_state() & ERROR) {
+		SDL_LogError(
+			SDL_LOG_CATEGORY_APPLICATION,
+			"%s",log_to_string({}, arg, args...).c_str()
+		);
+	}
 }
 
 template <typename Arg, typename... Args>
@@ -91,7 +97,12 @@ void flog_error(std::format_string<A...> fmt, A&&...args){
 
 template <typename Arg, typename... Args>
 void log_warn(Arg&& arg, Args&&... args) {
-	log_warn({}, arg, args...);
+	if (get_log_state() & WARN) {
+		SDL_LogWarn(
+			SDL_LOG_CATEGORY_APPLICATION,
+			log_to_string({}, arg, args...).c_str()
+		);
+	}
 }
 
 template <typename Arg, typename... Args>
