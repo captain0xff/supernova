@@ -577,6 +577,8 @@ public:
 	void set_blend_mode(const SDL_BlendMode blend_mode);
 	void set_colour_key(const uint32_t key, const bool enable=true);
 	void flip(const SDL_FlipMode flip_mode);
+	Surface convert_format(const SDL_PixelFormatEnum format);
+	void convert_format_ip(const SDL_PixelFormatEnum format);
 	void blit(Surface &dst_surface, const IVector &ivec);
 	void blit(Surface &dst_surface, const IRect &dst_rect);
 	void blit(

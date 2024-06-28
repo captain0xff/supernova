@@ -1535,6 +1535,14 @@ void Surface::flip(const SDL_FlipMode flip_mode) {
 	SDL_FlipSurface(surface.get(), flip_mode);
 }
 
+Surface Surface::convert_format(const SDL_PixelFormatEnum format) {
+	return SDL_ConvertSurfaceFormat(surface.get(), format);
+}
+
+void Surface::convert_format_ip(const SDL_PixelFormatEnum format) {
+	surface = managed_ptr<SDL_Surface>(SDL_ConvertSurfaceFormat(surface.get(), format), SDL_DestroySurface);
+}
+
 void Surface::blit(Surface &dst_surface, const IVector &ivec) {
 	SDL_Rect src_rect = {0, 0, surface.get()->w, surface.get()->h};
 	SDL_Rect dst_rect = {ivec.x, ivec.y, dst_surface.surface.get()->w, dst_surface.surface.get()->h};
