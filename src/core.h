@@ -48,22 +48,20 @@ template<typename T> using managed_ptr = std::unique_ptr<T, void(*)(T*)>;
 
 
 // General functions
-void start_text_input();
-
 #ifdef __ANDROID__
 void trigger_back_button();
 
 void* get_activity();
 
 string get_external_storage_path();
-int get_external_storage_state();
+uint32_t get_external_storage_state();
 
 string get_internal_storage_path();
 
 void* get_jni_env();
 
 // Returns if the permission was granted or not
-bool get_permission(const string permission);
+// bool get_permission(const string permission);
 
 // Set offsetx and offsety only when gravity is non-zero
 void show_toast(
@@ -430,10 +428,10 @@ public:
 
 	void static destroy(SDL_Window *window);
 	void wrap_mouse(const Vector &wrap_pos);
-	// This function should be only used if the renderer is created with an
-	// SDL_RENDERER_SOFTWARE flag
+	// This function should be only used if the renderer is a software renderer
 	Surface get_window_surface();
 	void gl_swap();
+	void start_text_input();
 };
 
 

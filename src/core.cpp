@@ -60,12 +60,7 @@ void image_function_not_implemented(const string &str) {
 
 
 // General functions
-void start_text_input() {
-	SDL_StartTextInput();
-}
-
-
-#ifdef __ANDROID__
+#ifdef ___ANDROID__
 void trigger_back_button() {
 	SDL_AndroidBackButton();
 }
@@ -84,7 +79,11 @@ string get_external_storage_path() {
 }
 
 int get_external_storage_state() {
-	return SDL_AndroidGetExternalStorageState();
+	uint32_t state;
+	if (SDL_AndroidGetExternalStorageState(&state) < 0) {
+		flog_error("Failed to get external storage state: {}", SDL_GetError());
+	}
+	return state;
 }
 
 string get_internal_storage_path() {
@@ -100,10 +99,10 @@ void* get_jni_env() {
 	return jni;
 }
 
-bool get_permission(const string permission) {
-	// Returns if the permission was granted or not
-	return SDL_AndroidRequestPermission(permission.c_str());
-}
+// bool get_permission(const string permission) {
+// 	// Returns if the permission was granted or not
+// 	return SDL_AndroidRequestPermission(permission.c_str());
+// }
 
 void show_toast(const string message, const bool duration, const int gravity, const int offsetx, const int offsety) {
 	// Set offset only when gravity is non-zero
@@ -1051,6 +1050,10 @@ void Window::gl_swap() {
 	SDL_GL_SwapWindow(window.get());
 }
 
+void Window::start_text_input() {
+	SDL_StartTextInput(window.get());
+}
+
 void Window::destroy(SDL_Window *window) {
 	SDL_DestroyWindow(window);
 	flog_info("Window closed successfully!");
@@ -1386,7 +1389,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 					if (event_keys) {
 						if (!event.key.repeat) {
 							for (auto &[key, value]: *event_keys) {
-								if ((event.key.keysym.sym == value.primary) || (event.key.keysym.sym == value.secondary)) {
+								if ((event.key.key == value.primary) || (event.key.key == value.secondary)) {
 									value.pressed = true;
 									value.down = true;
 								}
@@ -1398,7 +1401,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 					if (event_keys) {
 						if (!event.key.repeat) {
 							for (auto &[key, value]: *event_keys) {
-								if ((event.key.keysym.sym == value.primary) || (event.key.keysym.sym == value.secondary)) {
+								if ((event.key.key == value.primary) || (event.key.key == value.secondary)) {
 									value.released = true;
 									value.down = false;
 								}
