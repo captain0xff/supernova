@@ -1482,7 +1482,7 @@ bool Events::process_events(EventArgs event_args) {
 }
 
 
-Surface::Surface(const IVector &size, const SDL_PixelFormatEnum format):
+Surface::Surface(const IVector &size, const SDL_PixelFormat format):
 	surface(managed_ptr<SDL_Surface>(SDL_CreateSurface(size.x, size.y, format), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
 		flog_error("Failed to create surface: {}", SDL_GetError());
@@ -1538,12 +1538,12 @@ void Surface::flip(const SDL_FlipMode flip_mode) {
 	SDL_FlipSurface(surface.get(), flip_mode);
 }
 
-Surface Surface::convert_format(const SDL_PixelFormatEnum format) {
-	return SDL_ConvertSurfaceFormat(surface.get(), format);
+Surface Surface::convert_format(const SDL_PixelFormat format) {
+	return SDL_ConvertSurface(surface.get(), format);
 }
 
-void Surface::convert_format_ip(const SDL_PixelFormatEnum format) {
-	surface = managed_ptr<SDL_Surface>(SDL_ConvertSurfaceFormat(surface.get(), format), SDL_DestroySurface);
+void Surface::convert_format_ip(const SDL_PixelFormat format) {
+	surface = managed_ptr<SDL_Surface>(SDL_ConvertSurface(surface.get(), format), SDL_DestroySurface);
 }
 
 void Surface::blit(Surface &dst_surface, const IVector &ivec) {
@@ -1649,7 +1649,7 @@ Texture::Texture(Renderer &renderer, const Surface &surface):
 	get_size();
 }
 
-Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormatEnum format, const int access):
+Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormat format, const int access):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTexture(renderer.renderer.get(), format, access, size.x, size.y), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	w = size.x;

@@ -567,7 +567,7 @@ public:
 
 	Surface(
 		const IVector &size,
-		const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA8888
+		const SDL_PixelFormat format=SDL_PIXELFORMAT_RGBA8888
 	);
 	Surface(SDL_Surface *_surface);
 	Surface(const string &file);
@@ -575,8 +575,8 @@ public:
 	void set_blend_mode(const SDL_BlendMode blend_mode);
 	void set_colour_key(const uint32_t key, const bool enable=true);
 	void flip(const SDL_FlipMode flip_mode);
-	Surface convert_format(const SDL_PixelFormatEnum format);
-	void convert_format_ip(const SDL_PixelFormatEnum format);
+	Surface convert_format(const SDL_PixelFormat format);
+	void convert_format_ip(const SDL_PixelFormat format);
 	void blit(Surface &dst_surface, const IVector &ivec);
 	void blit(Surface &dst_surface, const IRect &dst_rect);
 	void blit(
@@ -606,7 +606,7 @@ public:
 	Texture(
 		Renderer &renderer,
 		const IVector &size,
-		const SDL_PixelFormatEnum format=SDL_PIXELFORMAT_RGBA32,
+		const SDL_PixelFormat format=SDL_PIXELFORMAT_RGBA32,
 		const int access=SDL_TEXTUREACCESS_TARGET
 	);
 
@@ -655,7 +655,7 @@ public:
 
 	uint64_t time_stamp = 0;
 	IVector size = {0, 0};
-	SDL_PixelFormatEnum format;
+	SDL_PixelFormat format;
 
 	PERMISSION_STATE permission_state;
 
