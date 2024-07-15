@@ -1740,26 +1740,26 @@ void Texture::render_rot(const Rect &dst_rect, const Rect &src_rect, const float
 }
 
 
-std::vector<SDL_CameraDeviceID> Camera::get_available_devices() {
+std::vector<SDL_CameraID> Camera::get_available_devices() {
 	int count;
-	SDL_CameraDeviceID *dvcs = SDL_GetCameraDevices(&count);
+	SDL_CameraID *dvcs = SDL_GetCameras(&count);
 	if (!dvcs) {
 		flog_error("Failed to get camera devices: {}", SDL_GetError());
 	}
-	std::vector<SDL_CameraDeviceID> devices(dvcs, dvcs + count);
+	std::vector<SDL_CameraID> devices(dvcs, dvcs + count);
 
 	return devices;
 }
 
-SDL_CameraDeviceID Camera::select_device(const int id) {
-	SDL_CameraDeviceID devid = get_available_devices().at(id);
+SDL_CameraID Camera::select_device(const int id) {
+	SDL_CameraID devid = get_available_devices().at(id);
 	if (!devid)
 		flog_error("No cameras available.");
 
 	return devid;
 }
 
-Camera::Camera(const int id): camera(SDL_OpenCameraDevice(select_device(id), NULL), SDL_CloseCamera) {
+Camera::Camera(const int id): camera(SDL_OpenCamera(select_device(id), NULL), SDL_CloseCamera) {
 	if (camera == nullptr) {
 		flog_error("Failed to open camera: {}", SDL_GetError());
 	} else {

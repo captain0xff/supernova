@@ -663,10 +663,10 @@ public:
 
 	Camera(const int id=0);
 
-	static std::vector<SDL_CameraDeviceID> get_available_devices();
+	static std::vector<SDL_CameraID> get_available_devices();
 	// Throws an error if the ID is greater than the number of available
 	// devices
-	static SDL_CameraDeviceID select_device(const int id=0);
+	static SDL_CameraID select_device(const int id=0);
 
 	PERMISSION_STATE get_permission_state();
 	// This function must be called before acquire_frame()
