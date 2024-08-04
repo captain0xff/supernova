@@ -86,7 +86,7 @@ struct Colour {
 	friend void operator*=(Colour &colour1, const Colour &colour2);
 	friend void operator/=(Colour &colour, const float val);
 
-	explicit operator FColour() const;
+	operator FColour() const;
 	operator SDL_Color() const;
 
 	const string to_str() const;
@@ -111,7 +111,7 @@ struct FColour {
 	friend void operator*=(FColour &fcolour, const float val);
 	friend void operator/=(FColour &fcolour, const float val);
 
-	explicit operator Colour() const;
+	operator Colour() const;
 	operator SDL_FColor() const;
 
 	const string to_str() const;
