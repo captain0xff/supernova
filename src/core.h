@@ -463,11 +463,7 @@ public:
 	void draw_point_raw(const Vector &point_pos);
 	void draw_point(const Vector &point_pos, const Colour &colour);
 	void draw_line_raw(const Vector &v1, const Vector &v2);
-	void draw_line(
-		const Vector &v1,
-		const Vector &v2,
-		const Colour &colour
-	);
+	void draw_line(const Vector &v1, const Vector &v2, const Colour &colour);
 	void draw_line(
 		const Vector &v1,
 		const Vector &v2,
@@ -475,31 +471,37 @@ public:
 		const float width
 	);
 	void draw_rect_raw(const Rect &rect, const float width=0);
-	void draw_rect(const Rect &rect,
+	void draw_rect(
+		const Rect &rect,
 		const Colour &colour,
 		const float width=0
 	);
-	void draw_circle(const Circle &circle,
+	void draw_circle(
+		const Circle &circle,
 		const Colour &colour,
 		const bool filled=true
 	);
-	void draw_polygon(const std::vector<Vector> vertices,
+	void draw_polygon(
+		const std::vector<Vector> &vertices,
 		const Colour colour,
 		const bool filled=true
 	);
-	void render_geometry_raw(const int num_vertices,
+	void render_geometry_raw(
+		const int num_vertices,
 		const SDL_Vertex *vertices,
 		const int num_indices,
 		const int *indices
 	);
-	void render_geometry_raw(const int num_vertices,
+	void render_geometry_raw(
+		const int num_vertices,
 		const SDL_Vertex *vertices,
 		const int num_indices,
 		const int *indices,
 		Texture &texture
 	);
 	void render_geometry(const std::vector<SDL_Vertex> &vertices);
-	void render_geometry(const std::vector<SDL_Vertex> &vertices,
+	void render_geometry(
+		const std::vector<SDL_Vertex> &vertices,
 		const std::vector<int> &indices
 	);
 	void render_geometry(

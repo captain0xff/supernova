@@ -1253,7 +1253,7 @@ void Renderer::draw_circle(const Circle &circle, const Colour &colour, const boo
 	}
 }
 
-void Renderer::draw_polygon(const std::vector<Vector> vertices, const Colour colour, const bool filled) {
+void Renderer::draw_polygon(const std::vector<Vector> &vertices, const Colour colour, const bool filled) {
 	int n = vertices.size();
 
 	if (filled) {
