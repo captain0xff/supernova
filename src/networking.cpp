@@ -61,7 +61,7 @@ StreamSocket::State& StreamSocket::get_state() {
 						flog_error("Failed to create stream socket: {}", SDL_GetError());
 						state = DEAD;
 					} else {
-						flog_error("Stream socket created successfully!");
+						flog_info("Stream socket created successfully!");
 						state = CONNECTING;
 					}
 					break;
@@ -382,7 +382,7 @@ DatagramSocket::State& DatagramSocket::get_state() {
 				flog_error("Failed to create datagram socket: {}", SDL_GetError());
 				state = DEAD;
 			} else {
-				flog_error("Datagram socket created successfully!");
+				flog_info("Datagram socket created successfully!");
 				state = READY;
 			}
 			break;
