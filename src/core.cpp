@@ -835,22 +835,22 @@ EngineArgs::EngineArgs():
 
 // Classes
 Engine::Engine(const EngineArgs &args) {
-	if (SDL_Init(args.sdl_init_flags) < 0)
+	if (!SDL_Init(args.sdl_init_flags))
 		flog_error("Failed to initialize SDL: {}", SDL_GetError());
 #ifdef IMAGE_ENABLED
 	if (IMG_Init(args.img_init_flags) != args.img_init_flags)
-		flog_error("Failed to initialize SDL_image: {}", IMG_GetError());
+		flog_error("Failed to initialize SDL_image: {}", SDL_GetError());
 #endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
 	if (Mix_Init(args.mix_init_flags) != args.mix_init_flags)
-		flog_error("Failed to initialize SDL_mixer: {}", Mix_GetError());
+		flog_error("Failed to initialize SDL_mixer: {}", SDL_GetError());
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
-	if (TTF_Init() < 0)
-		flog_error("Failed to initialize SDL_ttf: {}", TTF_GetError());
+	if (!TTF_Init())
+		flog_error("Failed to initialize SDL_ttf: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-	if (SDLNet_Init() < 0)
+	if (!SDLNet_Init())
 		flog_error("Failed to initialize SDL_net: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
@@ -1345,10 +1345,6 @@ Mouse::Mouse(const int needed_buttons) {
 	}
 }
 
-void Mouse::set_relative_mode(const bool val) {
-	SDL_SetRelativeMouseMode(static_cast<SDL_bool>(val));
-}
-
 void Mouse::wrap_in_window(Window &window, const Vector &wrap_pos) {
 	// The function calls window.wrap_mouse and updates the mouse position to wrap_pos
 	window.wrap_mouse(wrap_pos);
@@ -1615,7 +1611,7 @@ Texture::Texture(Renderer &renderer, const string &file):
 	texture(managed_ptr<SDL_Texture>(IMG_LoadTexture(renderer.renderer.get(), file.c_str()), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	if (texture.get() == nullptr)
-		flog_error("Failed to load texture! ({}): {}", file, IMG_GetError());
+		flog_error("Failed to load texture! ({}): {}", file, SDL_GetError());
 	else {
 		id = TEX_ID;
 		flog_info("Texture loaded successfully![{}] ({})", id, file);
@@ -1649,7 +1645,7 @@ Texture::Texture(Renderer &renderer, const Surface &surface):
 	get_size();
 }
 
-Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormat format, const int access):
+Texture::Texture(Renderer &renderer, const IVector &size, const SDL_PixelFormat format, const SDL_TextureAccess access):
 	texture(managed_ptr<SDL_Texture>(SDL_CreateTexture(renderer.renderer.get(), format, access, size.x, size.y), SDL_DestroyTexture)) {
 	tex_renderer = &renderer;
 	w = size.x;

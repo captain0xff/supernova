@@ -12,8 +12,8 @@ static int SOUND_ID = 0;
 
 // Classes
 Mixer::Mixer() {
-	if (Mix_OpenAudio(0, NULL) < 0)
-		flog_error("Failed to open audio device: {}", Mix_GetError());
+	if (!Mix_OpenAudio(0, NULL))
+		flog_error("Failed to open audio device: {}", SDL_GetError());
 }
 
 Mixer::~Mixer() {
@@ -27,7 +27,7 @@ void Mixer::allocate_channels(int channels) {
 
 Music::Music(const string &file): music(managed_ptr<Mix_Music>(Mix_LoadMUS(file.c_str()), Mix_FreeMusic)) {
 	if (music == NULL) {
-		flog_error("Failed to load music! ({}): {}", file, Mix_GetError());
+		flog_error("Failed to load music! ({}): {}", file, SDL_GetError());
 	} else {
 		id = MUSIC_ID;
 		flog_info("Music loaded successfully![{}] ({})", id, file);
@@ -78,7 +78,7 @@ void Music::toggle() {
 
 Sound::Sound(const string file): sound(managed_ptr<Mix_Chunk>(Mix_LoadWAV(file.c_str()), Mix_FreeChunk)) {
 	if (sound == NULL) {
-		flog_error("Failed to load sound! ({}): {}", file, Mix_GetError());
+		flog_error("Failed to load sound! ({}): {}", file, SDL_GetError());
 	} else {
 		id = SOUND_ID;
 		flog_info("Sound loaded successfully![{}] ({})", id, file);
@@ -90,7 +90,7 @@ void Sound::play(int loop, int channel) {
 	// Pass -1 to the loop for looping infinitely
 	// The first free channel is choosed by default
 	if ((channel = Mix_PlayChannel(-1, sound.get(), loop)) < 0) {
-		flog_error("Failed to play sound![{}]: {}", id, Mix_GetError());
+		flog_error("Failed to play sound![{}]: {}", id, SDL_GetError());
 	}
 }
 

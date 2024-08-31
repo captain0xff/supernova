@@ -328,8 +328,8 @@ struct EventArgs {
 
 struct EngineArgs {
 	unsigned int sdl_init_flags;
-	int img_init_flags;
-	int mix_init_flags;
+	unsigned int img_init_flags;
+	unsigned int mix_init_flags;
 
 	EngineArgs();
 };
@@ -428,6 +428,7 @@ public:
 
 	void static destroy(SDL_Window *window);
 	void wrap_mouse(const Vector &wrap_pos);
+	void set_relative_mouse_mode(const bool val=true);
 	// This function should be only used if the renderer is a software renderer
 	Surface get_window_surface();
 	void gl_swap();
@@ -456,7 +457,7 @@ public:
 		const IVector &size,
 		const SDL_RendererLogicalPresentation
 				mode=SDL_LOGICAL_PRESENTATION_DISABLED,
-		const SDL_ScaleMode scale_mode=SDL_SCALEMODE_BEST
+		const SDL_ScaleMode scale_mode=SDL_SCALEMODE_LINEAR
 	);
 	IVector get_output_size();
 	string get_driver_name();
@@ -535,8 +536,6 @@ public:
 	float horz_wheel = 0;
 
 	Mouse(const int needed_buttons = 0);
-
-	static void set_relative_mode(const bool val);
 	// The function calls window.wrap_mouse and updates the mouse position
 	// to wrap_pos
 	void wrap_in_window(Window &window, const Vector &wrap_pos);
@@ -609,7 +608,7 @@ public:
 		Renderer &renderer,
 		const IVector &size,
 		const SDL_PixelFormat format=SDL_PIXELFORMAT_RGBA32,
-		const int access=SDL_TEXTUREACCESS_TARGET
+		const SDL_TextureAccess access=SDL_TEXTUREACCESS_TARGET
 	);
 
 	// Also updates the w and h member variables
