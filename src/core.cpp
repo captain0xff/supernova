@@ -850,7 +850,7 @@ Engine::Engine(const EngineArgs &args) {
 		flog_error("Failed to initialize SDL_ttf: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-	if (!SDLNet_Init())
+	if (SDLNet_Init() < 0)
 		flog_error("Failed to initialize SDL_net: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
