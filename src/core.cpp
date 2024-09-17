@@ -1492,6 +1492,20 @@ Surface::Surface(const IVector &size, const SDL_PixelFormat format):
 	}
 }
 
+Surface::Surface(const IVector &size, void *pixel, const int pitch,const SDL_PixelFormat format):
+	surface(managed_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(size.x, size.y, format, pixel, pitch), SDL_DestroySurface)) {
+	if (surface.get() == nullptr)
+		flog_error("Failed to create surface: {}", SDL_GetError());
+	else {
+		id = SURF_ID;
+		flog_info("Surface created successfully![{}]", id);
+		SURF_ID++;
+
+		w = size.x;
+		h = size.y;
+	}
+}
+
 Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surface, SDL_DestroySurface)) {
 	if (surface.get() == nullptr) {
 		flog_error("Invalid surface");

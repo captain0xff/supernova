@@ -570,6 +570,10 @@ public:
 		const IVector &size,
 		const SDL_PixelFormat format=SDL_PIXELFORMAT_RGBA8888
 	);
+	Surface(
+		const IVector &size, void *pixel, const int pitch,
+		const SDL_PixelFormat format=SDL_PIXELFORMAT_RGBA8888
+	);
 	Surface(SDL_Surface *_surface);
 	Surface(const string &file);
 
