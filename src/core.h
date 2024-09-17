@@ -89,6 +89,8 @@ struct Colour {
 	operator FColour() const;
 	operator SDL_Color() const;
 
+	Colour static from_uint32(const uint32_t colour);
+
 	const string to_str() const;
 
 	// The values of mod_r, mod_g, mod_b and mod_a should lie b/w 0 to 1

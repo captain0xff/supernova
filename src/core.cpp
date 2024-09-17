@@ -164,6 +164,15 @@ Colour::operator SDL_Color() const {
 	return {r, g, b, a};
 }
 
+Colour Colour::from_uint32(const uint32_t colour) {
+	return {
+		static_cast<uint8_t>((colour & 0xff000000) >> 24),
+		static_cast<uint8_t>((colour & 0x00ff0000) >> 16),
+		static_cast<uint8_t>((colour & 0x0000ff00) >> 8),
+		static_cast<uint8_t>((colour & 0x000000ff))
+	};
+}
+
 const string Colour::to_str() const {
 	return "Colour(" + std::to_string(r) + ", " + std::to_string(g) + std::to_string(b) + std::to_string(a) + ")";
 }
