@@ -1106,8 +1106,8 @@ void Renderer::set_target(Texture &tex) {
 	SDL_SetRenderTarget(renderer.get(), tex.texture.get());
 }
 
-void Renderer::set_logical_presentation(const IVector &size, const SDL_RendererLogicalPresentation mode, SDL_ScaleMode scale_mode) {
-	SDL_SetRenderLogicalPresentation(renderer.get(), size.x, size.y, mode, scale_mode);
+void Renderer::set_logical_presentation(const IVector &size, const SDL_RendererLogicalPresentation mode) {
+	SDL_SetRenderLogicalPresentation(renderer.get(), size.x, size.y, mode);
 }
 
 IVector Renderer::get_output_size() {

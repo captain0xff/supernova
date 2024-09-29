@@ -458,8 +458,7 @@ public:
 	void set_logical_presentation(
 		const IVector &size,
 		const SDL_RendererLogicalPresentation
-				mode=SDL_LOGICAL_PRESENTATION_DISABLED,
-		const SDL_ScaleMode scale_mode=SDL_SCALEMODE_LINEAR
+				mode=SDL_LOGICAL_PRESENTATION_DISABLED
 	);
 	IVector get_output_size();
 	string get_driver_name();
