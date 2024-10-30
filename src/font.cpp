@@ -20,15 +20,15 @@ Font::Font(const string &file, const int size):
 		FONT_ID++;
 	}
 
-	line_spacing = TTF_FontLineSkip(font.get());
+	line_spacing = TTF_GetFontLineSkip(font.get());
 }
 
 int Font::wrap_alignment() {
-	return TTF_GetFontWrappedAlign(font.get());
+	return TTF_GetFontWrapAlignment(font.get());
 }
 
-void Font::wrap_alignment(const int align) {
-	TTF_SetFontWrappedAlign(font.get(), align);
+void Font::wrap_alignment(const TTF_HorizontalAlignment align) {
+	TTF_SetFontWrapAlignment(font.get(), align);
 }
 
 int Font::kerning() {
@@ -43,7 +43,10 @@ void Font::kerning(bool allowed) {
 
 int Font::get_glyph_kerning(const uint32_t prev_ch, const uint32_t ch) {
 	// GPOS kerning is not supported
-	return TTF_GetFontKerningSizeGlyphs32(font.get(), prev_ch, ch);
+	int kerning;
+	TTF_GetGlyphKerning(font.get(), prev_ch, ch, &kerning);
+
+	return kerning;
 }
 
 Surface Font::create_glyph(
@@ -56,16 +59,16 @@ Surface Font::create_glyph(
 
 	switch (quality) {
 		case FQ::SOLID:
-			surf = TTF_RenderGlyph32_Solid(font.get(), ch, colour);
+			surf = TTF_RenderGlyph_Solid(font.get(), ch, colour);
 			break;
 		case FQ::SHADED:
-			surf = TTF_RenderGlyph32_Shaded(font.get(), ch, colour, bg_colour);
+			surf = TTF_RenderGlyph_Shaded(font.get(), ch, colour, bg_colour);
 			break;
 		case FQ::BLENDED:
-			surf = TTF_RenderGlyph32_Blended(font.get(), ch, colour);
+			surf = TTF_RenderGlyph_Blended(font.get(), ch, colour);
 			break;
 		case FQ::LCD:
-			surf = TTF_RenderGlyph32_LCD(font.get(), ch, colour, bg_colour);
+			surf = TTF_RenderGlyph_LCD(font.get(), ch, colour, bg_colour);
 			break;
 	}
 
@@ -86,64 +89,72 @@ Texture Font::create_text(
 	switch (quality) {
 		case FQ::SOLID:
 			if (wrap_text) 
-				text_surf = TTF_RenderUTF8_Solid_Wrapped(
+				text_surf = TTF_RenderText_Solid_Wrapped(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r,colour.g, colour.b, colour.a},
 					wrap_length
 				);
 			else
-				text_surf = TTF_RenderUTF8_Solid(
+				text_surf = TTF_RenderText_Solid(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r, colour.g, colour.b, colour.a}
 				);
 			break;
 		case FQ::SHADED:
 			if (wrap_text)
-				text_surf = TTF_RenderUTF8_Shaded_Wrapped(
+				text_surf = TTF_RenderText_Shaded_Wrapped(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r, colour.g, colour.b, colour.a},
 					{bg_colour.r, bg_colour.g, bg_colour.b, bg_colour.a},
 					wrap_length
 				);
 			else
-				text_surf = TTF_RenderUTF8_Shaded(
+				text_surf = TTF_RenderText_Shaded(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r, colour.g, colour.b, colour.a},
 					{bg_colour.r, bg_colour.g, bg_colour.b, bg_colour.a}
 				);
 			break;
 		case FQ::BLENDED:
 			if (wrap_text)
-				text_surf = TTF_RenderUTF8_Blended_Wrapped(
+				text_surf = TTF_RenderText_Blended_Wrapped(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r, colour.g, colour.b, colour.a},
 					wrap_length
 				);
 			else
-				text_surf = TTF_RenderUTF8_Blended(
+				text_surf = TTF_RenderText_Blended(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r,colour.g, colour.b, colour.a}
 				);
 			break;
 		case FQ::LCD:
 			if (wrap_text)
-				text_surf = TTF_RenderUTF8_LCD_Wrapped(
+				text_surf = TTF_RenderText_LCD_Wrapped(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r, colour.g, colour.b, colour.a},
 					{bg_colour.r, bg_colour.g, bg_colour.b, bg_colour.a},
 					wrap_length
 				);
 			else
-				text_surf = TTF_RenderUTF8_LCD(
+				text_surf = TTF_RenderText_LCD(
 					font.get(),
 					text.c_str(),
+					text.size(),
 					{colour.r, colour.g, colour.b, colour.a},
 					{bg_colour.r, bg_colour.g, bg_colour.b, bg_colour.a}
 				);
@@ -165,8 +176,7 @@ FontAtlas Font::create_atlas(
 	std::unordered_map<char, IRect> data;
 
 	for (const char ch: chars) {
-		char chr[] = {ch, '\0'};
-		TTF_SizeUTF8(font.get(), chr, &w, &h);
+		TTF_GetStringSize(font.get(), &ch, 1, &w, &h);
 		data[ch] = {dst, 0, w, h};
 		dst += w;
 	}

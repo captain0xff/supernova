@@ -28,7 +28,7 @@ public:
 	Font(const string &file, const int size);
 
 	int wrap_alignment();
-	void wrap_alignment(const int align);
+	void wrap_alignment(const TTF_HorizontalAlignment align);
 	// These functions will only work if the font has kerning tables
 	// GPOS kerning is not supported
 	int kerning();
