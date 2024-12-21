@@ -832,9 +832,6 @@ void Circle::move_ip(const Vector &vec) {
 
 EngineArgs::EngineArgs():
 	sdl_init_flags(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_AUDIO)
-#ifdef IMAGE_ENABLED
-	, img_init_flags(IMG_INIT_PNG|IMG_INIT_JPG)
-#endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
 	, mix_init_flags(MIX_INIT_MP3|MIX_INIT_OGG)
 #endif /* MIXER_ENABLED */
@@ -846,10 +843,6 @@ EngineArgs::EngineArgs():
 Engine::Engine(const EngineArgs &args) {
 	if (!SDL_Init(args.sdl_init_flags))
 		flog_error("Failed to initialize SDL: {}", SDL_GetError());
-#ifdef IMAGE_ENABLED
-	if (IMG_Init(args.img_init_flags) != args.img_init_flags)
-		flog_error("Failed to initialize SDL_image: {}", SDL_GetError());
-#endif /* IMAGE_ENABLED */
 #ifdef MIXER_ENABLED
 	if (Mix_Init(args.mix_init_flags) != args.mix_init_flags)
 		flog_error("Failed to initialize SDL_mixer: {}", SDL_GetError());
@@ -859,7 +852,7 @@ Engine::Engine(const EngineArgs &args) {
 		flog_error("Failed to initialize SDL_ttf: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-	if (SDLNet_Init() < 0)
+	if (!SDLNet_Init())
 		flog_error("Failed to initialize SDL_net: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
@@ -867,9 +860,6 @@ Engine::Engine(const EngineArgs &args) {
 }
 
 Engine::~Engine() {
-#ifdef IMAGE_ENABLED
-	IMG_Quit();
-#endif /* IMAGE_ENABLED */
 #ifdef MIX_ENABLED
 	Mix_Quit();
 #endif /* MIX_ENABLED */

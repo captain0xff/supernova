@@ -330,7 +330,6 @@ struct EventArgs {
 
 struct EngineArgs {
 	unsigned int sdl_init_flags;
-	unsigned int img_init_flags;
 	unsigned int mix_init_flags;
 
 	EngineArgs();
