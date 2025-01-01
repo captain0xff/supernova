@@ -542,6 +542,7 @@ public:
 };
 
 
+typedef std::function<bool(SDL_Event&)> EventHandler;
 class Events {
 public:
 	SDL_Event event;
@@ -553,7 +554,7 @@ public:
 		EventKeys *event_keys = nullptr,
 		Mouse *mouse = nullptr,
 		Fingers *fingers = nullptr,
-		std::function<bool(SDL_Event&)> event_handler = nullptr
+		EventHandler event_handler = nullptr
 	);
 
 	bool process_events(EventArgs event_args);
