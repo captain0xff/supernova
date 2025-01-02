@@ -308,6 +308,37 @@ const string IVector::to_str() const {
 	return "IVector(" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
+IVector IRect::size() const {
+	return {w, h};
+}
+
+void IRect::size(const IVector &ivec) {
+	w = ivec.x;
+	h = ivec.y;
+}
+
+void IRect::scale(const IVector &ivec) {
+	w *= ivec.x;
+	h *= ivec.y;
+}
+
+void IRect::scale(const float val) {
+	w *= val;
+	h *= val;
+}
+
+float IRect::half_width() const {
+	return w / 2.0f;
+}
+
+float IRect::half_height() const {
+	return h / 2.0f;
+}
+
+Vector IRect::half_size() const {
+	return {half_width(), half_width()};
+}
+
 
 std::ostream& operator<<(std::ostream &os, const Vector &vector) {
 	std::cout << vector.to_str();

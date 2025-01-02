@@ -201,6 +201,15 @@ struct IRect {
 	operator SDL_Rect() const;
 
 	const string to_str() const;
+
+	IVector size() const;
+	void size(const IVector &ivec);
+	void scale(const IVector &ivec);
+	// Scales the height and width by the given factor
+	void scale(const float val);
+	float half_width() const;
+	float half_height() const;
+	Vector half_size() const;
 };
 
 
