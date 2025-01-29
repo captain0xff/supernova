@@ -49,6 +49,18 @@ int Font::get_glyph_kerning(const uint32_t prev_ch, const uint32_t ch) {
 	return kerning;
 }
 
+void Font::add_fallback(Font &fallback) {
+	if (!TTF_AddFallbackFont(font.get(), fallback.font.get())) {
+		flog_error("Failed to add fallback font: {}", SDL_GetError());
+	}
+}
+void Font::remove_fallback(Font &fallback) {
+	TTF_RemoveFallbackFont(font.get(), fallback.font.get());
+}
+void Font::clear_fallbacks() {
+	TTF_ClearFallbackFonts(font.get());
+}
+
 Surface Font::create_glyph(
 	const uint32_t ch,
 	const Colour colour,
@@ -248,4 +260,47 @@ void FontAtlas::draw_text_with_kerning(const string &text, const IVector &pos, c
 	// GPOS kerning is not supported
 	set_colour(colour);
 	draw_text_with_kerning(text, pos, scale);
+}
+
+
+TextEngine::TextEngine(Renderer &renderer):
+	renderer(renderer), engine(TTF_CreateRendererTextEngine(renderer.renderer.get()), TTF_DestroyRendererTextEngine)
+{
+	if (engine == nullptr) {
+		flog_error("Failed to create text engine: {}", SDL_GetError());
+	}
+}
+
+
+Text::Text(Font &font, TextEngine &text_engine, const string text, const Colour &colour):
+	text_obj(TTF_CreateText(text_engine.engine.get(), font.font.get(), text.c_str(), text.size()), TTF_DestroyText)
+{
+	if (text_obj == nullptr) {
+		flog_error("Failed to create text: {}", SDL_GetError());
+	}
+	TTF_SetTextColor(text_obj.get(), colour.r, colour.g, colour.b, colour.a);
+}
+
+void Text::font(Font &font) {
+	TTF_SetTextFont(text_obj.get(), font.font.get());
+}
+
+void Text::engine(TextEngine &text_engine) {
+	TTF_SetTextEngine(text_obj.get(), text_engine.engine.get());
+}
+
+void Text::colour(const Colour &colour) {
+	TTF_SetTextColor(text_obj.get(), colour.r, colour.g, colour.b, colour.a);
+}
+
+void Text::text(const string &text) {
+	TTF_SetTextString(text_obj.get(), text.c_str(), text.size());
+}
+
+void Text::wrap_width(const int width) {
+	TTF_SetTextWrapWidth(text_obj.get(), width);
+}
+
+void Text::draw(const Vector &pos) {
+	TTF_DrawRendererText(text_obj.get(), pos.x, pos.y);
 }
