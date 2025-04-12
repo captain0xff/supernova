@@ -1072,6 +1072,10 @@ void Window::wrap_mouse(const Vector &wrap_pos) {
 	SDL_WarpMouseInWindow(window.get(), static_cast<int>(wrap_pos.x), static_cast<int>(wrap_pos.y));
 }
 
+void Window::set_relative_mouse_mode(const bool val) {
+	SDL_SetWindowRelativeMouseMode(window.get(), val);
+}
+
 Surface Window::get_window_surface() {
 	return Surface(SDL_GetWindowSurface(window.get()));
 }
