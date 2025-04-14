@@ -536,6 +536,7 @@ public:
 class Mouse {
 public:
 	Vector pos = {0, 0};
+	Vector rel_pos = {0, 0};
 	std::unordered_map<int, MouseButton> buttons;
 	// The amount scrolled vertically, positive away from the user and
 	// negative towards the user

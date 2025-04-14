@@ -1401,6 +1401,7 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 			value.released = false;
 		}
 		mouse->vert_wheel = mouse->horz_wheel = 0;
+		mouse->rel_pos = {0, 0};
 	}
 
 	if (fingers) {
@@ -1441,8 +1442,10 @@ bool Events::process_events(EventKeys *event_keys, Mouse *mouse, Fingers *finger
 					break;
 				case SDL_EVENT_MOUSE_MOTION:
 					if (mouse) {
-						mouse->pos.x = event.button.x;
-						mouse->pos.y = event.button.y;
+						mouse->pos.x = event.motion.x;
+						mouse->pos.y = event.motion.y;
+						mouse->rel_pos.x = event.motion.xrel;
+						mouse->rel_pos.y = event.motion.yrel;
 						break;
 					}
 					break;
