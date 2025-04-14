@@ -436,6 +436,8 @@ public:
 		const uint32_t flags=0
 	);
 
+	IVector size() const;
+	void size(const IVector &size);
 	void static destroy(SDL_Window *window);
 	void wrap_mouse(const Vector &wrap_pos);
 	void set_relative_mouse_mode(const bool val=true);

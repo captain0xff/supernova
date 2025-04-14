@@ -1068,6 +1068,17 @@ Window::Window(const string &title, const IVector &size, const uint32_t flags):
 		flog_info("Window created successfully!");
 }
 
+IVector Window::size() const {
+	IVector size{};
+	SDL_GetWindowSize(window.get(), &size.x, &size.y);
+
+	return size;
+}
+
+void Window::size(const IVector &size) {
+	SDL_SetWindowSize(window.get(), size.x, size.y);
+}
+
 void Window::wrap_mouse(const Vector &wrap_pos) {
 	SDL_WarpMouseInWindow(window.get(), static_cast<int>(wrap_pos.x), static_cast<int>(wrap_pos.y));
 }
