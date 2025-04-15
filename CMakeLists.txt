@@ -26,9 +26,10 @@ endif()
 
 set(SRC_PATH src)
 set(HEADERS
-	${SRC_PATH}/engine.h
+	${SRC_PATH}/app.h
 	${SRC_PATH}/core.h
 	${SRC_PATH}/constants.h
+	${SRC_PATH}/engine.h
 	${SRC_PATH}/enums.h
 	${SRC_PATH}/print.h
 	${SRC_PATH}/logging.h
