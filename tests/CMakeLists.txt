@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_BUILD_TYPE Debug)
 
-# add_compile_definitions(IMAGE_ENABLED)
+add_compile_definitions(IMAGE_ENABLED)
 add_compile_definitions(MIXER_ENABLED)
 add_compile_definitions(TTF_ENABLED)
 add_compile_definitions(NET_ENABLED)

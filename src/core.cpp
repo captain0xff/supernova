@@ -861,21 +861,13 @@ void Circle::move_ip(const Vector &vec) {
 }
 
 
-EngineArgs::EngineArgs():
-	sdl_init_flags(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_AUDIO)
-#ifdef MIXER_ENABLED
-	, mix_init_flags(MIX_INIT_MP3|MIX_INIT_OGG)
-#endif /* MIXER_ENABLED */
-{}
-
-
 
 // Classes
-Engine::Engine(const EngineArgs &args) {
-	if (!SDL_Init(args.sdl_init_flags))
+Engine::Engine(const unsigned int init_flags) {
+	if (!SDL_Init(init_flags))
 		flog_error("Failed to initialize SDL: {}", SDL_GetError());
 #ifdef MIXER_ENABLED
-	if (Mix_Init(args.mix_init_flags) != args.mix_init_flags)
+	if (!MIX_Init())
 		flog_error("Failed to initialize SDL_mixer: {}", SDL_GetError());
 #endif /* MIXER_ENABLED */
 #ifdef TTF_ENABLED
@@ -883,7 +875,7 @@ Engine::Engine(const EngineArgs &args) {
 		flog_error("Failed to initialize SDL_ttf: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-	if (!SDLNet_Init())
+	if (!NET_Init())
 		flog_error("Failed to initialize SDL_net: {}", SDL_GetError());
 #endif /* TTF_ENABLED */
 	srand((unsigned) time(NULL)); // Create a seed for random number generation
@@ -898,7 +890,7 @@ Engine::~Engine() {
 	TTF_Quit();
 #endif /* TTF_ENABLED */
 #ifdef NET_ENABLED
-	SDLNet_Quit();
+	NET_Quit();
 #endif /* NET_ENABLED */
 	SDL_Quit();
 	flog_info("Engine stopped!");

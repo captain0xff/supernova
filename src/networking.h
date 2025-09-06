@@ -15,7 +15,7 @@
 // Classes
 class NetUtils {
 public:
-	static string get_address_string(SDLNet_Address *address);
+	static string get_address_string(NET_Address *address);
 	static std::vector<string> get_local_addresses();
 };
 
@@ -35,11 +35,11 @@ public:
 
 	State state;
 
-	SDLNet_Address *address;
-	SDLNet_StreamSocket *socket;
+	NET_Address *address;
+	NET_StreamSocket *socket;
 
 	StreamSocket(const uint16_t _port, const string &_host);
-	StreamSocket(SDLNet_StreamSocket *_socket);
+	StreamSocket(NET_StreamSocket *_socket);
 	StreamSocket(const StreamSocket&) = delete;
 	~StreamSocket();
 
@@ -71,8 +71,8 @@ public:
 	int last_id = 0;
 	std::unordered_map<int, StreamSocket> clients;
 
-	SDLNet_Server *server;
-	SDLNet_Address *address;
+	NET_Server *server;
+	NET_Address *address;
 
 	StreamServer(const uint16_t _port);
 	StreamServer(const uint16_t _port, const string &_host);
@@ -147,7 +147,7 @@ public:
 
 	State state;
 
-	SDLNet_Address *address;
+	NET_Address *address;
 
 	Datagram(const uint16_t _port, const string _host, Packet &_packet);
 	Datagram(const Datagram&) = delete;
@@ -173,9 +173,9 @@ public:
 
 	State state;
 
-	SDLNet_Address *address;
-	SDLNet_DatagramSocket *socket;
-	SDLNet_Datagram *datagram = nullptr;
+	NET_Address *address;
+	NET_DatagramSocket *socket;
+	NET_Datagram *datagram = nullptr;
 
 	// DatagramSocket(const uint16_t _port);
 	DatagramSocket(const uint16_t _port, const string &_host="0.0.0.0");

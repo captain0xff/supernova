@@ -15,47 +15,33 @@
 // Classes
 class Mixer {
 public:
-	Mixer();
-	~Mixer();
+	managed_ptr<MIX_Mixer> mixer;
 
-	void static allocate_channels(int channels);
+	Mixer(SDL_AudioDeviceID device_id=SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
 };
 
 
-class Music {
+class Audio {
 public:
 	int id;
-	bool is_paused = false;
-	managed_ptr<Mix_Music> music;
+	managed_ptr<MIX_Audio> audio;
 
-	Music(const string &file);
-
-	void play(int loop=0);
-	// Returns the current volume
-	float volume();
-	// The value of the parameter volume should be between 0 to 1
-	void volume(float volume);
-	void pause();
-	void resume();
-	// Toogles the music playing i.e resumes if paused and vice-versa
-	void toggle();
-	// void destroy();
+	// Currently only supports WAV format
+	Audio(Mixer &mixer, const string &file, bool predecode=true);	
 };
 
 
-class Sound {
+class Track {
 public:
-	int id, channel;
+	int id;
 	bool is_paused;
-	managed_ptr<Mix_Chunk> sound;
+	managed_ptr<MIX_Track> track;
 
-	// Currently only supports WAV format
-	Sound(const string file);
+	Track(Mixer &mixer);
 
 	// Pass -1 to the loop for looping infinitely
-	// The first free channel is choosed by default
-	void play(int loop=0, int channel=-1);
-	// Returns the current volume
+	void play(int loop=0);
+	void play(SDL_PropertiesID options);
 	float volume();
 	// The value of the parameter volume should be between 0 to 1
 	void volume(float volume);
@@ -63,7 +49,8 @@ public:
 	void resume();
 	// Toogles the music playing i.e resumes if paused and vice-versa
 	void toggle();
-	// void destroy();		
+
+	void setAudio(Audio &audio);
 };
 
 

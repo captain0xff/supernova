@@ -337,19 +337,10 @@ struct EventArgs {
 };
 
 
-struct EngineArgs {
-	unsigned int sdl_init_flags;
-	unsigned int mix_init_flags;
-
-	EngineArgs();
-};
-
-
-
 // Classes
 class Engine {
 public:
-	Engine(const EngineArgs &args={});
+	Engine(const unsigned int init_flags=SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_AUDIO);
 	~Engine();
 };
 

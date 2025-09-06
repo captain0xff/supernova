@@ -5,42 +5,42 @@
 
 
 // Classes
-string NetUtils::get_address_string(SDLNet_Address *address) {
-	return string(SDLNet_GetAddressString(address));
+string NetUtils::get_address_string(NET_Address *address) {
+	return string(NET_GetAddressString(address));
 }
 
 std::vector<string> NetUtils::get_local_addresses() {
 	int num;
-	SDLNet_Address **addresses = SDLNet_GetLocalAddresses(&num);
+	NET_Address **addresses = NET_GetLocalAddresses(&num);
 
 	std::vector<string> address_strings(num);
 	for (int i = 0; i < num; i++) {
 		address_strings[i] = get_address_string(addresses[i]);
 	}
-	SDLNet_FreeLocalAddresses(addresses);
+	NET_FreeLocalAddresses(addresses);
 
 	return address_strings;
 }
 
 
 StreamSocket::StreamSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
-	address = SDLNet_ResolveHostname(host.c_str());
+	address = NET_ResolveHostname(host.c_str());
 	state = RESOLVING_ADDRESS;
 }
 
-StreamSocket::StreamSocket(SDLNet_StreamSocket *_socket): port(0) {
+StreamSocket::StreamSocket(NET_StreamSocket *_socket): port(0) {
 	socket = _socket;
-	address = SDLNet_GetStreamSocketAddress(socket);
+	address = NET_GetStreamSocketAddress(socket);
 
 	state = READY;
 }
 
 StreamSocket::~StreamSocket() {
 	if (state != DESTROYED) {
-		SDLNet_WaitUntilStreamSocketDrained(socket, -1);
-		SDLNet_DestroyStreamSocket(socket);
+		NET_WaitUntilStreamSocketDrained(socket, -1);
+		NET_DestroyStreamSocket(socket);
 		if (address != nullptr)
-			SDLNet_UnrefAddress(address); 
+			NET_UnrefAddress(address); 
 		state = DESTROYED;
 	}
 }
@@ -48,14 +48,14 @@ StreamSocket::~StreamSocket() {
 StreamSocket::State& StreamSocket::get_state() {
 	switch (state) {
 		case RESOLVING_ADDRESS:
-			switch (SDLNet_GetAddressStatus(address)) {
-				case -1:
+			switch (NET_GetAddressStatus(address)) {
+				case NET_FAILURE:
 					flog_error("Failed to resolve address: {}", SDL_GetError());
 					state = DEAD;
 					break;
-				case 1:
-					socket = SDLNet_CreateClient(address, port);
-					SDLNet_UnrefAddress(address);
+				case NET_SUCCESS:
+					socket = NET_CreateClient(address, port);
+					NET_UnrefAddress(address);
 					address = nullptr;
 					if (socket == nullptr) {
 						flog_error("Failed to create stream socket: {}", SDL_GetError());
@@ -65,22 +65,26 @@ StreamSocket::State& StreamSocket::get_state() {
 						state = CONNECTING;
 					}
 					break;
+				case NET_WAITING:
+					break;
 			}
 			break;
 		case CONNECTING:
-			switch(SDLNet_GetConnectionStatus(socket)) {
-				case -1:
+			switch(NET_GetConnectionStatus(socket)) {
+				case NET_FAILURE:
 					flog_error("Failed to connect with server: {}", SDL_GetError());
 					state = DEAD;
 					break;
-				case 1:
+				case NET_SUCCESS:
 					state = READY;
+					break;
+				case NET_WAITING:
 					break;
 			}
 			break;
 		case DEAD:
-			if (SDLNet_GetStreamSocketPendingWrites(socket) <= 0) {
-				SDLNet_DestroyStreamSocket(socket);
+			if (NET_GetStreamSocketPendingWrites(socket) <= 0) {
+				NET_DestroyStreamSocket(socket);
 				state = DESTROYED;
 			}
 			break;
@@ -93,11 +97,11 @@ StreamSocket::State& StreamSocket::get_state() {
 
 int StreamSocket::read(void *buffer, const int size) {
 	// Returns the number of bytes read and -1 on error
-	return SDLNet_ReadFromStreamSocket(socket, buffer, size);
+	return NET_ReadFromStreamSocket(socket, buffer, size);
 }
 
 int StreamSocket::write(const void *buffer, const int size) {
-	return SDLNet_WriteToStreamSocket(socket, buffer, size);
+	return NET_WriteToStreamSocket(socket, buffer, size);
 }
 
 int StreamSocket::write(const string &msg) {
@@ -112,35 +116,37 @@ StreamServer::StreamServer(const uint16_t _port): port(_port) {
 }
 
 StreamServer::StreamServer(const uint16_t _port, const string &_host): port(_port), host(_host) {
-	address = SDLNet_ResolveHostname(host.c_str());
+	address = NET_ResolveHostname(host.c_str());
 	state = RESOLVING_ADDRESS;
 }
 
 StreamServer::~StreamServer() {
-	SDLNet_DestroyServer(server);
+	NET_DestroyServer(server);
 	if (address != nullptr)
-		SDLNet_UnrefAddress(address);
+		NET_UnrefAddress(address);
 }
 
 StreamServer::State& StreamServer::get_state() {
 	switch (state) {
 		case RESOLVING_ADDRESS:
-			switch (SDLNet_GetAddressStatus(address)) {
-				case -1:
+			switch (NET_GetAddressStatus(address)) {
+				case NET_FAILURE:
 					flog_error("Failed to resolve server address: {}", SDL_GetError());
 					state = DEAD;
 					break;
-				case 1:
+				case NET_SUCCESS:
 					state = CREATING_SERVER;
+					break;
+				case NET_WAITING:
 					break;
 			}
 			break;
 		case CREATING_SERVER:
 			if (address == nullptr) {
-				server = SDLNet_CreateServer(NULL, port);
+				server = NET_CreateServer(NULL, port);
 			} else {
-				server = SDLNet_CreateServer(address, port);
-				SDLNet_UnrefAddress(address);
+				server = NET_CreateServer(address, port);
+				NET_UnrefAddress(address);
 				address = nullptr;
 			}
 			if (server == nullptr) {
@@ -160,9 +166,9 @@ StreamServer::State& StreamServer::get_state() {
 
 StreamSocket* StreamServer::accept_client() {
 	// Returns nullptr if no new client is available
-	SDLNet_StreamSocket *client;
+	NET_StreamSocket *client;
 
-	SDLNet_AcceptClient(server, &client);
+	NET_AcceptClient(server, &client);
 	if (client != NULL) {
 		auto res = clients.try_emplace(1, client);
 		if (res.second)
@@ -312,24 +318,26 @@ void Packet::clear() {
 
 Datagram::Datagram(const uint16_t _port, const string _host, Packet &_packet):
 	port(_port), host(_host), packet(_packet) {
-	address = SDLNet_ResolveHostname(host.c_str());
+	address = NET_ResolveHostname(host.c_str());
 	state = RESOLVING;
 }
 
 Datagram::~Datagram() {
-	SDLNet_UnrefAddress(address);
+	NET_UnrefAddress(address);
 }
 
 Datagram::State& Datagram::get_state() {
 	switch (state) {
 		case RESOLVING:
-			switch (SDLNet_GetAddressStatus(address)) {
-				case -1:
+			switch (NET_GetAddressStatus(address)) {
+				case NET_FAILURE:
 					flog_error("Failed to resolve address: {}", SDL_GetError());
 					state = DEAD;
 					break;
-				case 1:
+				case NET_SUCCESS:
 					state = READY;
+					break;
+				case NET_WAITING:
 					break;
 			}
 		default:
@@ -346,36 +354,38 @@ Datagram::State& Datagram::get_state() {
 // }
 
 DatagramSocket::DatagramSocket(const uint16_t _port, const string &_host): port(_port), host(_host) {
-	address = SDLNet_ResolveHostname(host.c_str());
+	address = NET_ResolveHostname(host.c_str());
 	state = RESOLVING_ADDRESS;
 }
 
 DatagramSocket::~DatagramSocket() {
-	SDLNet_DestroyDatagram(datagram);
-	SDLNet_DestroyDatagramSocket(socket);
+	NET_DestroyDatagram(datagram);
+	NET_DestroyDatagramSocket(socket);
 	if (address != nullptr)
-		SDLNet_UnrefAddress(address);
+		NET_UnrefAddress(address);
 }
 
 DatagramSocket::State& DatagramSocket::get_state() {
 	switch (state) {
 		case RESOLVING_ADDRESS:
-			switch (SDLNet_GetAddressStatus(address)) {
-				case -1:
+			switch (NET_GetAddressStatus(address)) {
+				case NET_FAILURE:
 					flog_error("Failed to resolve address: {}", SDL_GetError());
 					state = DEAD;
 					break;
-				case 1:
+				case NET_SUCCESS:
 					state = CREATING_SOCKET;
+					break;
+				case NET_WAITING:
 					break;
 			}
 			break;
 		case CREATING_SOCKET:
 			if (address == nullptr) {
-				socket = SDLNet_CreateDatagramSocket(NULL, port);
+				socket = NET_CreateDatagramSocket(NULL, port);
 			} else {
-				socket = SDLNet_CreateDatagramSocket(address, port);
-				SDLNet_UnrefAddress(address);
+				socket = NET_CreateDatagramSocket(address, port);
+				NET_UnrefAddress(address);
 				address = nullptr;
 			}
 			if (socket == nullptr) {
@@ -394,7 +404,7 @@ DatagramSocket::State& DatagramSocket::get_state() {
 }
 
 void DatagramSocket::send(Datagram &_datagram) {
-	int res = SDLNet_SendDatagram(
+	int res = NET_SendDatagram(
 		socket,
 		_datagram.address,
 		_datagram.port,
@@ -409,7 +419,7 @@ void DatagramSocket::send(Datagram &_datagram) {
 
 bool DatagramSocket::recv(Packet &packet) {
 	// Returns true when a packet is available
-	int res = SDLNet_ReceiveDatagram(socket, &datagram);
+	int res = NET_ReceiveDatagram(socket, &datagram);
 
 	if (res == 0 && datagram != nullptr) {
 		packet.buffer.assign(datagram->buf, datagram->buf + datagram->buflen);
