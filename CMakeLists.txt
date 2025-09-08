@@ -24,16 +24,18 @@ if (SUPERNOVA_ROOTPROJECT)
 	include(GNUInstallDirs)
 endif()
 
-set(SRC_PATH src)
+set(HEADER_PATH include/supernova)
 set(HEADERS
-	${SRC_PATH}/app.h
-	${SRC_PATH}/core.h
-	${SRC_PATH}/constants.h
-	${SRC_PATH}/engine.h
-	${SRC_PATH}/enums.h
-	${SRC_PATH}/print.h
-	${SRC_PATH}/logging.h
+	${HEADER_PATH}/app.h
+	${HEADER_PATH}/core.h
+	${HEADER_PATH}/constants.h
+	${HEADER_PATH}/engine.h
+	${HEADER_PATH}/enums.h
+	${HEADER_PATH}/print.h
+	${HEADER_PATH}/logging.h
 )
+
+set(SRC_PATH src)
 set(SOURCES
 	${SRC_PATH}/core.cpp
 	${SRC_PATH}/logging.cpp
@@ -52,7 +54,7 @@ if (ENABLE_IMAGE)
 	list(APPEND LIBS SDL3_image::SDL3_image)
 	add_compile_definitions(${PROJECT_NAME} IMAGE_ENABLED)
 	list(APPEND SOURCES ${SRC_PATH}/graphics.cpp)
-	list(APPEND HEADERS ${SRC_PATH}/graphics.h)
+	list(APPEND HEADERS ${HEADER_PATH}/graphics.h)
 endif()
 
 if (ENABLE_MIXER)
@@ -62,7 +64,7 @@ if (ENABLE_MIXER)
 	list(APPEND LIBS SDL3_mixer::SDL3_mixer)
 	add_compile_definitions(${PROJECT_NAME} MIXER_ENABLED)
 	list(APPEND SOURCES ${SRC_PATH}/mixer.cpp)
-	list(APPEND HEADERS ${SRC_PATH}/mixer.h)
+	list(APPEND HEADERS ${HEADER_PATH}/mixer.h)
 endif()
 
 if (ENABLE_TTF)
@@ -72,7 +74,7 @@ if (ENABLE_TTF)
 	list(APPEND LIBS SDL3_ttf::SDL3_ttf)
 	add_compile_definitions(${PROJECT_NAME} TTF_ENABLED)
 	list(APPEND SOURCES ${SRC_PATH}/font.cpp)
-	list(APPEND HEADERS ${SRC_PATH}/font.h)
+	list(APPEND HEADERS ${HEADER_PATH}/font.h)
 endif()
 
 if (ENABLE_NET)
@@ -82,7 +84,7 @@ if (ENABLE_NET)
 	list(APPEND LIBS SDL3_net::SDL3_net)
 	add_compile_definitions(${PROJECT_NAME} NET_ENABLED)
 	list(APPEND SOURCES ${SRC_PATH}/networking.cpp)
-	list(APPEND HEADERS ${SRC_PATH}/networking.h)
+	list(APPEND HEADERS ${HEADER_PATH}/networking.h)
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
@@ -92,6 +94,8 @@ if (NOT MSVC)
 endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBS})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${HEADER_PATH})
 
 # Setting which header files should be supplied with the library
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
