@@ -15,5 +15,17 @@ make install
 ## Examples
 Check the official [examples repository](https://github.com/captain1947/supernova-examples) for a wide range of demos and sample projects.
 
+<p align="left">
+  <img src="res/demo.png" />
+</p>
+
+<p align="left">
+  <img src="res/benchmark.png" />
+</p>
+
+<p align="left">
+  <img src="res/imgui.png" />
+</p>
+
 ## Known Issues
 * The project won't compile in termux. For fixing compile with `cmake .. -DCMAKE_CXX_FLAGS=-U__ANDROID__`.
