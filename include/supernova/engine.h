@@ -2,7 +2,9 @@
 #define SUPERNOVA_ENGINE_H
 
 
+#include "constants.h"
 #include "core.h"
+#include "logging.h"
 
 #if __has_include("graphics.h")
 #include "graphics.h"
