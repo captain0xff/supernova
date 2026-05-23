@@ -393,6 +393,7 @@ public:
 	SDL_IOStream *io;
 
 	IO(const string &file, const string access_mode="r");
+	IO(void *memory, const size_t size);
 	~IO();
 
 	int64_t get_file_size();
@@ -580,6 +581,7 @@ public:
 	);
 	Surface(SDL_Surface *_surface);
 	Surface(const string &file);
+	Surface(IO &io);
 
 	void set_blend_mode(const SDL_BlendMode blend_mode);
 	void set_colour_key(const uint32_t key, const bool enable=true);

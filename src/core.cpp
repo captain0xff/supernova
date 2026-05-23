@@ -970,6 +970,15 @@ IO::IO(const string &file, const string access_mode) {
 		IS_LOADED = true;
 }
 
+IO::IO(void *memory, const size_t size) {
+	io = SDL_IOFromMem(memory, size);
+
+	if (io == NULL)
+		flog_error("Failed to create IO from memory: {}", SDL_GetError());
+	else
+		IS_LOADED = true;
+}
+
 IO::~IO() {
 	close();
 }
@@ -1559,6 +1568,20 @@ Surface::Surface(SDL_Surface *_surface): surface(managed_ptr<SDL_Surface>(_surfa
 Surface::Surface(const string &file):
 	surface(managed_ptr<SDL_Surface>(IMG_Load(file.c_str()), SDL_DestroySurface)) {
 	if (surface.get() == nullptr)
+		flog_error("Failed to load surface ({}): {}", file, SDL_GetError());
+	else {
+		id = SURF_ID;
+		flog_info("Surface loaded successfully![{}]", id);
+		SURF_ID++;
+
+		w = surface.get()->w;
+		h = surface.get()->h;
+	}
+}
+
+Surface::Surface(IO &io):
+	surface(managed_ptr<SDL_Surface>(IMG_Load_IO(io.io, false), SDL_DestroySurface)) {
+	if (surface.get() == nullptr)
 		flog_error("Failed to load surface: {}", SDL_GetError());
 	else {
 		id = SURF_ID;
@@ -1571,6 +1594,10 @@ Surface::Surface(const string &file):
 }
 #else
 Surface::Surface([[maybe_unused]] const string &file):
+	surface(managed_ptr<SDL_Surface>(nullptr, SDL_DestroySurface)) {
+	image_function_not_implemented("Surface::Surface(const string &file)");
+}
+Surface::Surface([[maybe_unused]] IO &io):
 	surface(managed_ptr<SDL_Surface>(nullptr, SDL_DestroySurface)) {
 	image_function_not_implemented("Surface::Surface(const string &file)");
 }
